@@ -1,0 +1,10 @@
+instructor_id,first_name,last_name,primary_color_id,secondary_color_id,primary_style_id,secondary_style_id,is_team_captain,can_teach_NL,can_teach_babies,can_teach_adults,can_teach_adapted
+1,Danielle,Johnson,1,2,6,3,True,True,True,True,True
+2,Joshua,Walker,2,1,2,1,False,True,False,True,True
+3,Jill,Rhodes,1,2,2,1,False,True,False,True,False
+4,Patricia,Miller,3,1,2,5,False,False,False,True,True
+5,Robert,Johnson,3,1,1,5,False,True,False,False,False
+6,Jeffery,Wagner,1,4,4,1,False,False,True,False,False
+7,Anthony,Gonzalez,2,4,1,2,False,True,False,True,True
+8,Debra,Gardner,1,3,3,5,False,False,True,False,False
+9,Jeffrey,Lawrence,2,4,3,1,False,True,True,True,False

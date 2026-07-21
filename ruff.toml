@@ -1,0 +1,9 @@
+# Minimal correctness gate (D3). Intentionally narrow: syntax errors,
+# comparison/assert bugs, and undefined names only. F401 (unused imports) is
+# excluded because backend/server.py's _db_* aliases are consumed dynamically
+# by the routers via the host module (host._db_get_instructor, ...).
+# Tighten incrementally once the backlog's cleanup items land.
+target-version = "py312"
+
+[lint]
+select = ["E9", "F63", "F7", "F82"]

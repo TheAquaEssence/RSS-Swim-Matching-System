@@ -1,0 +1,77 @@
+{
+  "name": "aqua-essence-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron desktop host for Aqua Essence",
+  "author": "The Aqua Essence contributors",
+  "main": "main.cjs",
+  "scripts": {
+    "postinstall": "install-electron",
+    "start": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check main.cjs && node --check backend-process.cjs && node --check preload.cjs && node --check dialog_bridge.cjs && node --check download_bridge.cjs && node --check ipc_contract.cjs && node --check verify-package.cjs && node --check ../packaging/smoke/electron_renderer_smoke.cjs",
+    "smoke:renderer": "node ../packaging/smoke/electron_renderer_smoke.cjs \"../.dist/electron/win-unpacked/Aqua Essence.exe\" ../.dist/renderer-smoke-user-data ../.dist/renderer-smoke-artifacts",
+    "pack:win": "electron-builder --win dir nsis --publish never",
+    "verify:package": "node verify-package.cjs ../.dist/electron/win-unpacked"
+  },
+  "devDependencies": {
+    "electron": "43.1.1",
+    "electron-builder": "26.15.3",
+    "playwright-core": "1.61.1"
+  },
+  "build": {
+    "appId": "org.aquaessence.desktop",
+    "productName": "Aqua Essence",
+    "asar": true,
+    "directories": {
+      "output": "../.dist/electron"
+    },
+    "files": [
+      "main.cjs",
+      "backend-process.cjs",
+      "preload.cjs",
+      "dialog_bridge.cjs",
+      "download_bridge.cjs",
+      "ipc_contract.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../.dist/pyinstaller/aqua-backend",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../LICENSE",
+        "to": "LICENSE.aqua-essence.txt"
+      },
+      {
+        "from": "../THIRD_PARTY_NOTICES.md",
+        "to": "THIRD_PARTY_NOTICES.md"
+      },
+      {
+        "from": "../.dist/pyinstaller-release-metadata",
+        "to": ".",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "dir",
+        "nsis"
+      ],
+      "artifactName": "Aqua-Essence-Setup-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "Aqua Essence"
+    }
+  }
+}

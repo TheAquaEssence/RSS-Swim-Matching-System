@@ -1,0 +1,721 @@
+swimmer_id,class_id,instructor_id,class_name,session,status
+1072,5001,14,Adapted Saturday 6:15 pm,2024 Fall,archived
+1217,5002,8,RSS 5 Tuesday 6:15 pm,2024 Fall,archived
+1094,5003,4,RSS 7 Monday 4:30 pm,2024 Fall,archived
+1143,5004,8,RSS 4 Thursday 4:00 pm,2024 Fall,archived
+1237,5005,10,Adult Learn to Swim Tuesday 10:30 am,2024 Fall,archived
+1128,5006,1,RSS 11 Tuesday 4:30 pm,2024 Fall,archived
+1039,5007,11,RSS 5 Monday 4:00 pm,2024 Fall,archived
+1227,5008,12,RSS 11 Friday 4:30 pm,2024 Fall,archived
+1282,5009,22,Adult Learn to Swim Friday 4:00 pm,2024 Fall,archived
+1051,5010,1,RSS 2 Wednesday 10:30 am,2024 Fall,archived
+1026,5011,19,RSS 5 Monday 9:00 am,2024 Fall,archived
+1277,5012,20,RSS 7 Wednesday 6:15 pm,2024 Fall,archived
+1008,5013,11,RSS 7 Friday 5:00 pm,2024 Fall,archived
+1048,5014,4,RSS 7 Friday 10:30 am,2024 Fall,archived
+1122,5015,9,RSS 1 Saturday 4:30 pm,2024 Fall,archived
+1086,5016,1,RSS 9 Friday 6:15 pm,2024 Fall,archived
+1209,5017,24,RSS 12 Saturday 6:15 pm,2024 Fall,archived
+1249,5018,7,RSS 6 Thursday 9:00 am,2024 Fall,archived
+1247,5019,22,RSS 6 Friday 4:00 pm,2024 Fall,archived
+1110,5020,22,Adult Learn to Swim Monday 6:15 pm,2024 Fall,archived
+1206,5021,10,RSS 9 Wednesday 6:15 pm,2024 Fall,archived
+1031,5022,14,RSS 6 Thursday 6:15 pm,2024 Fall,archived
+1085,5023,10,RSS 9 Tuesday 10:30 am,2024 Fall,archived
+1195,5024,14,RSS 11 Thursday 6:15 pm,2024 Fall,archived
+1002,5025,24,RSS 3 Friday 5:00 pm,2024 Fall,archived
+1200,5026,10,RSS 7 Friday 9:00 am,2024 Fall,archived
+1136,5027,10,RSS 5 Tuesday 4:30 pm,2024 Fall,archived
+1233,5028,19,RSS 10 Saturday 4:00 pm,2024 Fall,archived
+1147,5029,15,RSS 8 Thursday 6:15 pm,2024 Fall,archived
+1299,5030,7,RSS 9 Thursday 6:15 pm,2024 Fall,archived
+1250,5031,6,RSS 11 Monday 4:00 pm,2024 Fall,archived
+1080,5032,17,RSS 11 Saturday 5:00 pm,2024 Fall,archived
+1098,5033,11,RSS 2 Tuesday 6:15 pm,2024 Fall,archived
+1152,5034,10,RSS 4 Tuesday 10:30 am,2024 Fall,archived
+1112,5035,1,RSS 1 Tuesday 4:30 pm,2024 Fall,archived
+1030,5036,20,Adult Learn to Swim Monday 4:30 pm,2024 Fall,archived
+1032,5037,14,RSS 11 Friday 10:30 am,2024 Fall,archived
+1161,5038,23,RSS 12 Thursday 4:30 pm,2024 Fall,archived
+1265,5039,13,RSS 4 Tuesday 6:15 pm,2024 Fall,archived
+1290,5040,23,RSS 1 Monday 4:30 pm,2024 Fall,archived
+1245,5041,8,RSS 3 Saturday 5:00 pm,2024 Fall,archived
+1258,5042,15,RSS 1 Friday 10:30 am,2024 Fall,archived
+1081,5043,4,RSS 8 Tuesday 4:30 pm,2024 Fall,archived
+1262,5044,22,RSS 9 Friday 5:00 pm,2024 Fall,archived
+1042,5045,11,Adapted Thursday 5:00 pm,2024 Fall,archived
+1218,5046,24,RSS 9 Thursday 5:00 pm,2024 Fall,archived
+1287,5047,15,RSS 3 Saturday 4:30 pm,2024 Fall,archived
+1018,5048,15,RSS 5 Tuesday 6:15 pm,2024 Fall,archived
+1153,5049,9,Adapted Friday 4:30 pm,2024 Fall,archived
+1253,5050,21,RSS 4 Wednesday 4:30 pm,2024 Fall,archived
+1173,5051,3,RSS 12 Wednesday 10:30 am,2024 Fall,archived
+1221,5052,9,RSS 6 Wednesday 5:00 pm,2024 Fall,archived
+1061,5053,3,RSS 3 Tuesday 10:30 am,2024 Fall,archived
+1104,5054,13,RSS 12 Tuesday 6:15 pm,2024 Fall,archived
+1279,5055,7,RSS 2 Thursday 4:30 pm,2024 Fall,archived
+1242,5056,11,RSS 9 Thursday 4:30 pm,2024 Fall,archived
+1228,5057,2,RSS 4 Thursday 4:30 pm,2024 Fall,archived
+1146,5058,25,RSS 10 Saturday 9:00 am,2024 Fall,archived
+1064,5059,25,RSS 10 Thursday 4:30 pm,2024 Fall,archived
+1149,5060,1,RSS 6 Wednesday 4:30 pm,2024 Fall,archived
+1252,5061,14,RSS 9 Saturday 6:15 pm,2024 Fall,archived
+1011,5062,18,Adapted Friday 10:30 am,2024 Fall,archived
+1159,5063,16,RSS 4 Wednesday 4:30 pm,2024 Fall,archived
+1021,5064,16,RSS 1 Thursday 4:00 pm,2024 Fall,archived
+1108,5065,22,RSS 11 Thursday 6:15 pm,2024 Fall,archived
+1169,5066,6,Adult Learn to Swim Thursday 10:30 am,2024 Fall,archived
+1150,5067,20,RSS 9 Monday 4:30 pm,2024 Fall,archived
+1145,5068,19,RSS 10 Saturday 9:00 am,2024 Fall,archived
+1134,5069,3,RSS 11 Thursday 10:30 am,2024 Fall,archived
+1259,5070,15,RSS 3 Monday 4:00 pm,2024 Fall,archived
+1067,5071,13,RSS 6 Tuesday 4:30 pm,2024 Fall,archived
+1053,5072,11,RSS 6 Thursday 4:00 pm,2024 Fall,archived
+1172,5073,25,Adult Learn to Swim Thursday 4:00 pm,2024 Fall,archived
+1184,5074,3,RSS 8 Monday 6:15 pm,2024 Fall,archived
+1231,5075,18,RSS 1 Wednesday 10:30 am,2024 Fall,archived
+1062,5076,21,RSS 2 Saturday 9:00 am,2024 Fall,archived
+1068,5077,25,RSS 1 Tuesday 10:30 am,2024 Fall,archived
+1102,5078,1,RSS 10 Tuesday 10:30 am,2024 Fall,archived
+1034,5079,5,RSS 8 Saturday 9:00 am,2024 Fall,archived
+1244,5080,19,RSS 4 Thursday 6:15 pm,2024 Fall,archived
+1166,5081,9,Adapted Wednesday 10:30 am,2024 Fall,archived
+1077,5082,20,RSS 10 Saturday 6:15 pm,2024 Fall,archived
+1118,5083,4,Adapted Tuesday 4:00 pm,2024 Fall,archived
+1226,5084,4,RSS 10 Monday 4:00 pm,2024 Fall,archived
+1193,5085,19,RSS 11 Thursday 4:30 pm,2024 Fall,archived
+1019,5086,23,RSS 4 Monday 5:00 pm,2024 Fall,archived
+1003,5087,23,Adult Learn to Swim Saturday 10:30 am,2024 Fall,archived
+1255,5088,4,RSS 12 Wednesday 6:15 pm,2024 Fall,archived
+1160,5089,20,Adapted Monday 5:00 pm,2024 Fall,archived
+1273,5090,2,RSS 6 Friday 4:30 pm,2024 Fall,archived
+1261,5091,22,RSS 6 Monday 5:00 pm,2024 Fall,archived
+1215,5092,21,RSS 6 Monday 4:30 pm,2024 Fall,archived
+1138,5093,16,RSS 2 Thursday 4:00 pm,2024 Fall,archived
+1055,5094,21,Adult Learn to Swim Thursday 6:15 pm,2024 Fall,archived
+1130,5095,5,RSS 7 Tuesday 6:15 pm,2024 Fall,archived
+1224,5096,17,RSS 11 Wednesday 5:00 pm,2024 Fall,archived
+1222,5097,18,Adapted Thursday 4:30 pm,2024 Fall,archived
+1090,5098,14,Adult Learn to Swim Saturday 5:00 pm,2024 Fall,archived
+1251,5099,9,RSS 6 Tuesday 9:00 am,2024 Fall,archived
+1063,5100,9,RSS 8 Tuesday 4:30 pm,2024 Fall,archived
+1095,5101,19,RSS 10 Saturday 4:30 pm,2024 Fall,archived
+1073,5102,11,RSS 1 Thursday 4:00 pm,2024 Fall,archived
+1041,5103,6,RSS 8 Tuesday 4:00 pm,2024 Fall,archived
+1113,5104,9,RSS 6 Wednesday 5:00 pm,2024 Fall,archived
+1140,5105,23,RSS 5 Friday 9:00 am,2024 Fall,archived
+1181,5106,17,RSS 4 Monday 10:30 am,2024 Fall,archived
+1078,5107,24,RSS 7 Thursday 5:00 pm,2024 Fall,archived
+1157,5108,25,RSS 4 Saturday 4:30 pm,2024 Fall,archived
+1168,5109,21,RSS 12 Thursday 4:30 pm,2024 Fall,archived
+1274,5110,1,RSS 2 Wednesday 10:30 am,2024 Fall,archived
+1214,5111,13,RSS 12 Tuesday 4:00 pm,2024 Fall,archived
+1171,5112,22,RSS 10 Wednesday 4:30 pm,2024 Fall,archived
+1142,5113,18,RSS 9 Wednesday 4:30 pm,2024 Fall,archived
+1219,5114,24,RSS 9 Wednesday 4:00 pm,2024 Fall,archived
+1170,5115,23,RSS 8 Wednesday 4:00 pm,2024 Fall,archived
+1027,5116,9,RSS 4 Monday 6:15 pm,2024 Fall,archived
+1035,5117,7,RSS 6 Monday 6:15 pm,2024 Fall,archived
+1205,5118,18,Adapted Saturday 10:30 am,2024 Fall,archived
+1257,5119,7,RSS 4 Saturday 4:30 pm,2024 Fall,archived
+1028,5120,9,RSS 12 Friday 5:00 pm,2024 Fall,archived
+1188,5121,20,RSS 5 Monday 10:30 am,2024 Fall,archived
+1040,5122,10,RSS 4 Wednesday 10:30 am,2024 Fall,archived
+1070,5123,10,RSS 1 Saturday 5:00 pm,2024 Fall,archived
+1199,5124,5,RSS 5 Monday 9:00 am,2024 Fall,archived
+1155,5125,18,RSS 5 Saturday 10:30 am,2024 Fall,archived
+1054,5126,21,Adult Learn to Swim Thursday 9:00 am,2024 Fall,archived
+1088,5127,1,RSS 10 Wednesday 4:30 pm,2024 Fall,archived
+1229,5128,16,RSS 8 Wednesday 10:30 am,2024 Fall,archived
+1163,5129,2,RSS 5 Thursday 9:00 am,2024 Fall,archived
+1183,5130,3,RSS 7 Thursday 9:00 am,2024 Fall,archived
+1280,5131,19,RSS 11 Saturday 9:00 am,2024 Fall,archived
+1126,5132,5,RSS 3 Friday 4:00 pm,2024 Fall,archived
+1065,5133,3,RSS 4 Monday 5:00 pm,2024 Fall,archived
+1014,5134,25,RSS 7 Friday 5:00 pm,2024 Fall,archived
+1024,5135,20,RSS 4 Friday 4:30 pm,2024 Fall,archived
+1283,5136,15,RSS 8 Wednesday 5:00 pm,2024 Fall,archived
+1109,5137,14,RSS 5 Friday 5:00 pm,2024 Fall,archived
+1071,5138,2,RSS 10 Saturday 9:00 am,2024 Fall,archived
+1012,5139,25,RSS 4 Saturday 10:30 am,2024 Fall,archived
+1001,5140,9,RSS 11 Monday 10:30 am,2024 Fall,archived
+1285,5141,8,RSS 3 Friday 9:00 am,2024 Fall,archived
+1204,5142,6,RSS 1 Thursday 4:30 pm,2024 Fall,archived
+1189,5143,23,RSS 10 Thursday 4:00 pm,2024 Fall,archived
+1256,5144,2,RSS 4 Wednesday 6:15 pm,2024 Fall,archived
+1114,5145,10,RSS 12 Thursday 9:00 am,2024 Fall,archived
+1180,5146,22,RSS 4 Wednesday 6:15 pm,2024 Fall,archived
+1281,5147,19,RSS 11 Tuesday 4:30 pm,2024 Fall,archived
+1144,5148,4,RSS 9 Tuesday 6:15 pm,2024 Fall,archived
+1190,5149,5,RSS 5 Tuesday 9:00 am,2024 Fall,archived
+1029,5150,2,RSS 3 Wednesday 5:00 pm,2024 Fall,archived
+1020,5151,24,Adult Learn to Swim Friday 4:00 pm,2024 Fall,archived
+1294,5152,15,RSS 2 Thursday 6:15 pm,2024 Fall,archived
+1196,5153,10,RSS 12 Thursday 4:00 pm,2024 Fall,archived
+1010,5154,17,RSS 9 Thursday 4:30 pm,2024 Fall,archived
+1275,5155,3,RSS 10 Monday 4:30 pm,2024 Fall,archived
+1176,5156,24,RSS 6 Friday 4:00 pm,2024 Fall,archived
+1038,5157,1,RSS 2 Tuesday 6:15 pm,2024 Fall,archived
+1111,5158,19,RSS 10 Monday 6:15 pm,2024 Fall,archived
+1033,5159,9,RSS 10 Monday 10:30 am,2024 Fall,archived
+1239,5160,16,RSS 9 Saturday 4:30 pm,2024 Fall,archived
+1079,5161,9,RSS 3 Friday 4:30 pm,2024 Fall,archived
+1298,5162,21,Adult Learn to Swim Thursday 9:00 am,2024 Fall,archived
+1141,5163,16,RSS 6 Thursday 4:00 pm,2024 Fall,archived
+1092,5164,11,RSS 11 Monday 10:30 am,2024 Fall,archived
+1175,5165,11,RSS 7 Saturday 4:30 pm,2024 Fall,archived
+1260,5166,10,RSS 11 Thursday 5:00 pm,2024 Fall,archived
+1185,5167,2,RSS 8 Monday 4:00 pm,2024 Fall,archived
+1091,5168,9,RSS 6 Monday 4:30 pm,2024 Fall,archived
+1105,5169,17,Adult Learn to Swim Monday 6:15 pm,2024 Fall,archived
+1179,5170,18,RSS 8 Thursday 9:00 am,2024 Fall,archived
+1248,5171,7,RSS 9 Wednesday 5:00 pm,2024 Fall,archived
+1216,5172,25,RSS 8 Saturday 4:30 pm,2024 Fall,archived
+1046,5173,25,RSS 1 Tuesday 4:00 pm,2024 Fall,archived
+1197,5174,18,RSS 3 Wednesday 4:30 pm,2024 Fall,archived
+1270,5175,23,RSS 8 Monday 9:00 am,2024 Fall,archived
+1004,5176,21,RSS 10 Tuesday 6:15 pm,2024 Fall,archived
+1023,5177,6,RSS 5 Friday 9:00 am,2024 Fall,archived
+1243,5178,18,RSS 7 Monday 10:30 am,2024 Fall,archived
+1119,5179,4,RSS 8 Monday 6:15 pm,2024 Fall,archived
+1043,5180,5,RSS 8 Saturday 4:00 pm,2024 Fall,archived
+1261,5181,22,Adult Learn to Swim Tuesday 6:15 pm,2025 Winter,archived
+1140,5182,4,RSS 11 Saturday 9:00 am,2025 Winter,archived
+1213,5183,10,Adapted Thursday 9:00 am,2025 Winter,archived
+1248,5184,19,RSS 6 Saturday 10:30 am,2025 Winter,archived
+1242,5185,3,RSS 5 Wednesday 6:15 pm,2025 Winter,archived
+1125,5186,14,RSS 3 Tuesday 10:30 am,2025 Winter,archived
+1234,5187,18,RSS 6 Friday 5:00 pm,2025 Winter,archived
+1283,5188,9,Adult Learn to Swim Tuesday 4:00 pm,2025 Winter,archived
+1075,5189,16,Adapted Wednesday 6:15 pm,2025 Winter,archived
+1197,5190,11,Adapted Monday 4:30 pm,2025 Winter,archived
+1098,5191,3,RSS 3 Tuesday 6:15 pm,2025 Winter,archived
+1300,5192,24,RSS 11 Thursday 5:00 pm,2025 Winter,archived
+1070,5193,12,RSS 2 Thursday 9:00 am,2025 Winter,archived
+1036,5194,9,RSS 9 Monday 4:30 pm,2025 Winter,archived
+1142,5195,12,RSS 11 Saturday 6:15 pm,2025 Winter,archived
+1298,5196,9,RSS 10 Thursday 6:15 pm,2025 Winter,archived
+1175,5197,12,RSS 2 Saturday 10:30 am,2025 Winter,archived
+1260,5198,16,RSS 1 Friday 5:00 pm,2025 Winter,archived
+1137,5199,11,RSS 10 Tuesday 6:15 pm,2025 Winter,archived
+1002,5200,3,RSS 11 Thursday 6:15 pm,2025 Winter,archived
+1145,5201,10,RSS 11 Thursday 9:00 am,2025 Winter,archived
+1153,5202,5,RSS 1 Monday 4:00 pm,2025 Winter,archived
+1251,5203,16,RSS 2 Monday 10:30 am,2025 Winter,archived
+1077,5204,18,RSS 3 Thursday 4:30 pm,2025 Winter,archived
+1229,5205,12,RSS 11 Saturday 6:15 pm,2025 Winter,archived
+1297,5206,18,RSS 7 Friday 6:15 pm,2025 Winter,archived
+1177,5207,24,RSS 3 Thursday 6:15 pm,2025 Winter,archived
+1171,5208,4,Adult Learn to Swim Thursday 5:00 pm,2025 Winter,archived
+1194,5209,14,RSS 5 Monday 6:15 pm,2025 Winter,archived
+1294,5210,12,RSS 4 Thursday 4:30 pm,2025 Winter,archived
+1165,5211,8,Adult Learn to Swim Wednesday 9:00 am,2025 Winter,archived
+1097,5212,22,RSS 6 Friday 6:15 pm,2025 Winter,archived
+1123,5213,12,RSS 1 Thursday 4:00 pm,2025 Winter,archived
+1291,5214,7,RSS 2 Thursday 9:00 am,2025 Winter,archived
+1120,5215,22,RSS 4 Saturday 6:15 pm,2025 Winter,archived
+1211,5216,20,RSS 1 Monday 4:00 pm,2025 Winter,archived
+1023,5217,8,RSS 3 Friday 10:30 am,2025 Winter,archived
+1163,5218,3,Adult Learn to Swim Friday 10:30 am,2025 Winter,archived
+1243,5219,19,RSS 4 Tuesday 4:00 pm,2025 Winter,archived
+1196,5220,25,RSS 3 Friday 9:00 am,2025 Winter,archived
+1198,5221,9,Adult Learn to Swim Tuesday 10:30 am,2025 Winter,archived
+1078,5222,18,RSS 5 Tuesday 9:00 am,2025 Winter,archived
+1254,5223,22,Adult Learn to Swim Monday 10:30 am,2025 Winter,archived
+1019,5224,1,RSS 6 Tuesday 5:00 pm,2025 Winter,archived
+1065,5225,11,RSS 1 Tuesday 4:00 pm,2025 Winter,archived
+1129,5226,2,RSS 3 Saturday 4:30 pm,2025 Winter,archived
+1275,5227,17,RSS 2 Saturday 9:00 am,2025 Winter,archived
+1152,5228,16,RSS 8 Wednesday 5:00 pm,2025 Winter,archived
+1085,5229,19,RSS 2 Thursday 5:00 pm,2025 Winter,archived
+1223,5230,8,RSS 10 Monday 6:15 pm,2025 Winter,archived
+1026,5231,22,RSS 9 Wednesday 4:30 pm,2025 Winter,archived
+1224,5232,21,RSS 1 Monday 4:30 pm,2025 Winter,archived
+1217,5233,13,RSS 7 Saturday 9:00 am,2025 Winter,archived
+1113,5234,16,RSS 12 Thursday 9:00 am,2025 Winter,archived
+1250,5235,3,RSS 6 Friday 10:30 am,2025 Winter,archived
+1135,5236,3,RSS 3 Wednesday 5:00 pm,2025 Winter,archived
+1271,5237,21,RSS 10 Friday 6:15 pm,2025 Winter,archived
+1117,5238,11,RSS 7 Friday 5:00 pm,2025 Winter,archived
+1004,5239,10,RSS 8 Friday 5:00 pm,2025 Winter,archived
+1185,5240,14,RSS 2 Saturday 9:00 am,2025 Winter,archived
+1037,5241,21,RSS 11 Friday 6:15 pm,2025 Winter,archived
+1105,5242,7,RSS 7 Thursday 10:30 am,2025 Winter,archived
+1278,5243,14,RSS 6 Thursday 4:30 pm,2025 Winter,archived
+1168,5244,14,RSS 12 Monday 4:00 pm,2025 Winter,archived
+1040,5245,14,RSS 6 Saturday 4:00 pm,2025 Winter,archived
+1020,5246,12,RSS 3 Saturday 4:30 pm,2025 Winter,archived
+1121,5247,3,RSS 2 Monday 9:00 am,2025 Winter,archived
+1201,5248,14,RSS 2 Saturday 6:15 pm,2025 Winter,archived
+1068,5249,12,Adapted Tuesday 5:00 pm,2025 Winter,archived
+1087,5250,2,RSS 10 Friday 5:00 pm,2025 Winter,archived
+1160,5251,11,RSS 11 Monday 4:30 pm,2025 Winter,archived
+1178,5252,12,Adult Learn to Swim Saturday 4:30 pm,2025 Winter,archived
+1102,5253,24,RSS 1 Wednesday 5:00 pm,2025 Winter,archived
+1167,5254,10,RSS 6 Monday 5:00 pm,2025 Winter,archived
+1021,5255,17,RSS 4 Tuesday 6:15 pm,2025 Winter,archived
+1219,5256,16,RSS 4 Monday 4:00 pm,2025 Winter,archived
+1252,5257,18,RSS 6 Monday 4:00 pm,2025 Winter,archived
+1225,5258,19,RSS 4 Thursday 5:00 pm,2025 Winter,archived
+1173,5259,25,Adult Learn to Swim Friday 5:00 pm,2025 Winter,archived
+1220,5260,22,RSS 11 Friday 9:00 am,2025 Winter,archived
+1282,5261,20,RSS 11 Saturday 4:00 pm,2025 Winter,archived
+1290,5262,1,RSS 3 Wednesday 6:15 pm,2025 Winter,archived
+1082,5263,25,RSS 5 Wednesday 4:00 pm,2025 Winter,archived
+1161,5264,1,RSS 3 Tuesday 5:00 pm,2025 Winter,archived
+1184,5265,22,RSS 7 Monday 10:30 am,2025 Winter,archived
+1195,5266,24,RSS 11 Monday 9:00 am,2025 Winter,archived
+1295,5267,24,RSS 9 Tuesday 4:30 pm,2025 Winter,archived
+1139,5268,14,RSS 8 Wednesday 10:30 am,2025 Winter,archived
+1010,5269,12,RSS 5 Saturday 4:00 pm,2025 Winter,archived
+1159,5270,25,RSS 10 Friday 9:00 am,2025 Winter,archived
+1018,5271,2,RSS 3 Tuesday 5:00 pm,2025 Winter,archived
+1061,5272,2,RSS 11 Monday 4:00 pm,2025 Winter,archived
+1162,5273,15,RSS 11 Thursday 4:30 pm,2025 Winter,archived
+1176,5274,20,RSS 8 Thursday 4:00 pm,2025 Winter,archived
+1074,5275,7,Adapted Friday 9:00 am,2025 Winter,archived
+1059,5276,12,RSS 7 Monday 4:00 pm,2025 Winter,archived
+1192,5277,22,RSS 11 Friday 4:30 pm,2025 Winter,archived
+1024,5278,17,RSS 11 Wednesday 9:00 am,2025 Winter,archived
+1112,5279,8,RSS 7 Friday 9:00 am,2025 Winter,archived
+1246,5280,1,RSS 4 Wednesday 10:30 am,2025 Winter,archived
+1215,5281,25,RSS 3 Wednesday 4:00 pm,2025 Winter,archived
+1263,5282,11,RSS 2 Monday 4:30 pm,2025 Winter,archived
+1181,5283,24,RSS 7 Tuesday 10:30 am,2025 Winter,archived
+1233,5284,13,RSS 9 Saturday 10:30 am,2025 Winter,archived
+1114,5285,17,RSS 9 Saturday 4:00 pm,2025 Winter,archived
+1043,5286,3,RSS 7 Saturday 9:00 am,2025 Winter,archived
+1276,5287,14,RSS 1 Thursday 9:00 am,2025 Winter,archived
+1277,5288,11,RSS 10 Thursday 5:00 pm,2025 Winter,archived
+1008,5289,13,RSS 12 Saturday 4:30 pm,2025 Winter,archived
+1012,5290,10,RSS 2 Thursday 9:00 am,2025 Winter,archived
+1084,5291,11,RSS 3 Friday 4:30 pm,2025 Winter,archived
+1015,5292,23,RSS 6 Monday 4:30 pm,2025 Winter,archived
+1076,5293,4,RSS 4 Thursday 5:00 pm,2025 Winter,archived
+1092,5294,13,RSS 9 Monday 4:30 pm,2025 Winter,archived
+1096,5295,10,RSS 12 Wednesday 10:30 am,2025 Winter,archived
+1111,5296,11,Adapted Tuesday 9:00 am,2025 Winter,archived
+1038,5297,17,RSS 11 Monday 5:00 pm,2025 Winter,archived
+1063,5298,17,RSS 4 Wednesday 4:00 pm,2025 Winter,archived
+1136,5299,24,Adult Learn to Swim Saturday 10:30 am,2025 Winter,archived
+1106,5300,8,RSS 2 Tuesday 4:00 pm,2025 Winter,archived
+1280,5301,7,RSS 3 Friday 10:30 am,2025 Winter,archived
+1284,5302,25,Adapted Saturday 9:00 am,2025 Winter,archived
+1047,5303,6,Adapted Saturday 4:30 pm,2025 Winter,archived
+1044,5304,15,Adapted Friday 5:00 pm,2025 Winter,archived
+1045,5305,15,RSS 11 Friday 6:15 pm,2025 Winter,archived
+1226,5306,21,RSS 10 Wednesday 6:15 pm,2025 Winter,archived
+1157,5307,11,RSS 3 Thursday 9:00 am,2025 Winter,archived
+1238,5308,16,RSS 8 Saturday 4:00 pm,2025 Winter,archived
+1265,5309,9,RSS 10 Monday 4:00 pm,2025 Winter,archived
+1062,5310,17,RSS 2 Wednesday 4:30 pm,2025 Winter,archived
+1128,5311,15,RSS 1 Monday 4:00 pm,2025 Winter,archived
+1150,5312,10,RSS 2 Saturday 9:00 am,2025 Winter,archived
+1240,5313,20,RSS 10 Friday 4:30 pm,2025 Winter,archived
+1060,5314,15,RSS 10 Friday 6:15 pm,2025 Winter,archived
+1119,5315,2,RSS 8 Friday 6:15 pm,2025 Winter,archived
+1164,5316,7,RSS 6 Friday 4:30 pm,2025 Winter,archived
+1066,5317,17,RSS 3 Monday 4:30 pm,2025 Winter,archived
+1118,5318,4,Adapted Wednesday 6:15 pm,2025 Winter,archived
+1270,5319,3,RSS 9 Saturday 10:30 am,2025 Winter,archived
+1003,5320,2,RSS 4 Saturday 4:30 pm,2025 Winter,archived
+1266,5321,15,RSS 9 Friday 5:00 pm,2025 Winter,archived
+1206,5322,6,RSS 6 Wednesday 4:00 pm,2025 Winter,archived
+1299,5323,13,RSS 7 Wednesday 6:15 pm,2025 Winter,archived
+1041,5324,20,RSS 1 Saturday 6:15 pm,2025 Winter,archived
+1257,5325,11,RSS 2 Wednesday 9:00 am,2025 Winter,archived
+1289,5326,18,RSS 11 Thursday 4:00 pm,2025 Winter,archived
+1089,5327,9,RSS 12 Saturday 5:00 pm,2025 Winter,archived
+1151,5328,5,RSS 6 Monday 5:00 pm,2025 Winter,archived
+1193,5329,22,RSS 3 Wednesday 4:00 pm,2025 Winter,archived
+1109,5330,21,RSS 12 Saturday 4:30 pm,2025 Winter,archived
+1256,5331,5,RSS 10 Saturday 9:00 am,2025 Winter,archived
+1262,5332,10,RSS 9 Thursday 6:15 pm,2025 Winter,archived
+1259,5333,11,Adult Learn to Swim Tuesday 6:15 pm,2025 Winter,archived
+1051,5334,23,Adult Learn to Swim Saturday 6:15 pm,2025 Winter,archived
+1099,5335,17,RSS 2 Saturday 6:15 pm,2025 Winter,archived
+1124,5336,14,RSS 9 Wednesday 9:00 am,2025 Winter,archived
+1028,5337,12,RSS 5 Tuesday 10:30 am,2025 Winter,archived
+1209,5338,11,Adapted Thursday 10:30 am,2025 Winter,archived
+1222,5339,8,RSS 3 Tuesday 9:00 am,2025 Winter,archived
+1187,5340,10,Adult Learn to Swim Monday 5:00 pm,2025 Winter,archived
+1188,5341,25,RSS 9 Saturday 5:00 pm,2025 Winter,archived
+1158,5342,2,RSS 11 Wednesday 5:00 pm,2025 Winter,archived
+1006,5343,5,RSS 10 Thursday 10:30 am,2025 Winter,archived
+1228,5344,6,RSS 3 Saturday 5:00 pm,2025 Winter,archived
+1071,5345,6,RSS 12 Thursday 9:00 am,2025 Winter,archived
+1258,5346,14,RSS 6 Saturday 6:15 pm,2025 Winter,archived
+1013,5347,8,RSS 8 Friday 4:00 pm,2025 Winter,archived
+1170,5348,25,RSS 12 Thursday 10:30 am,2025 Winter,archived
+1172,5349,18,RSS 4 Wednesday 4:30 pm,2025 Winter,archived
+1205,5350,7,RSS 6 Saturday 5:00 pm,2025 Winter,archived
+1091,5351,15,RSS 8 Wednesday 4:30 pm,2025 Winter,archived
+1057,5352,17,RSS 9 Thursday 10:30 am,2025 Winter,archived
+1049,5353,7,Adapted Friday 10:30 am,2025 Winter,archived
+1080,5354,9,RSS 1 Saturday 4:30 pm,2025 Winter,archived
+1033,5355,12,RSS 9 Monday 6:15 pm,2025 Winter,archived
+1231,5356,17,Adult Learn to Swim Monday 4:00 pm,2025 Winter,archived
+1269,5357,3,Adapted Tuesday 4:00 pm,2025 Winter,archived
+1093,5358,15,RSS 9 Tuesday 4:30 pm,2025 Winter,archived
+1146,5359,3,RSS 4 Thursday 4:00 pm,2025 Winter,archived
+1249,5360,1,RSS 7 Monday 4:30 pm,2025 Winter,archived
+1258,5361,12,RSS 7 Friday 9:00 am,2025 Spring,archived
+1192,5362,20,RSS 3 Saturday 4:30 pm,2025 Spring,archived
+1121,5363,12,RSS 6 Thursday 9:00 am,2025 Spring,archived
+1198,5364,19,RSS 3 Friday 4:00 pm,2025 Spring,archived
+1042,5365,13,RSS 6 Saturday 4:00 pm,2025 Spring,archived
+1299,5366,8,RSS 2 Monday 6:15 pm,2025 Spring,archived
+1115,5367,6,RSS 8 Friday 4:30 pm,2025 Spring,archived
+1015,5368,18,RSS 2 Wednesday 4:00 pm,2025 Spring,archived
+1164,5369,23,RSS 8 Tuesday 5:00 pm,2025 Spring,archived
+1051,5370,10,RSS 12 Thursday 10:30 am,2025 Spring,archived
+1172,5371,4,RSS 3 Monday 4:30 pm,2025 Spring,archived
+1075,5372,6,RSS 12 Thursday 9:00 am,2025 Spring,archived
+1071,5373,22,Adult Learn to Swim Wednesday 6:15 pm,2025 Spring,archived
+1020,5374,12,RSS 12 Monday 5:00 pm,2025 Spring,archived
+1147,5375,18,RSS 5 Wednesday 10:30 am,2025 Spring,archived
+1242,5376,23,RSS 12 Saturday 6:15 pm,2025 Spring,archived
+1072,5377,6,Adapted Wednesday 5:00 pm,2025 Spring,archived
+1241,5378,8,RSS 2 Tuesday 10:30 am,2025 Spring,archived
+1230,5379,8,Adapted Thursday 9:00 am,2025 Spring,archived
+1003,5380,12,RSS 9 Friday 4:00 pm,2025 Spring,archived
+1041,5381,15,Adapted Friday 10:30 am,2025 Spring,archived
+1010,5382,20,RSS 2 Monday 4:00 pm,2025 Spring,archived
+1132,5383,13,RSS 12 Saturday 4:30 pm,2025 Spring,archived
+1111,5384,17,RSS 7 Thursday 5:00 pm,2025 Spring,archived
+1077,5385,3,RSS 3 Wednesday 6:15 pm,2025 Spring,archived
+1271,5386,3,RSS 8 Thursday 6:15 pm,2025 Spring,archived
+1217,5387,17,RSS 6 Tuesday 5:00 pm,2025 Spring,archived
+1057,5388,21,RSS 10 Tuesday 10:30 am,2025 Spring,archived
+1148,5389,14,RSS 9 Monday 9:00 am,2025 Spring,archived
+1122,5390,17,RSS 3 Wednesday 10:30 am,2025 Spring,archived
+1155,5391,6,RSS 6 Saturday 10:30 am,2025 Spring,archived
+1063,5392,12,RSS 9 Wednesday 9:00 am,2025 Spring,archived
+1025,5393,9,RSS 4 Saturday 5:00 pm,2025 Spring,archived
+1123,5394,9,RSS 3 Saturday 4:00 pm,2025 Spring,archived
+1215,5395,20,RSS 9 Monday 5:00 pm,2025 Spring,archived
+1235,5396,21,RSS 3 Friday 5:00 pm,2025 Spring,archived
+1033,5397,5,RSS 3 Saturday 5:00 pm,2025 Spring,archived
+1273,5398,24,RSS 10 Wednesday 5:00 pm,2025 Spring,archived
+1256,5399,2,Adult Learn to Swim Monday 9:00 am,2025 Spring,archived
+1009,5400,2,RSS 11 Friday 4:00 pm,2025 Spring,archived
+1124,5401,21,RSS 4 Friday 4:30 pm,2025 Spring,archived
+1074,5402,20,RSS 11 Monday 4:30 pm,2025 Spring,archived
+1150,5403,21,RSS 9 Wednesday 6:15 pm,2025 Spring,archived
+1220,5404,10,RSS 8 Tuesday 6:15 pm,2025 Spring,archived
+1001,5405,13,RSS 5 Thursday 9:00 am,2025 Spring,archived
+1158,5406,23,RSS 1 Tuesday 4:30 pm,2025 Spring,archived
+1091,5407,14,RSS 8 Thursday 10:30 am,2025 Spring,archived
+1062,5408,11,RSS 10 Tuesday 4:00 pm,2025 Spring,archived
+1286,5409,23,RSS 6 Saturday 4:00 pm,2025 Spring,archived
+1107,5410,13,RSS 3 Wednesday 5:00 pm,2025 Spring,archived
+1048,5411,18,RSS 2 Wednesday 10:30 am,2025 Spring,archived
+1171,5412,15,RSS 2 Wednesday 4:30 pm,2025 Spring,archived
+1290,5413,8,RSS 3 Monday 9:00 am,2025 Spring,archived
+1022,5414,10,RSS 7 Friday 4:30 pm,2025 Spring,archived
+1135,5415,8,Adult Learn to Swim Tuesday 4:00 pm,2025 Spring,archived
+1093,5416,19,RSS 12 Wednesday 10:30 am,2025 Spring,archived
+1018,5417,25,RSS 3 Thursday 5:00 pm,2025 Spring,archived
+1246,5418,15,RSS 8 Wednesday 4:30 pm,2025 Spring,archived
+1140,5419,1,RSS 2 Thursday 5:00 pm,2025 Spring,archived
+1130,5420,15,RSS 4 Tuesday 5:00 pm,2025 Spring,archived
+1202,5421,12,RSS 1 Monday 4:00 pm,2025 Spring,archived
+1283,5422,16,RSS 10 Saturday 6:15 pm,2025 Spring,archived
+1142,5423,16,RSS 5 Friday 9:00 am,2025 Spring,archived
+1006,5424,4,RSS 7 Tuesday 4:00 pm,2025 Spring,archived
+1100,5425,24,RSS 6 Thursday 4:00 pm,2025 Spring,archived
+1224,5426,2,RSS 7 Monday 5:00 pm,2025 Spring,archived
+1298,5427,18,RSS 4 Wednesday 5:00 pm,2025 Spring,archived
+1012,5428,10,RSS 2 Thursday 5:00 pm,2025 Spring,archived
+1163,5429,15,Adapted Friday 4:00 pm,2025 Spring,archived
+1236,5430,20,RSS 11 Friday 9:00 am,2025 Spring,archived
+1096,5431,5,RSS 2 Thursday 4:00 pm,2025 Spring,archived
+1065,5432,11,RSS 9 Wednesday 10:30 am,2025 Spring,archived
+1295,5433,7,RSS 10 Friday 4:30 pm,2025 Spring,archived
+1005,5434,17,RSS 1 Monday 9:00 am,2025 Spring,archived
+1092,5435,5,RSS 12 Wednesday 4:30 pm,2025 Spring,archived
+1240,5436,17,RSS 8 Tuesday 5:00 pm,2025 Spring,archived
+1244,5437,17,RSS 3 Wednesday 5:00 pm,2025 Spring,archived
+1089,5438,11,RSS 3 Thursday 5:00 pm,2025 Spring,archived
+1253,5439,24,Adult Learn to Swim Wednesday 5:00 pm,2025 Spring,archived
+1188,5440,11,RSS 9 Friday 5:00 pm,2025 Spring,archived
+1169,5441,16,RSS 12 Friday 4:00 pm,2025 Spring,archived
+1161,5442,16,Adult Learn to Swim Monday 4:00 pm,2025 Spring,archived
+1027,5443,11,RSS 11 Monday 4:30 pm,2025 Spring,archived
+1297,5444,19,RSS 5 Saturday 6:15 pm,2025 Spring,archived
+1149,5445,21,RSS 1 Friday 4:30 pm,2025 Spring,archived
+1189,5446,9,RSS 11 Friday 5:00 pm,2025 Spring,archived
+1194,5447,8,RSS 12 Monday 5:00 pm,2025 Spring,archived
+1086,5448,16,RSS 3 Friday 6:15 pm,2025 Spring,archived
+1035,5449,24,RSS 10 Thursday 10:30 am,2025 Spring,archived
+1233,5450,22,RSS 4 Monday 5:00 pm,2025 Spring,archived
+1254,5451,23,RSS 2 Tuesday 9:00 am,2025 Spring,archived
+1285,5452,15,RSS 6 Thursday 10:30 am,2025 Spring,archived
+1087,5453,14,RSS 12 Tuesday 4:30 pm,2025 Spring,archived
+1165,5454,17,Adapted Friday 4:30 pm,2025 Spring,archived
+1045,5455,24,RSS 12 Monday 6:15 pm,2025 Spring,archived
+1200,5456,5,RSS 9 Tuesday 5:00 pm,2025 Spring,archived
+1176,5457,11,RSS 11 Thursday 5:00 pm,2025 Spring,archived
+1119,5458,13,RSS 6 Tuesday 4:30 pm,2025 Spring,archived
+1179,5459,18,RSS 6 Friday 4:00 pm,2025 Spring,archived
+1267,5460,22,Adapted Saturday 6:15 pm,2025 Spring,archived
+1162,5461,21,Adapted Saturday 4:00 pm,2025 Spring,archived
+1047,5462,20,RSS 8 Tuesday 10:30 am,2025 Spring,archived
+1212,5463,9,RSS 9 Wednesday 10:30 am,2025 Spring,archived
+1017,5464,10,Adapted Wednesday 6:15 pm,2025 Spring,archived
+1184,5465,7,RSS 12 Saturday 4:30 pm,2025 Spring,archived
+1118,5466,11,RSS 8 Wednesday 5:00 pm,2025 Spring,archived
+1279,5467,24,RSS 5 Wednesday 9:00 am,2025 Spring,archived
+1076,5468,19,RSS 11 Friday 4:30 pm,2025 Spring,archived
+1052,5469,13,Adult Learn to Swim Wednesday 10:30 am,2025 Spring,archived
+1211,5470,10,RSS 1 Wednesday 6:15 pm,2025 Spring,archived
+1228,5471,3,RSS 6 Thursday 6:15 pm,2025 Spring,archived
+1011,5472,9,RSS 12 Thursday 10:30 am,2025 Spring,archived
+1081,5473,7,Adult Learn to Swim Friday 4:00 pm,2025 Spring,archived
+1080,5474,18,RSS 12 Wednesday 10:30 am,2025 Spring,archived
+1278,5475,4,RSS 10 Saturday 5:00 pm,2025 Spring,archived
+1102,5476,8,RSS 4 Monday 6:15 pm,2025 Spring,archived
+1209,5477,17,RSS 4 Saturday 10:30 am,2025 Spring,archived
+1275,5478,2,RSS 2 Thursday 4:00 pm,2025 Spring,archived
+1229,5479,23,RSS 8 Monday 6:15 pm,2025 Spring,archived
+1214,5480,25,RSS 3 Monday 5:00 pm,2025 Spring,archived
+1166,5481,6,RSS 7 Saturday 4:30 pm,2025 Spring,archived
+1049,5482,16,RSS 11 Tuesday 4:00 pm,2025 Spring,archived
+1259,5483,11,RSS 5 Saturday 9:00 am,2025 Spring,archived
+1226,5484,25,RSS 2 Saturday 5:00 pm,2025 Spring,archived
+1013,5485,8,RSS 9 Saturday 6:15 pm,2025 Spring,archived
+1168,5486,2,RSS 3 Thursday 10:30 am,2025 Spring,archived
+1085,5487,2,Adult Learn to Swim Thursday 4:30 pm,2025 Spring,archived
+1070,5488,6,RSS 12 Wednesday 9:00 am,2025 Spring,archived
+1032,5489,1,RSS 5 Friday 5:00 pm,2025 Spring,archived
+1095,5490,4,RSS 6 Wednesday 4:30 pm,2025 Spring,archived
+1112,5491,21,RSS 9 Friday 4:30 pm,2025 Spring,archived
+1103,5492,5,Adult Learn to Swim Friday 4:30 pm,2025 Spring,archived
+1113,5493,9,RSS 4 Monday 4:00 pm,2025 Spring,archived
+1099,5494,6,RSS 12 Thursday 6:15 pm,2025 Spring,archived
+1208,5495,9,RSS 12 Tuesday 9:00 am,2025 Spring,archived
+1250,5496,24,RSS 6 Wednesday 5:00 pm,2025 Spring,archived
+1128,5497,22,Adapted Tuesday 10:30 am,2025 Spring,archived
+1292,5498,20,Adult Learn to Swim Saturday 4:30 pm,2025 Spring,archived
+1249,5499,14,RSS 9 Wednesday 9:00 am,2025 Spring,archived
+1133,5500,13,RSS 11 Monday 10:30 am,2025 Spring,archived
+1069,5501,5,RSS 8 Wednesday 10:30 am,2025 Spring,archived
+1247,5502,1,RSS 5 Thursday 10:30 am,2025 Spring,archived
+1109,5503,15,Adapted Wednesday 4:00 pm,2025 Spring,archived
+1021,5504,10,RSS 10 Saturday 5:00 pm,2025 Spring,archived
+1277,5505,1,RSS 5 Saturday 4:00 pm,2025 Spring,archived
+1270,5506,23,RSS 4 Monday 6:15 pm,2025 Spring,archived
+1199,5507,4,RSS 8 Wednesday 10:30 am,2025 Spring,archived
+1196,5508,13,RSS 11 Friday 6:15 pm,2025 Spring,archived
+1193,5509,25,RSS 5 Saturday 9:00 am,2025 Spring,archived
+1083,5510,21,RSS 5 Wednesday 5:00 pm,2025 Spring,archived
+1218,5511,8,RSS 4 Tuesday 4:30 pm,2025 Spring,archived
+1157,5512,5,RSS 8 Saturday 5:00 pm,2025 Spring,archived
+1084,5513,12,RSS 7 Saturday 5:00 pm,2025 Spring,archived
+1152,5514,16,Adapted Friday 6:15 pm,2025 Spring,archived
+1079,5515,7,Adapted Tuesday 6:15 pm,2025 Spring,archived
+1294,5516,25,RSS 10 Monday 5:00 pm,2025 Spring,archived
+1110,5517,15,RSS 9 Saturday 4:00 pm,2025 Spring,archived
+1043,5518,3,RSS 10 Monday 9:00 am,2025 Spring,archived
+1114,5519,18,RSS 9 Tuesday 5:00 pm,2025 Spring,archived
+1090,5520,18,RSS 3 Tuesday 4:00 pm,2025 Spring,archived
+1145,5521,17,RSS 8 Monday 6:15 pm,2025 Spring,archived
+1266,5522,7,RSS 12 Friday 4:30 pm,2025 Spring,archived
+1210,5523,3,RSS 9 Thursday 9:00 am,2025 Spring,archived
+1170,5524,15,RSS 3 Friday 4:30 pm,2025 Spring,archived
+1288,5525,15,RSS 10 Monday 5:00 pm,2025 Spring,archived
+1293,5526,15,RSS 11 Wednesday 6:15 pm,2025 Spring,archived
+1287,5527,1,RSS 7 Wednesday 9:00 am,2025 Spring,archived
+1104,5528,24,RSS 4 Friday 9:00 am,2025 Spring,archived
+1094,5529,2,RSS 7 Wednesday 6:15 pm,2025 Spring,archived
+1280,5530,3,RSS 9 Monday 9:00 am,2025 Spring,archived
+1008,5531,16,RSS 1 Wednesday 4:30 pm,2025 Spring,archived
+1037,5532,6,Adapted Tuesday 6:15 pm,2025 Spring,archived
+1175,5533,24,RSS 11 Thursday 4:00 pm,2025 Spring,archived
+1227,5534,13,RSS 8 Thursday 4:30 pm,2025 Spring,archived
+1197,5535,3,RSS 11 Saturday 5:00 pm,2025 Spring,archived
+1261,5536,5,RSS 11 Wednesday 9:00 am,2025 Spring,archived
+1031,5537,6,RSS 9 Thursday 5:00 pm,2025 Spring,archived
+1231,5538,5,RSS 12 Tuesday 9:00 am,2025 Spring,archived
+1151,5539,25,RSS 1 Wednesday 4:30 pm,2025 Spring,archived
+1154,5540,22,RSS 12 Friday 4:30 pm,2025 Spring,archived
+1273,5541,22,RSS 1 Monday 4:30 pm,2025 Summer,active
+1195,5542,5,Adult Learn to Swim Saturday 10:30 am,2025 Summer,active
+1118,5543,3,RSS 12 Tuesday 9:00 am,2025 Summer,active
+1127,5544,7,RSS 9 Thursday 4:00 pm,2025 Summer,active
+1236,5545,2,RSS 10 Saturday 6:15 pm,2025 Summer,active
+1178,5546,20,RSS 8 Saturday 4:30 pm,2025 Summer,active
+1080,5547,1,RSS 1 Friday 5:00 pm,2025 Summer,active
+1142,5548,14,RSS 1 Monday 5:00 pm,2025 Summer,active
+1097,5549,24,RSS 5 Friday 4:00 pm,2025 Summer,active
+1058,5550,1,RSS 9 Saturday 6:15 pm,2025 Summer,active
+1017,5551,14,Adapted Tuesday 9:00 am,2025 Summer,active
+1215,5552,4,RSS 9 Tuesday 10:30 am,2025 Summer,active
+1009,5553,7,RSS 10 Friday 4:00 pm,2025 Summer,active
+1124,5554,12,RSS 5 Thursday 9:00 am,2025 Summer,active
+1106,5555,12,RSS 7 Thursday 5:00 pm,2025 Summer,active
+1035,5556,8,RSS 12 Tuesday 4:00 pm,2025 Summer,active
+1052,5557,22,Adult Learn to Swim Monday 6:15 pm,2025 Summer,active
+1018,5558,21,Adapted Monday 9:00 am,2025 Summer,active
+1229,5559,13,RSS 7 Thursday 5:00 pm,2025 Summer,active
+1025,5560,16,RSS 1 Saturday 9:00 am,2025 Summer,active
+1126,5561,23,RSS 3 Monday 4:30 pm,2025 Summer,active
+1023,5562,14,RSS 11 Wednesday 5:00 pm,2025 Summer,active
+1206,5563,4,RSS 9 Monday 10:30 am,2025 Summer,active
+1225,5564,7,Adult Learn to Swim Saturday 5:00 pm,2025 Summer,active
+1120,5565,16,RSS 5 Monday 9:00 am,2025 Summer,active
+1112,5566,22,RSS 5 Friday 5:00 pm,2025 Summer,active
+1029,5567,22,RSS 1 Tuesday 4:00 pm,2025 Summer,active
+1072,5568,1,RSS 4 Friday 10:30 am,2025 Summer,active
+1258,5569,25,Adult Learn to Swim Saturday 4:30 pm,2025 Summer,active
+1149,5570,3,RSS 5 Tuesday 5:00 pm,2025 Summer,active
+1276,5571,8,RSS 10 Thursday 6:15 pm,2025 Summer,active
+1164,5572,18,RSS 6 Thursday 6:15 pm,2025 Summer,active
+1165,5573,5,Adapted Saturday 6:15 pm,2025 Summer,active
+1122,5574,3,RSS 9 Saturday 4:00 pm,2025 Summer,active
+1155,5575,2,RSS 2 Thursday 10:30 am,2025 Summer,active
+1074,5576,3,RSS 6 Friday 5:00 pm,2025 Summer,active
+1114,5577,20,RSS 7 Wednesday 9:00 am,2025 Summer,active
+1212,5578,21,RSS 5 Thursday 4:30 pm,2025 Summer,active
+1154,5579,8,RSS 6 Friday 4:30 pm,2025 Summer,active
+1141,5580,14,RSS 3 Saturday 5:00 pm,2025 Summer,active
+1032,5581,22,RSS 7 Monday 5:00 pm,2025 Summer,active
+1090,5582,10,Adapted Tuesday 6:15 pm,2025 Summer,active
+1219,5583,3,RSS 2 Wednesday 10:30 am,2025 Summer,active
+1254,5584,13,RSS 12 Saturday 10:30 am,2025 Summer,active
+1281,5585,24,RSS 7 Wednesday 4:00 pm,2025 Summer,active
+1249,5586,4,RSS 2 Monday 4:00 pm,2025 Summer,active
+1089,5587,15,RSS 6 Wednesday 9:00 am,2025 Summer,active
+1242,5588,5,RSS 2 Tuesday 4:30 pm,2025 Summer,active
+1268,5589,15,RSS 9 Friday 5:00 pm,2025 Summer,active
+1172,5590,14,RSS 2 Monday 9:00 am,2025 Summer,active
+1098,5591,12,RSS 9 Monday 5:00 pm,2025 Summer,active
+1202,5592,20,Adapted Wednesday 4:30 pm,2025 Summer,active
+1135,5593,1,RSS 5 Thursday 4:30 pm,2025 Summer,active
+1082,5594,25,RSS 2 Saturday 5:00 pm,2025 Summer,active
+1179,5595,8,RSS 10 Friday 10:30 am,2025 Summer,active
+1107,5596,22,RSS 7 Tuesday 10:30 am,2025 Summer,active
+1105,5597,9,RSS 5 Wednesday 4:30 pm,2025 Summer,active
+1039,5598,5,RSS 2 Tuesday 4:30 pm,2025 Summer,active
+1077,5599,9,RSS 7 Wednesday 4:30 pm,2025 Summer,active
+1292,5600,3,RSS 6 Wednesday 10:30 am,2025 Summer,active
+1048,5601,24,RSS 11 Thursday 5:00 pm,2025 Summer,active
+1194,5602,20,RSS 4 Thursday 9:00 am,2025 Summer,active
+1138,5603,5,RSS 5 Monday 4:30 pm,2025 Summer,active
+1267,5604,11,Adult Learn to Swim Friday 4:30 pm,2025 Summer,active
+1062,5605,11,RSS 8 Wednesday 4:30 pm,2025 Summer,active
+1218,5606,21,RSS 10 Tuesday 4:00 pm,2025 Summer,active
+1291,5607,11,RSS 10 Saturday 10:30 am,2025 Summer,active
+1253,5608,16,RSS 6 Tuesday 4:30 pm,2025 Summer,active
+1220,5609,11,RSS 5 Saturday 6:15 pm,2025 Summer,active
+1182,5610,21,RSS 8 Friday 10:30 am,2025 Summer,active
+1037,5611,11,RSS 7 Wednesday 4:30 pm,2025 Summer,active
+1207,5612,12,RSS 2 Friday 10:30 am,2025 Summer,active
+1119,5613,19,RSS 9 Tuesday 6:15 pm,2025 Summer,active
+1015,5614,25,RSS 9 Monday 6:15 pm,2025 Summer,active
+1144,5615,15,RSS 12 Tuesday 4:30 pm,2025 Summer,active
+1286,5616,10,Adult Learn to Swim Saturday 9:00 am,2025 Summer,active
+1245,5617,14,RSS 11 Thursday 10:30 am,2025 Summer,active
+1143,5618,21,RSS 5 Tuesday 4:00 pm,2025 Summer,active
+1136,5619,22,RSS 3 Saturday 4:30 pm,2025 Summer,active
+1285,5620,13,RSS 2 Thursday 5:00 pm,2025 Summer,active
+1100,5621,16,RSS 10 Thursday 5:00 pm,2025 Summer,active
+1063,5622,17,Adult Learn to Swim Saturday 4:30 pm,2025 Summer,active
+1066,5623,18,RSS 1 Wednesday 6:15 pm,2025 Summer,active
+1053,5624,18,RSS 10 Saturday 9:00 am,2025 Summer,active
+1085,5625,4,Adapted Tuesday 6:15 pm,2025 Summer,active
+1166,5626,22,RSS 6 Tuesday 6:15 pm,2025 Summer,active
+1021,5627,20,RSS 1 Friday 6:15 pm,2025 Summer,active
+1116,5628,22,RSS 11 Thursday 4:00 pm,2025 Summer,active
+1095,5629,14,RSS 2 Monday 9:00 am,2025 Summer,active
+1024,5630,9,RSS 4 Friday 6:15 pm,2025 Summer,active
+1238,5631,17,RSS 9 Friday 6:15 pm,2025 Summer,active
+1186,5632,19,RSS 4 Thursday 4:00 pm,2025 Summer,active
+1049,5633,13,RSS 8 Saturday 5:00 pm,2025 Summer,active
+1014,5634,23,RSS 9 Tuesday 4:00 pm,2025 Summer,active
+1069,5635,1,RSS 8 Monday 4:00 pm,2025 Summer,active
+1241,5636,14,RSS 2 Monday 6:15 pm,2025 Summer,active
+1173,5637,5,RSS 6 Wednesday 4:00 pm,2025 Summer,active
+1266,5638,15,Adapted Tuesday 5:00 pm,2025 Summer,active
+1203,5639,16,RSS 6 Thursday 9:00 am,2025 Summer,active
+1011,5640,15,RSS 12 Saturday 4:30 pm,2025 Summer,active
+1019,5641,11,RSS 2 Wednesday 9:00 am,2025 Summer,active
+1208,5642,23,RSS 2 Monday 4:00 pm,2025 Summer,active
+1299,5643,21,RSS 2 Saturday 10:30 am,2025 Summer,active
+1151,5644,24,RSS 4 Friday 10:30 am,2025 Summer,active
+1209,5645,18,RSS 3 Wednesday 5:00 pm,2025 Summer,active
+1251,5646,14,RSS 8 Tuesday 4:30 pm,2025 Summer,active
+1226,5647,21,RSS 3 Tuesday 6:15 pm,2025 Summer,active
+1056,5648,22,RSS 7 Thursday 9:00 am,2025 Summer,active
+1123,5649,24,RSS 10 Tuesday 4:30 pm,2025 Summer,active
+1054,5650,19,RSS 7 Thursday 9:00 am,2025 Summer,active
+1086,5651,23,RSS 4 Tuesday 4:00 pm,2025 Summer,active
+1078,5652,25,RSS 12 Monday 5:00 pm,2025 Summer,active
+1004,5653,4,Adapted Friday 10:30 am,2025 Summer,active
+1055,5654,12,RSS 6 Tuesday 4:30 pm,2025 Summer,active
+1199,5655,4,RSS 5 Saturday 4:30 pm,2025 Summer,active
+1031,5656,17,RSS 11 Wednesday 5:00 pm,2025 Summer,active
+1192,5657,13,RSS 10 Thursday 5:00 pm,2025 Summer,active
+1272,5658,4,RSS 6 Wednesday 4:30 pm,2025 Summer,active
+1246,5659,20,RSS 3 Saturday 6:15 pm,2025 Summer,active
+1255,5660,10,RSS 10 Friday 9:00 am,2025 Summer,active
+1217,5661,22,RSS 3 Wednesday 9:00 am,2025 Summer,active
+1102,5662,8,RSS 5 Monday 10:30 am,2025 Summer,active
+1296,5663,12,RSS 12 Tuesday 5:00 pm,2025 Summer,active
+1293,5664,13,RSS 7 Friday 10:30 am,2025 Summer,active
+1083,5665,19,RSS 7 Thursday 10:30 am,2025 Summer,active
+1073,5666,16,RSS 11 Friday 6:15 pm,2025 Summer,active
+1250,5667,21,RSS 3 Friday 10:30 am,2025 Summer,active
+1270,5668,16,RSS 5 Tuesday 10:30 am,2025 Summer,active
+1137,5669,11,Adult Learn to Swim Thursday 5:00 pm,2025 Summer,active
+1167,5670,2,Adult Learn to Swim Wednesday 9:00 am,2025 Summer,active
+1092,5671,16,RSS 3 Tuesday 4:30 pm,2025 Summer,active
+1079,5672,18,RSS 9 Saturday 4:30 pm,2025 Summer,active
+1067,5673,14,RSS 11 Thursday 4:30 pm,2025 Summer,active
+1093,5674,23,Adult Learn to Swim Thursday 4:30 pm,2025 Summer,active
+1132,5675,6,RSS 2 Friday 9:00 am,2025 Summer,active
+1128,5676,25,RSS 4 Wednesday 9:00 am,2025 Summer,active
+1204,5677,9,RSS 4 Friday 4:00 pm,2025 Summer,active
+1026,5678,6,Adapted Thursday 5:00 pm,2025 Summer,active
+1121,5679,24,Adapted Thursday 5:00 pm,2025 Summer,active
+1247,5680,17,RSS 2 Friday 9:00 am,2025 Summer,active
+1180,5681,9,Adapted Friday 4:00 pm,2025 Summer,active
+1263,5682,18,Adult Learn to Swim Monday 6:15 pm,2025 Summer,active
+1081,5683,15,RSS 9 Tuesday 4:30 pm,2025 Summer,active
+1277,5684,4,RSS 12 Saturday 10:30 am,2025 Summer,active
+1012,5685,10,Adult Learn to Swim Monday 4:30 pm,2025 Summer,active
+1145,5686,9,RSS 6 Monday 4:30 pm,2025 Summer,active
+1057,5687,4,Adapted Tuesday 10:30 am,2025 Summer,active
+1038,5688,24,RSS 10 Saturday 4:00 pm,2025 Summer,active
+1005,5689,23,RSS 10 Saturday 4:30 pm,2025 Summer,active
+1168,5690,6,RSS 10 Tuesday 10:30 am,2025 Summer,active
+1177,5691,7,Adapted Monday 5:00 pm,2025 Summer,active
+1271,5692,12,RSS 9 Wednesday 5:00 pm,2025 Summer,active
+1224,5693,18,RSS 3 Wednesday 6:15 pm,2025 Summer,active
+1076,5694,10,RSS 5 Friday 4:00 pm,2025 Summer,active
+1040,5695,17,RSS 11 Monday 10:30 am,2025 Summer,active
+1051,5696,25,Adapted Thursday 9:00 am,2025 Summer,active
+1216,5697,9,Adult Learn to Swim Saturday 10:30 am,2025 Summer,active
+1059,5698,23,Adult Learn to Swim Tuesday 10:30 am,2025 Summer,active
+1174,5699,5,RSS 12 Wednesday 10:30 am,2025 Summer,active
+1183,5700,25,Adult Learn to Swim Saturday 4:30 pm,2025 Summer,active
+1252,5701,16,RSS 3 Friday 6:15 pm,2025 Summer,active
+1087,5702,9,RSS 11 Thursday 4:30 pm,2025 Summer,active
+1235,5703,15,RSS 2 Saturday 9:00 am,2025 Summer,active
+1280,5704,13,RSS 9 Saturday 4:00 pm,2025 Summer,active
+1198,5705,23,RSS 6 Thursday 4:30 pm,2025 Summer,active
+1298,5706,11,RSS 10 Monday 6:15 pm,2025 Summer,active
+1044,5707,3,RSS 12 Thursday 6:15 pm,2025 Summer,active
+1091,5708,22,RSS 12 Wednesday 9:00 am,2025 Summer,active
+1134,5709,18,RSS 7 Tuesday 4:30 pm,2025 Summer,active
+1036,5710,7,RSS 8 Wednesday 4:00 pm,2025 Summer,active
+1222,5711,10,RSS 6 Friday 5:00 pm,2025 Summer,active
+1240,5712,5,RSS 10 Thursday 4:00 pm,2025 Summer,active
+1016,5713,22,Adapted Monday 9:00 am,2025 Summer,active
+1068,5714,4,RSS 11 Thursday 9:00 am,2025 Summer,active
+1152,5715,4,Adult Learn to Swim Tuesday 4:30 pm,2025 Summer,active
+1108,5716,15,RSS 1 Thursday 10:30 am,2025 Summer,active
+1109,5717,23,RSS 3 Saturday 4:00 pm,2025 Summer,active
+1010,5718,6,Adult Learn to Swim Wednesday 9:00 am,2025 Summer,active
+1162,5719,21,RSS 6 Wednesday 9:00 am,2025 Summer,active
+1244,5720,12,RSS 11 Saturday 10:30 am,2025 Summer,active

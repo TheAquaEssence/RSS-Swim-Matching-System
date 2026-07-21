@@ -1,0 +1,10 @@
+# Aqua Essence Swim Matching — development and test dependencies
+# Includes the runtime set; install with:  pip install -r requirements-dev.txt
+# Use the supported Python version recorded in .python-version (currently 3.14).
+
+-r requirements.txt
+
+pytest==9.0.2        # Unit tests
+httpx==0.28.1        # Required by FastAPI/Starlette TestClient in backend and dashboard tests
+faker==40.1.2        # Synthetic data generation scripts (data_generation/)
+ruff==0.15.12        # Linting (python -m ruff check .)

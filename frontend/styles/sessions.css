@@ -1,0 +1,266 @@
+/* ── Card entrance animation ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .app-main > .card {
+    animation: card-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .app-main > .card:nth-child(1) { animation-delay: 0.05s; }
+  .app-main > .card:nth-child(2) { animation-delay: 0.12s; }
+  .app-main > .card:nth-child(3) { animation-delay: 0.19s; }
+
+  @keyframes card-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ── Details summary polish ─────────────────────────────────────────────── */
+.details-summary {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 2px 0;
+}
+
+/* ── Actions row spacing ────────────────────────────────────────────────── */
+.actions-row {
+  margin-top: 4px;
+}
+
+/* Historical pairings — session selector */
+.session-selector-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.session-selector-search {
+  flex: 1;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-2);
+  color: var(--text);
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.session-selector-search::placeholder {
+  color: var(--muted);
+}
+
+.session-selector-search:focus {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+/* Year group — collapsible sections inside session list */
+/* ── Session selector toolbar ───────────────────────────────────────────── */
+.session-selector-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.session-selector-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* ── Outer list container ───────────────────────────────────────────────── */
+.session-selector-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-2);
+  overflow-x: hidden;
+}
+
+/* ── Year group ─────────────────────────────────────────────────────────── */
+.session-year-group {
+  border-bottom: 1px solid var(--border);
+}
+.session-year-group:last-child { border-bottom: none; }
+
+/* ── Year header ────────────────────────────────────────────────────────── */
+.session-year-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--primary) 6%, transparent),
+    transparent 70%);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.session-year-header::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: transparent;
+  border-radius: 0 2px 2px 0;
+  transition: background 0.15s ease;
+}
+
+.session-year-group:has(.session-year-body:not(.hidden)) .session-year-header::before {
+  background: var(--primary);
+}
+
+.session-year-header:hover {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--primary) 12%, transparent),
+    transparent 70%);
+}
+
+/* ── Year header checkbox ───────────────────────────────────────────────── */
+.session-year-cb {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── Year label ─────────────────────────────────────────────────────────── */
+.session-year-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  flex: 1;
+}
+
+/* ── Session + pairing counts ───────────────────────────────────────────── */
+.session-year-meta {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── Chevron arrow ──────────────────────────────────────────────────────── */
+.session-year-arrow {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.session-year-arrow::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg) translate(-1px, 1px);
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.session-year-arrow.open::before {
+  transform: rotate(45deg) translate(-1px, -1px);
+  border-color: var(--primary);
+}
+
+/* ── Collapsible body — animated with max-height ────────────────────────── */
+.session-year-body {
+  display: block !important; /* override global .hidden { display:none } */
+  max-height: 800px;
+  overflow: hidden;
+  transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity    0.2s  ease;
+  opacity: 1;
+  border-top: 1px solid var(--border);
+}
+
+.session-year-body.hidden {
+  max-height: 0 !important;
+  opacity: 0;
+  border-top-color: transparent;
+}
+
+/* ── Individual session rows (inside year body) ─────────────────────────── */
+.session-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px 7px 32px; /* indented to show hierarchy */
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--text);
+  transition: background-color 0.12s ease;
+}
+
+.session-selector-row:last-child { border-bottom: none; }
+
+.session-selector-row:hover {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.session-selector-checkbox {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.session-selector-name {
+  flex: 1;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.session-selector-count {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.session-row-action {
+  background: none;
+  border: none;
+  padding: 0 4px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.12s ease, color 0.12s ease;
+  flex-shrink: 0;
+}
+
+.session-selector-row:hover .session-row-action,
+.session-row-action:focus-visible {
+  opacity: 1;
+}
+
+.session-row-action:hover { color: var(--text); }
+.session-row-action-delete:hover { color: var(--danger, #e5484d); }

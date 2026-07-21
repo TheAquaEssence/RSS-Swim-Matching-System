@@ -1,0 +1,118 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
+.claudeignore
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Data layout
+# Static reference CSVs in data/source/ are tracked by git, EXCEPT the
+# operational files below, which contain real personal data — never commit.
+# Synthetic tracked stand-ins live only in examples/demo/. Keep the retired
+# app_samples path ignored so operational files cannot silently repopulate it.
+data/source/instructors.csv
+data/source/pairings.csv
+data/app_samples/
+# Generated/synthetic CSVs (randomly generated, not committed).
+data/generated/
+data/scaling/
+# Legacy pre-ranking reference data and coordinator workbooks — kept locally
+# only; combined.xlsx and partner exports may contain real names.
+# See docs/reference-data-provenance.md.
+data/legacy/
+reference/
+
+# Generated denormalized outputs (local only)
+data_solution/
+
+# Local working notes
+IMPROVEMENTS.md
+
+# Generated job artifacts (local only)
+xai_job/
+
+# Benchmark artifacts
+benchmark_results/
+
+# Local SQLite database — contains real operational data; never commit
+data/aqua_essence.db
+
+# Build outputs
+backend/build/
+solvers/cpp_exact/build/
+build/
+.dist/
+jobs/
+settings/
+
+# Bundled Python runtime produced by packaging scripts (can be hundreds of MB)
+python_runtime/
+
+# Compiled binaries
+*.exe
+*.dll
+*.obj
+*.o
+*.pdb
+*.lib
+
+# Solver output
+solvers/python_cpsat/engine/output/
+
+# Windows batch scripts (solvers use solver_wrapper.py directly)
+*.bat
+
+# Shell scripts
+run_benchmarks.sh
+
+# Environment and secrets
+.env
+.env.*
+
+# Log files
+*.log
+logs/
+
+# pytest scratch directories and cache artifacts
+*/pytest_tmp*/
+.pytest_tmp/
+.tmp_pytest/
+.pytest_cache/
+.pytest_cache_local/
+pytest-cache-files-*/
+
+# Temp and debug scratch directories
+_tmp*/
+_debug*/
+
+# Jackrabbit exports staged locally for testing — contains real student PII
+# (names, DOBs, special-needs notes); never commit.
+files/
+
+# Playwright MCP debug artifacts (console logs, page snapshots)
+.playwright-mcp/
+
+# Local agent configuration. Tracked guidance lives in docs/development.md;
+# AGENTS.md and .agents may be supplied by a developer environment.
+AGENTS.md
+.agents/

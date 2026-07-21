@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version-file: ".python-version"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Verify public commit attribution
+        run: python scripts/check_commit_attribution.py
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Run tests
+        run: >
+          python -m pytest -q
+          solvers/python_cpsat/engine/tests/
+          core/scoring/tests/
+          core/tests/
+          backend/tests/
+          frontend/xai_dashboard/tests/
+          solvers/tests/
+          data_generation/tests/

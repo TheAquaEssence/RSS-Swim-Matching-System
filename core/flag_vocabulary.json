@@ -1,0 +1,146 @@
+{
+  "flag_codes": {
+    "low_confidence_under_50": {
+      "title": "Low confidence",
+      "description": "Match confidence is below 50 — assignment quality is poor",
+      "severity": "review",
+      "default_review_action": "consider_reassignment"
+    },
+    "continuity_dispute": {
+      "title": "Continuity dispute",
+      "description": "Multiple swimmers claimed the same continuity instructor; this swimmer lost the tiebreak",
+      "severity": "review",
+      "default_review_action": "review_continuity_tiebreak"
+    },
+    "match_confidence_below_70": {
+      "title": "Confidence below review target",
+      "description": "Match confidence is below 70 — assignment should be checked",
+      "severity": "info",
+      "default_review_action": "quick_review_assignment"
+    },
+    "compatibility_below_50": {
+      "title": "Low compatibility",
+      "description": "Compatibility score is below 50 — instructor may not be a good fit",
+      "severity": "review",
+      "default_review_action": "consider_reassignment"
+    },
+    "forced_assignment": {
+      "title": "Only one legal option",
+      "description": "Only one legal instructor was available after applying all constraints",
+      "severity": "info",
+      "default_review_action": "confirm_no_better_option_available"
+    },
+    "uneven_pair_fit": {
+      "title": "Uneven pair fit",
+      "description": "The two swimmers in this pair have a large gap in individual compatibility scores",
+      "severity": "info",
+      "default_review_action": "review_pair_balance"
+    },
+    "note_requested_assignment": {
+      "title": "Note-requested assignment",
+      "description": "This assignment was influenced by a prefer or always note request",
+      "severity": "info",
+      "default_review_action": "verify_note_request_still_applies"
+    },
+    "continuity_overrides_adapted_capability": {
+      "title": "Adapted capability override",
+      "description": "Swimmer has continuity with a previous instructor who is not marked adapted-capable — continuity was preserved per client policy",
+      "severity": "urgent",
+      "default_review_action": "verify_instructor_qualification_record"
+    },
+    "manual_policy_review_required": {
+      "title": "Manual policy review required",
+      "description": "Solver surfaced a continuity-over-qualification tradeoff that requires human confirmation",
+      "severity": "urgent",
+      "default_review_action": "confirm_policy_override"
+    },
+    "continuity_capacity_conflict": {
+      "title": "Continuity capacity conflict",
+      "description": "Multiple swimmers claimed continuity with the same instructor but only one class slot was available",
+      "severity": "review",
+      "default_review_action": "review_continuity_tiebreak"
+    },
+    "continuity_blocked_by_adult_capability": {
+      "title": "Adult capability blocked continuity",
+      "description": "Swimmer is 18 or older and has a continuity instructor, but that instructor is not adult-capable — continuity was not preserved",
+      "severity": "review",
+      "default_review_action": "verify_instructor_qualification_record"
+    },
+    "continuity_blocked_by_baby_capability": {
+      "title": "Baby capability blocked continuity",
+      "description": "Swimmer is under 2.5 years old and has a continuity instructor, but that instructor is not baby-capable — continuity was not preserved",
+      "severity": "review",
+      "default_review_action": "verify_instructor_qualification_record"
+    },
+    "continuity_pairing_conflict": {
+      "title": "Pairing continuity conflict",
+      "description": "Pair lost continuity with their previous instructor because that instructor was assigned to a private continuity swimmer",
+      "severity": "review",
+      "default_review_action": "review_pairing_decision"
+    },
+    "non_response_swimmer_type": {
+      "title": "Default swimmer type used",
+      "description": "Swimmer has the Non-Response / Unknown type — survey data was not provided",
+      "severity": "review",
+      "default_review_action": "update_swimmer_type"
+    },
+    "default_instructor_profile": {
+      "title": "Default instructor profile used",
+      "description": "Instructor was missing color, style, or certification data, so the configured default instructor profile was used",
+      "severity": "review",
+      "default_review_action": "update_instructor_profile"
+    },
+    "pre_assigned_instructor": {
+      "title": "Pre-assigned instructor",
+      "description": "Class already had an instructor filled in, so that instructor assignment was preserved",
+      "severity": "info",
+      "default_review_action": "quick_review_assignment"
+    },
+    "registered_class_not_found": {
+      "title": "Registered class not found",
+      "description": "Swimmer's registered class name was not found in the selected classes file, so no class roster could be built for that swimmer",
+      "severity": "review",
+      "default_review_action": "verify_class_registration"
+    },
+    "registered_class_full": {
+      "title": "Registered class full",
+      "description": "Swimmer's registered class matched the selected classes file, but the current fixed-roster workflow only supports two swimmers per class row so the swimmer could not be placed into that class",
+      "severity": "review",
+      "default_review_action": "verify_class_registration"
+    },
+    "pre_assigned_instructor_name_ambiguous": {
+      "title": "Pre-assigned instructor name ambiguous",
+      "description": "A pre-assigned instructor name matched more than one instructor record, so one was chosen automatically and should be verified",
+      "severity": "review",
+      "default_review_action": "verify_instructor_qualification_record"
+    },
+    "adapted_swimmer_single_legal_instructor": {
+      "title": "Single adapted-capable option",
+      "description": "Adapted swimmer has only one legal adapted-capable instructor available — no flexibility in assignment",
+      "severity": "review",
+      "default_review_action": "confirm_no_better_option_available"
+    },
+    "below_min_auto_assign_score": {
+      "title": "Below auto-assignment threshold",
+      "description": "Best legal match is below the minimum auto-assign compatibility threshold",
+      "severity": "review",
+      "default_review_action": "review_manual_assignment_override"
+    }
+  },
+  "review_actions": {
+    "verify_instructor_qualification_record": "Verify that the instructor's qualification record is current and accurate",
+    "confirm_policy_override": "Confirm this policy override is intentional and appropriate",
+    "review_continuity_tiebreak": "Review why continuity was not preserved and confirm the tiebreak decision",
+    "review_pairing_decision": "Review the pairing decision and confirm the instructor assignment is acceptable",
+    "review_pair_balance": "Review whether one swimmer in the pair is significantly worse matched than the other",
+    "update_swimmer_type": "Update the swimmer's type based on survey or intake information",
+    "update_instructor_profile": "Update the instructor's color, style, and certification profile information",
+    "consider_reassignment": "Consider whether a better instructor assignment exists",
+    "quick_review_assignment": "Briefly review this assignment — it is not necessarily bad but should be checked",
+    "confirm_no_better_option_available": "Confirm that no better instructor option was available given the constraints",
+    "verify_note_request_still_applies": "Verify that the note request that influenced this assignment is still current",
+    "review_manual_assignment_override": "Review whether a below-threshold legal match should be manually assigned",
+    "verify_class_registration": "Verify that the swimmer's registered class name matches an active class in the selected classes file"
+  },
+  "severity_levels": ["none", "info", "review", "urgent"]
+}

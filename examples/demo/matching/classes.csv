@@ -1,0 +1,10 @@
+class_id,start_time,end_time,day_of_week,location,class_name,session,instructor_name,open,size,status,cat_1,cat_2,start_date,end_date
+1,06:30 PM,07:00 PM,Wed,Pool A,RSS 1 Wednesday 18:30 2:1,2026 Spring,Danielle J.,2,2,Active,RSS Spring,,2026-04-27,2026-06-15
+2,06:30 PM,07:00 PM,Wed,Pool A,RSS 2 Wednesday 18:30 2:1,2026 Spring,Joshua W.,2,2,Active,RSS Spring,,2026-04-27,2026-06-15
+3,06:30 PM,07:00 PM,Wed,Pool A,RSS 3 Wednesday 18:30 2:1,2026 Spring,Jill R.,2,2,Active,RSS Spring,,2026-04-27,2026-06-15
+4,06:30 PM,07:00 PM,Wed,Pool A,RSS 4 Wednesday 18:30 2:1,2026 Spring,Patricia M.,2,2,Active,RSS Spring,,2026-04-27,2026-06-15
+5,06:30 PM,07:00 PM,Wed,Pool A,RSS 5 Wednesday 18:30 2:1,2026 Spring,Robert J.,2,2,Active,RSS Spring,,2026-04-27,2026-06-15
+6,06:30 PM,07:00 PM,Wed,Pool A,RSS 6 Wednesday 18:30 2:1,2026 Spring,Jeffery W.,2,2,Active,RSS Spring,,2026-04-27,2026-06-15
+7,06:30 PM,07:00 PM,Wed,Pool A,RSS 7 Wednesday 18:30 2:1,2026 Spring,Anthony G.,2,2,Active,RSS Spring,,2026-04-27,2026-06-15
+8,06:30 PM,07:00 PM,Wed,Pool A,RSS 8 Wednesday 18:30 2:1,2026 Spring,Debra G.,2,2,Active,RSS Spring,,2026-04-27,2026-06-15
+9,06:30 PM,07:00 PM,Wed,Pool A,RSS 9 Wednesday 18:30 2:1,2026 Spring,Jeffrey L.,2,2,Active,RSS Spring,,2026-04-27,2026-06-15

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XAI Dashboard — Aqua Essence</title>
+  <link rel="stylesheet" href="/vendor/fonts/fonts.css">
+  <link rel="stylesheet" href="/xai/static/dashboard.css?v=20260422a">
+  <link rel="stylesheet" href="/xai/static/ux-refresh.css?v=20260719a">
+  <script src="/xai/static/vendor/chartjs/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="xai-header-shell">
+  <header class="top-bar">
+    <a href="/" class="brand" aria-label="Return to Aqua Essence matching">
+      <span>Aqua Essence</span>
+      <small>Explainability</small>
+    </a>
+    <nav class="product-nav" aria-label="Primary navigation">
+      <a class="product-nav-link" href="/">Matching</a>
+      <a class="product-nav-link active" href="/xai/" aria-current="page">Explainability</a>
+    </nav>
+    <div class="header-actions">
+      <button id="xai-theme-toggle" class="btn btn-outline theme-control" type="button">Light mode</button>
+      <button id="btn-reload" class="btn btn-outline" type="button">Refresh data</button>
+    </div>
+  </header>
+
+  <!-- Tab Bar -->
+  <nav class="tab-bar">
+    <button class="tab active" data-view="overview" type="button">Overview</button>
+    <button class="tab" data-view="explorer" type="button">Match Explorer</button>
+  </nav>
+  </div>
+
+  <div class="layout">
+    <main class="content">
+
+      <!-- ========== OVERVIEW ========== -->
+      <section id="view-overview">
+        <!-- Summary Cards -->
+        <div class="summary-row">
+          <div class="stat-card">
+            <span class="stat-value" id="stat-assigned">—</span>
+            <span class="stat-label">Matched</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="stat-unassigned">—</span>
+            <span class="stat-label">Unassigned</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="stat-confidence">—</span>
+            <span class="stat-label">Avg Confidence</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="stat-classes">—</span>
+            <span class="stat-label">Classes</span>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+          <div class="card">
+            <h3>Confidence Distribution</h3>
+            <canvas id="chart-confidence"></canvas>
+          </div>
+          <div class="card">
+            <div class="chart-header">
+              <h3>Match Breakdown</h3>
+              <select id="chart-types-dim" class="chart-select">
+                <option value="match_type">Match Type</option>
+                <option value="format">Format</option>
+              </select>
+            </div>
+            <canvas id="chart-types"></canvas>
+          </div>
+        </div>
+
+        <!-- Flagged Matches -->
+        <div class="card">
+          <h3>Flagged Matches <span class="badge" id="flagged-count">0</span></h3>
+          <table id="flagged-table">
+            <thead>
+              <tr><th>Swimmer</th><th>Instructor</th><th>Confidence</th><th>Flag</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <p id="flagged-empty" class="empty-msg">No flagged matches — all matches look good.</p>
+        </div>
+      </section>
+
+      <!-- ========== MATCH EXPLORER ========== -->
+      <section id="view-explorer" class="hidden">
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <input type="search" id="filter-search" placeholder="Search by swimmer or instructor" class="filter-input" aria-label="Search matches">
+          <select id="filter-type" class="filter-select" aria-label="Filter by match type">
+            <option value="">All Types</option>
+            <option value="pre-assigned">Pre-assigned</option>
+            <option value="continuity">Continuity</option>
+            <option value="compatibility">Compatibility</option>
+          </select>
+          <select id="filter-format" class="filter-select" aria-label="Filter by class format">
+            <option value="">All Formats</option>
+            <option value="individual">Individual</option>
+            <option value="pair">Pair</option>
+          </select>
+          <label class="filter-checkbox">
+            <input type="checkbox" id="filter-flagged"> Flagged only
+          </label>
+          <div class="view-toggle">
+            <button class="toggle-btn active" data-mode="table" type="button" title="Table view" aria-label="Table view">☰</button>
+            <button class="toggle-btn" data-mode="cards" type="button" title="Card view" aria-label="Card view">▦</button>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div id="explorer-table-view">
+          <table id="explorer-table">
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="idx">#</th>
+                <th class="sortable" data-sort="swimmer">Swimmer</th>
+                <th class="sortable" data-sort="instructor">Instructor</th>
+                <th class="sortable" data-sort="type">Type</th>
+                <th class="sortable" data-sort="confidence">Confidence</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- Card Grid View -->
+        <div id="explorer-card-view" class="card-grid hidden"></div>
+
+        <p id="explorer-empty" class="empty-msg hidden">No matches found matching your filters.</p>
+      </section>
+
+    </main>
+
+    <!-- ========== MATCH DETAIL PANEL ========== -->
+    <aside id="detail-panel" class="detail-panel hidden">
+      <div class="panel-header">
+        <h2>Match Detail</h2>
+        <button id="btn-close-panel" class="btn-close" type="button" aria-label="Close match detail">&times;</button>
+      </div>
+
+      <div class="panel-body">
+        <!-- Layer 1: Summary -->
+        <div class="detail-summary">
+          <div class="confidence-badge" id="detail-confidence">—</div>
+          <span class="match-type-badge" id="detail-type-badge">—</span>
+          <h3 id="detail-swimmer-name">—</h3>
+          <p class="detail-sub">matched with <strong id="detail-instructor-name">—</strong></p>
+          <p class="detail-reason" id="detail-reason">—</p>
+          <div class="detail-explanation" id="detail-explanation" style="display:none;">
+            <h4>Explanation</h4>
+            <p id="detail-explanation-text"></p>
+          </div>
+          <div class="detail-flags hidden" id="detail-flags">
+            <h4>Review Flags</h4>
+            <div id="detail-flags-list" class="detail-flags-list"></div>
+          </div>
+        </div>
+
+        <!-- Layer 2: Scoring Details (collapsible) -->
+        <details class="detail-section">
+          <summary>Scoring Details</summary>
+          <div class="detail-section-body">
+            <canvas id="chart-breakdown" height="150"></canvas>
+            <table id="breakdown-table">
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+
+        <!-- Layer 3: Alternatives (collapsible) -->
+        <details class="detail-section">
+          <summary>Alternative Instructors</summary>
+          <div class="detail-section-body">
+            <canvas id="chart-alternatives" height="200"></canvas>
+            <div id="alternatives-list"></div>
+          </div>
+        </details>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Backdrop for detail panel -->
+  <div id="panel-backdrop" class="panel-backdrop hidden"></div>
+
+  <!-- Audit Calculation Modal -->
+  <div id="audit-modal" class="audit-modal hidden">
+    <div class="audit-modal-content">
+      <div class="audit-modal-header">
+        <div class="audit-header-left">
+          <div class="audit-modal-icon">🔍</div>
+          <div>
+            <h2>Score Calculation Breakdown</h2>
+            <p class="audit-subtitle" id="audit-subtitle"></p>
+          </div>
+        </div>
+        <button id="btn-close-audit" class="btn-close" type="button" aria-label="Close score calculation breakdown">&times;</button>
+      </div>
+      <div class="audit-modal-body">
+        <div id="audit-tables"></div>
+      </div>
+    </div>
+  </div>
+  <div id="audit-backdrop" class="audit-backdrop hidden"></div>
+
+  <script src="/shared/ui_utils.js"></script>
+  <script src="/xai/static/dashboard.js?v=20260422a"></script>
+</body>
+</html>

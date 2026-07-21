@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aqua Essence</title>
+  <link rel="stylesheet" href="./vendor/fonts/fonts.css" />
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/results.css" />
+  <link rel="stylesheet" href="./styles/overlays.css" />
+  <link rel="stylesheet" href="./styles/sessions.css" />
+  <link rel="stylesheet" href="./styles/instructor-editor.css" />
+  <link rel="stylesheet" href="./styles/ux-refresh.css" />
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="app-brand">
+      <h1 class="app-title">Aqua Essence</h1>
+      <p class="app-subtitle">Swimmer to Instructor Matching</p>
+    </div>
+    <nav class="product-nav" aria-label="Primary navigation">
+      <a class="product-nav-link active" href="/" aria-current="page">Matching</a>
+      <a class="product-nav-link" id="explainabilityNavLink" href="/xai/"
+        aria-disabled="true" aria-describedby="explainabilityNavHint">Explainability</a>
+      <span class="visually-hidden" id="explainabilityNavHint">Available after a matching result is generated.</span>
+    </nav>
+    <div class="header-right">
+      <label class="operator-field" title="Optional — your name is recorded with changes you make (instructor edits, imports)">
+        <span>Operator</span>
+        <input type="text" id="operatorNameInput" placeholder="Your name" maxlength="80" autocomplete="off" />
+      </label>
+
+      <div class="header-status">
+        <span class="status-dot" id="hostStatusDot"></span>
+        <span id="hostStatusText">Host: checking...</span>
+      </div>
+
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light mode">
+        <span class="theme-icon" aria-hidden="true"></span>
+        <span class="theme-text" id="themeText">Light mode</span>
+      </button>
+    </div>
+
+  </header>
+
+  <main class="app-main">
+    <section class="card setup-card">
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">Setup</span>
+          <h2 class="card-title">Choose matching data</h2>
+          <p class="card-hint">Confirm the classes, swimmers, and instructors to include in this run.</p>
+        </div>
+        <span class="step-badge">Step 1 of 2</span>
+      </div>
+
+      <div class="file-row">
+        <div class="file-row-left">
+          <label class="file-label">classes.csv</label>
+          <div class="file-meta" id="classesFileMeta">Selected file: no file selected</div>
+        </div>
+
+        <div class="file-row-right">
+          <button class="button button-secondary" id="classesBrowseButton" type="button">Select file</button>
+          <button class="button button-ghost" id="classesClearButton" type="button">Clear</button>
+        </div>
+
+      </div>
+
+      <div class="file-row">
+        <div class="file-row-left">
+          <label class="file-label" for="swimmersBrowseButton">swimmers.csv</label>
+          <div class="file-meta" id="swimmersFileMeta">Selected file: (loading...)</div>
+        </div>
+        <div class="file-row-right">
+          <button class="button button-secondary" id="swimmersBrowseButton" type="button">Select file</button>
+          <button class="button button-ghost" id="swimmersResetButton" type="button">Clear</button>
+        </div>
+      </div>
+
+      <div class="file-row">
+        <div class="file-row-left">
+          <label class="file-label" for="instructorsBrowseButton">instructors.csv</label>
+          <div class="file-meta" id="instructorsFileMeta">Selected file: (loading...)</div>
+          <label class="use-db-instructors-toggle">
+            <input type="checkbox" id="useDbInstructorsToggle" />
+            <span>Use database instructors</span>
+          </label>
+        </div>
+        <div class="file-row-right">
+          <span class="file-meta hidden" id="instructorsDbEditorHint">Profiles live in the database — edit them in
+            <button class="link-button" id="instructorsDbEditorHintLink" type="button">Manage Instructors</button></span>
+          <button class="button button-secondary hidden" id="instructorsStylesColorsEditButton" type="button">Edit styles and colors</button>
+          <button class="button button-secondary" id="instructorsBrowseButton" type="button">Select file</button>
+          <button class="button button-ghost" id="instructorsResetButton" type="button">Clear</button>
+        </div>
+      </div>
+
+      <div class="data-sources-summary hidden" id="dataSourcesSummary"></div>
+
+      <div class="actions-row">
+        <button class="button button-primary" id="generateButton" type="button" disabled>
+          Generate matching
+        </button>
+
+        <button class="button button-secondary hidden" id="reopenPdfButton" type="button">
+          Save latest matching report (PDF)
+        </button>
+
+        <button class="button button-secondary hidden" id="downloadFilledClassesButton" type="button">
+          Download filled classes CSV
+        </button>
+
+      </div>
+
+      <div class="output" id="output"></div>
+    </section>
+
+    <section class="card results-card hidden" id="results-section">
+      <div class="section-heading results-heading">
+        <div>
+          <span class="section-eyebrow">Review</span>
+          <h2 class="card-title">Matching results</h2>
+          <p class="card-hint">Select any row to review the match details and supporting profiles.</p>
+        </div>
+        <span class="step-badge step-badge-success">Step 2 of 2</span>
+      </div>
+      <div class="results-summary" id="results-summary"></div>
+      <div class="results-table-wrap">
+        <table class="results-table" id="results-table">
+          <thead>
+            <tr>
+              <th>Instructor</th>
+              <th>Swimmer(s)</th>
+              <th>Confidence</th>
+              <th>Flags</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+
+      <div id="unassigned-section" class="unassigned-section hidden">
+        <h3 class="card-title">Unassigned Swimmers</h3>
+        <div class="results-table-wrap">
+          <table class="results-table" id="unassigned-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Skill Level</th>
+                <th>Age</th>
+                <th>Special Needs</th>
+                <th>Reason</th>
+                <th>Flags</th>
+                <th>Best Legal Match</th>
+              </tr>
+            </thead>
+            <tbody id="unassigned-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <details id="advancedSection">
+        <summary class="details-summary">
+          <span>Advanced settings</span>
+          <span class="details-subtitle">History, reference tables, and defaults</span>
+        </summary>
+
+        <div class="details-body">
+          <h3 class="section-title">History</h3>
+
+          <!-- Historical pairings — DB-first with session selector -->
+          <div class="file-row" id="historicalDbRow">
+            <div class="file-row-left">
+              <label class="file-label">Historical Pairings</label>
+              <div class="file-meta" id="historicalDbMeta">Loading sessions from database…</div>
+            </div>
+            <div class="file-row-right">
+              <button class="button button-secondary" id="historicalSessionsToggle" type="button">Choose sessions</button>
+            </div>
+          </div>
+
+          <!-- Session selector panel (hidden by default) -->
+          <div id="historicalSessionsPanel" class="hidden">
+            <div class="session-selector-search-row">
+              <input id="historicalSessionSearch" class="session-selector-search" type="search"
+                placeholder="Search sessions…" autocomplete="off" />
+              <button class="button button-ghost" id="historicalSelectAll"  type="button">All</button>
+              <button class="button button-ghost" id="historicalSelectNone" type="button">None</button>
+            </div>
+            <div id="historicalSessionsList" class="session-selector-list"></div>
+          </div>
+
+          <div class="file-row">
+            <div class="file-row-left">
+              <label class="file-label">Import from Jackrabbit</label>
+              <div class="file-meta" id="jackrabbitImportMeta">Upload the CSV exported from the Jackrabbit extension to store pairings in the database.</div>
+            </div>
+            <div class="file-row-right">
+              <input type="file" id="jackrabbitPairingsFileInput" accept=".csv" style="display:none" />
+              <button class="button button-secondary" id="jackrabbitImportButton" type="button">Upload pairings CSV</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3 class="section-title">Reference tables</h3>
+
+          <div class="file-row">
+            <div class="file-row-left">
+              <label class="file-label" for="swimmerTypeColorRankingsBrowseButton">swimmer_type_color_rankings.csv</label>
+              <div class="file-meta" id="swimmerTypeColorRankingsFileMeta">Selected file: (loading...)</div>
+            </div>
+            <div class="file-row-right">
+              <button class="button button-secondary" id="swimmerTypeColorRankingsEditButton" type="button">Edit rankings</button>
+              <button class="button button-secondary" id="swimmerTypeColorRankingsBrowseButton" type="button">Select
+                file</button>
+              <button class="button button-ghost" id="swimmerTypeColorRankingsResetButton" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="file-row">
+            <div class="file-row-left">
+              <label class="file-label" for="swimmerTypeStyleRankingsBrowseButton">swimmer_type_style_rankings.csv</label>
+              <div class="file-meta" id="swimmerTypeStyleRankingsFileMeta">Selected file: (loading...)</div>
+            </div>
+            <div class="file-row-right">
+              <button class="button button-secondary" id="swimmerTypeStyleRankingsEditButton" type="button">Edit rankings</button>
+              <button class="button button-secondary" id="swimmerTypeStyleRankingsBrowseButton" type="button">Select
+                file</button>
+              <button class="button button-ghost" id="swimmerTypeStyleRankingsResetButton" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="file-row">
+            <div class="file-row-left">
+              <label class="file-label" for="personalityColorsBrowseButton">personality_colors.csv</label>
+              <div class="file-meta" id="personalityColorsFileMeta">Selected file: (loading...)</div>
+            </div>
+            <div class="file-row-right">
+              <button class="button button-secondary" id="personalityColorsManageButton" type="button">Add / edit</button>
+              <button class="button button-secondary" id="personalityColorsBrowseButton" type="button">Select
+                file</button>
+              <button class="button button-ghost" id="personalityColorsResetButton" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="file-row">
+            <div class="file-row-left">
+              <label class="file-label" for="instructorStylesBrowseButton">instructor_styles.csv</label>
+              <div class="file-meta" id="instructorStylesFileMeta">Selected file: (loading...)</div>
+            </div>
+            <div class="file-row-right">
+              <button class="button button-secondary" id="instructorStylesManageButton" type="button">Add / edit</button>
+              <button class="button button-secondary" id="instructorStylesBrowseButton" type="button">Select
+                file</button>
+              <button class="button button-ghost" id="instructorStylesResetButton" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="file-row">
+            <div class="file-row-left">
+              <label class="file-label" for="swimmerTypesBrowseButton">swimmer_types.csv</label>
+              <div class="file-meta" id="swimmerTypesFileMeta">Selected file: (loading...)</div>
+            </div>
+            <div class="file-row-right">
+              <button class="button button-secondary" id="swimmerTypesManageButton" type="button">Add / edit</button>
+              <button class="button button-secondary" id="swimmerTypesBrowseButton" type="button">Select file</button>
+              <button class="button button-ghost" id="swimmerTypesResetButton" type="button">Reset</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="file-row">
+            <div class="file-row-left">
+              <label class="file-label">Instructor profiles</label>
+              <div class="file-meta">View and edit profiles, capabilities, and styles stored in the database.</div>
+            </div>
+            <div class="file-row-right">
+              <button class="button button-secondary" id="manageInstructorsButton" type="button">Manage instructors</button>
+            </div>
+          </div>
+
+          <div class="file-row">
+            <div class="file-row-left">
+              <label class="file-label" for="defaultInstructorEditButton">Default instructor profile</label>
+              <div class="file-meta" id="instructorDefaultsMeta">Loading default instructor profile...</div>
+            </div>
+            <div class="file-row-right">
+              <button class="button button-secondary" id="defaultInstructorEditButton" type="button">Edit</button>
+            </div>
+          </div>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <!-- Profile side drawer -->
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+  <aside id="profile-drawer" class="profile-drawer">
+    <div class="drawer-header" id="drawer-header">
+      <span class="drawer-title" id="drawer-title">Profile</span>
+      <button class="drawer-close" id="drawer-close" type="button" aria-label="Close profile">&times;</button>
+    </div>
+    <div class="drawer-content" id="drawer-content"></div>
+  </aside>
+
+  <dialog id="rankings-editor-modal" class="rankings-editor-modal"
+    aria-labelledby="rankings-editor-title">
+    <div class="rankings-editor-header">
+      <div>
+        <h2 class="rankings-editor-title" id="rankings-editor-title">Edit rankings</h2>
+        <p class="rankings-editor-subtitle" id="rankings-editor-subtitle"></p>
+      </div>
+      <button class="drawer-close" id="rankings-editor-close" type="button" aria-label="Close rankings editor">&times;</button>
+    </div>
+
+    <div class="rankings-editor-toolbar">
+      <label class="rankings-editor-picker">
+        <span>Swimmer type</span>
+        <select id="rankings-editor-swimmer-type"></select>
+      </label>
+      <div class="rankings-editor-meta" id="rankings-editor-file-meta"></div>
+    </div>
+
+    <p class="rankings-editor-hint" id="rankings-editor-hint"></p>
+
+    <div class="rankings-editor-add-row">
+      <input id="rankings-editor-new-item-name" class="rankings-editor-input" type="text"
+        placeholder="Add a new item" />
+      <button class="button button-secondary" id="rankings-editor-add-button" type="button">Add</button>
+    </div>
+
+    <div id="rankings-editor-error" class="rankings-editor-error hidden"></div>
+    <ul id="rankings-editor-list" class="rankings-editor-list"></ul>
+
+    <div class="rankings-editor-actions">
+      <button class="button button-ghost" id="rankings-editor-cancel" type="button">Cancel</button>
+      <button class="button button-primary" id="rankings-editor-save" type="button">Save</button>
+    </div>
+  </dialog>
+
+  <dialog id="reference-editor-modal" class="rankings-editor-modal"
+    aria-labelledby="reference-editor-title">
+    <div class="rankings-editor-header">
+      <div>
+        <h2 class="rankings-editor-title" id="reference-editor-title">Edit reference table</h2>
+        <p class="rankings-editor-subtitle" id="reference-editor-subtitle"></p>
+      </div>
+      <button class="drawer-close" id="reference-editor-close" type="button" aria-label="Close reference editor">&times;</button>
+    </div>
+
+    <div class="rankings-editor-toolbar">
+      <div class="rankings-editor-meta" id="reference-editor-file-meta"></div>
+      <button class="button button-secondary" id="reference-editor-add-button" type="button">Add</button>
+    </div>
+
+    <div id="reference-editor-error" class="rankings-editor-error hidden"></div>
+    <ul id="reference-editor-list" class="rankings-editor-list"></ul>
+
+    <div class="rankings-editor-actions">
+      <button class="button button-ghost" id="reference-editor-cancel" type="button">Close</button>
+      <button class="button button-primary" id="reference-editor-save" type="button">Save</button>
+    </div>
+  </dialog>
+
+  <dialog id="reference-editor-form-modal" class="rankings-editor-modal reference-editor-form-modal"
+    aria-labelledby="reference-editor-form-title">
+    <div class="rankings-editor-header">
+      <div>
+        <h3 class="rankings-editor-title" id="reference-editor-form-title">Edit item</h3>
+      </div>
+      <button class="drawer-close" id="reference-editor-form-close" type="button" aria-label="Close reference form">&times;</button>
+    </div>
+
+    <div id="reference-editor-form-fields" class="reference-editor-form-fields"></div>
+    <div id="reference-editor-form-error" class="rankings-editor-error hidden"></div>
+
+    <div class="rankings-editor-actions">
+      <button class="button button-ghost" id="reference-editor-form-cancel" type="button">Cancel</button>
+      <button class="button button-primary" id="reference-editor-apply-button" type="button">Apply changes</button>
+    </div>
+  </dialog>
+
+  <dialog id="instructor-defaults-modal" class="rankings-editor-modal instructor-defaults-modal"
+    aria-labelledby="instructor-defaults-title">
+    <div class="rankings-editor-header">
+      <div>
+        <h2 class="rankings-editor-title" id="instructor-defaults-title">Edit default instructor profile</h2>
+        <p class="rankings-editor-subtitle">Used when an instructor is missing color, style, or certification data.</p>
+      </div>
+      <button class="drawer-close" id="instructor-defaults-close" type="button" aria-label="Close default instructor profile editor">&times;</button>
+    </div>
+
+    <div class="instructor-defaults-panel">
+      <p class="card-hint small">
+        Matches using this fallback will be flagged for review. Your selections are saved locally for next time.
+      </p>
+
+      <div class="instructor-defaults-grid">
+        <label class="instructor-defaults-field">
+          <span>Primary color</span>
+          <select id="defaultInstructorPrimaryColor"></select>
+        </label>
+        <label class="instructor-defaults-field">
+          <span>Secondary color</span>
+          <select id="defaultInstructorSecondaryColor"></select>
+        </label>
+        <label class="instructor-defaults-field">
+          <span>Primary style</span>
+          <select id="defaultInstructorPrimaryStyle"></select>
+        </label>
+        <label class="instructor-defaults-field">
+          <span>Secondary style</span>
+          <select id="defaultInstructorSecondaryStyle"></select>
+        </label>
+      </div>
+
+      <div class="instructor-defaults-checks">
+        <label class="instructor-defaults-check"><input type="checkbox" id="defaultInstructorCanTeachNL"> Can teach NL</label>
+        <label class="instructor-defaults-check"><input type="checkbox" id="defaultInstructorCanTeachBabies"> Can teach babies</label>
+        <label class="instructor-defaults-check"><input type="checkbox" id="defaultInstructorCanTeachAdults"> Can teach adults</label>
+        <label class="instructor-defaults-check"><input type="checkbox" id="defaultInstructorCanTeachAdapted"> Can teach adapted</label>
+        <label class="instructor-defaults-check"><input type="checkbox" id="defaultInstructorTeamCaptain"> Team captain</label>
+      </div>
+
+      <div class="file-meta" id="instructorDefaultsModalMeta">Loading default instructor profile...</div>
+    </div>
+
+    <div class="rankings-editor-actions">
+      <button class="button button-ghost" id="resetInstructorDefaultsButton" type="button">Reset to app defaults</button>
+      <div class="instructor-defaults-actions">
+        <button class="button button-ghost" id="instructorDefaultsCancelButton" type="button">Close</button>
+        <button class="button button-primary" id="saveInstructorDefaultsButton" type="button">Save</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="instructor-style-color-editor-modal" class="rankings-editor-modal instructor-style-color-editor-modal"
+    aria-labelledby="instructor-style-color-editor-title">
+    <div class="rankings-editor-header">
+      <div>
+        <h2 class="rankings-editor-title" id="instructor-style-color-editor-title">Edit instructor styles and colors</h2>
+        <p class="rankings-editor-subtitle">
+          Assign styles and colors for the currently selected instructors file. Only active rows in the allowed teaching positions are shown.
+        </p>
+      </div>
+      <button class="drawer-close" id="instructor-style-color-editor-close" type="button" aria-label="Close instructor styles and colors editor">&times;</button>
+    </div>
+
+    <div class="rankings-editor-toolbar instructor-style-color-editor-toolbar">
+      <label class="rankings-editor-picker instructor-style-color-search">
+        <span>Find instructor</span>
+        <input id="instructor-style-color-editor-search" class="rankings-editor-input" type="text" placeholder="Search by name or position" />
+      </label>
+      <div class="rankings-editor-meta" id="instructor-style-color-editor-meta">Loading instructor file...</div>
+    </div>
+
+    <div id="instructor-style-color-editor-error" class="rankings-editor-error hidden"></div>
+
+    <div class="instructor-style-color-editor-table-wrap">
+      <table class="results-table instructor-style-color-editor-table">
+        <thead>
+          <tr>
+            <th>Instructor</th>
+            <th>Position</th>
+            <th>Primary color</th>
+            <th>Secondary color</th>
+            <th>Primary style</th>
+            <th>Secondary style</th>
+          </tr>
+        </thead>
+        <tbody id="instructor-style-color-editor-body"></tbody>
+      </table>
+    </div>
+
+    <div class="rankings-editor-actions">
+      <button class="button button-ghost" id="instructor-style-color-editor-cancel" type="button">Close</button>
+      <button class="button button-primary" id="instructor-style-color-editor-save" type="button">Save</button>
+    </div>
+  </dialog>
+
+  <!-- Instructor Editor Modal -->
+  <dialog id="instructor-editor-modal" class="rankings-editor-modal instructor-editor-modal"
+    aria-labelledby="instructor-editor-title">
+    <div class="rankings-editor-header">
+      <div>
+        <h2 class="rankings-editor-title" id="instructor-editor-title">Manage Instructors</h2>
+        <p class="rankings-editor-subtitle">Edit profiles, capabilities, and styles for instructors in the database. Drop a CSV or Excel file here to import.</p>
+      </div>
+      <button class="drawer-close" id="instructor-editor-close" type="button" aria-label="Close instructor editor">&times;</button>
+    </div>
+
+    <div class="rankings-editor-toolbar instructor-editor-toolbar">
+      <label class="rankings-editor-picker instructor-editor-search-wrap">
+        <span>Find instructor</span>
+        <input id="instructor-editor-search" class="rankings-editor-input" type="text" placeholder="Search by name&hellip;" autocomplete="off" />
+      </label>
+      <div class="instructor-editor-toolbar-actions">
+        <button class="button button-ghost" id="instructor-editor-incomplete-toggle" type="button">Incomplete only</button>
+        <button class="button button-ghost" id="instructor-editor-stats-toggle" type="button">Staffing overview</button>
+        <input type="file" id="instructor-import-file-input" accept=".csv,.xlsx,.xlsm" style="display:none" />
+        <button class="button button-secondary" id="instructor-editor-import-btn" type="button">Import CSV</button>
+        <button class="button button-secondary" id="instructor-editor-export-btn" type="button">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="rankings-editor-meta" id="instructor-editor-meta">Loading instructors&hellip;</div>
+    <div class="instructor-staffing-overview hidden" id="instructor-staffing-overview"></div>
+    <div class="instructor-editor-solver-hint hidden" id="instructor-editor-solver-hint"></div>
+    <div class="instructor-import-status hidden" id="instructor-import-status">
+      <span id="instructor-import-status-text"></span>
+      <button class="button button-ghost instructor-import-undo-btn hidden" id="instructor-import-undo-btn" type="button">Undo</button>
+    </div>
+    <div id="instructor-editor-error" class="rankings-editor-error hidden"></div>
+
+    <div class="instructor-editor-table-wrap">
+      <table class="results-table instructor-editor-table">
+        <thead>
+          <tr>
+            <th class="instructor-sort-header" data-sort-key="name" role="button" tabindex="0">Name<span class="instructor-sort-arrow" aria-hidden="true"></span></th>
+            <th class="instructor-sort-header" data-sort-key="status" role="button" tabindex="0">Profile status<span class="instructor-sort-arrow" aria-hidden="true"></span></th>
+            <th>Capabilities</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="instructor-editor-body"></tbody>
+      </table>
+    </div>
+
+    <div class="rankings-editor-actions">
+      <button class="button button-ghost" id="instructor-editor-cancel" type="button">Close</button>
+    </div>
+  </dialog>
+
+  <!-- Instructor Edit Form Modal (nested) -->
+  <dialog id="instructor-edit-form-modal" class="rankings-editor-modal instructor-edit-form-modal"
+    aria-labelledby="instructor-edit-form-title">
+    <div class="rankings-editor-header">
+      <div>
+        <h3 class="rankings-editor-title" id="instructor-edit-form-title">Edit instructor</h3>
+        <p class="rankings-editor-subtitle" id="instructor-edit-form-subtitle"></p>
+      </div>
+      <button class="drawer-close" id="instructor-edit-form-close" type="button" aria-label="Close instructor edit form">&times;</button>
+    </div>
+
+    <div id="instructor-edit-form-error" class="rankings-editor-error hidden"></div>
+
+    <div class="instructor-edit-form-body">
+      <div class="instructor-defaults-grid">
+        <label class="instructor-defaults-field">
+          <span>First name</span>
+          <input type="text" id="instructor-edit-first-name" class="rankings-editor-input" />
+        </label>
+        <label class="instructor-defaults-field">
+          <span>Last name</span>
+          <input type="text" id="instructor-edit-last-name" class="rankings-editor-input" />
+        </label>
+      </div>
+
+      <div class="instructor-defaults-grid">
+        <label class="instructor-defaults-field">
+          <span>Primary color</span>
+          <select id="instructor-edit-primary-color"></select>
+        </label>
+        <label class="instructor-defaults-field">
+          <span>Secondary color</span>
+          <select id="instructor-edit-secondary-color"></select>
+        </label>
+        <label class="instructor-defaults-field">
+          <span>Primary style</span>
+          <select id="instructor-edit-primary-style"></select>
+        </label>
+        <label class="instructor-defaults-field">
+          <span>Secondary style</span>
+          <select id="instructor-edit-secondary-style"></select>
+        </label>
+      </div>
+
+      <div class="instructor-defaults-checks">
+        <label class="instructor-defaults-check"><input type="checkbox" id="instructor-edit-can-teach-babies"> Can teach babies</label>
+        <label class="instructor-defaults-check"><input type="checkbox" id="instructor-edit-can-teach-adults"> Can teach adults</label>
+        <label class="instructor-defaults-check"><input type="checkbox" id="instructor-edit-can-teach-adapted"> Can teach adapted</label>
+        <label class="instructor-defaults-check"><input type="checkbox" id="instructor-edit-team-captain"> Team captain</label>
+      </div>
+
+      <div class="file-meta" id="instructor-edit-profile-source-hint"></div>
+      <div class="file-meta" id="instructor-edit-last-updated"></div>
+    </div>
+
+    <div class="rankings-editor-actions">
+      <button class="button button-ghost" id="instructor-edit-form-cancel" type="button">Cancel</button>
+      <button class="button button-primary" id="instructor-edit-form-save" type="button">Save</button>
+    </div>
+  </dialog>
+
+  <!-- Instructor Import Review Modal (nested) -->
+  <dialog id="instructor-import-review-modal" class="rankings-editor-modal instructor-import-review-modal"
+    aria-labelledby="instructor-import-review-title">
+    <div class="rankings-editor-header">
+      <div>
+        <h3 class="rankings-editor-title" id="instructor-import-review-title">Review import</h3>
+        <p class="rankings-editor-subtitle" id="instructor-import-review-subtitle">Choose which changes to apply. Nothing is saved until you confirm.</p>
+      </div>
+      <button class="drawer-close" id="instructor-import-review-close" type="button" aria-label="Close import review">&times;</button>
+    </div>
+
+    <div class="rankings-editor-meta" id="instructor-import-review-meta"></div>
+    <div id="instructor-import-review-error" class="rankings-editor-error hidden"></div>
+
+    <div class="instructor-import-review-toolbar">
+      <input id="instructor-import-review-search" class="rankings-editor-input instructor-import-review-search"
+        type="text" placeholder="Filter by name or ID&hellip;" autocomplete="off" />
+      <button class="button button-ghost" id="instructor-import-accept-all" type="button">Accept all</button>
+      <button class="button button-ghost" id="instructor-import-skip-all" type="button">Skip all</button>
+    </div>
+
+    <div class="instructor-import-review-list" id="instructor-import-review-list"></div>
+
+    <div class="rankings-editor-actions">
+      <button class="button button-ghost" id="instructor-import-review-cancel" type="button">Cancel</button>
+      <button class="button button-primary" id="instructor-import-review-apply" type="button">Apply selected</button>
+    </div>
+  </dialog>
+
+  <script src="./shared/ui_utils.js"></script>
+  <script src="./profile_drawer.js"></script>
+  <script src="./settings_files.js"></script>
+  <script src="./reference_editors.js"></script>
+  <script src="./instructor_defaults.js"></script>
+  <script src="./instructor_editor.js"></script>
+  <script src="./session_selector.js"></script>
+  <script src="./generate_flow.js"></script>
+  <script src="./app.js"></script>
+</body>
+
+</html>

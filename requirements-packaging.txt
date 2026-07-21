@@ -1,0 +1,6 @@
+# Build-only dependencies for the frozen Windows backend.
+# Install from the repository root with:
+#   python -m pip install -r requirements-packaging.txt
+
+-r requirements-runtime-lock.txt
+PyInstaller==6.21.0

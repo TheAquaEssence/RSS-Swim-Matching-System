@@ -1,0 +1,577 @@
+/* ── Instructor Editor Modal ────────────────────────────────────────────── */
+.instructor-editor-modal[open] {
+  width: min(900px, calc(100vw - 28px));
+  /* keep the modal fixed-height so only the table scrolls, not the whole dialog */
+  overflow: hidden;
+  max-height: min(680px, calc(100vh - 28px));
+}
+
+.instructor-editor-modal[open] .instructor-editor-table-wrap {
+  flex: 1;
+  min-height: 0;    /* required for flex children to shrink below their content size */
+  overflow-y: auto;
+}
+
+.instructor-editor-toolbar {
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.instructor-editor-search-wrap {
+  flex: 1;
+  min-width: min(240px, 100%);
+}
+
+.instructor-editor-toolbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.instructor-editor-table-wrap {
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  min-height: 80px;
+}
+
+.instructor-editor-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--card);
+  backdrop-filter: none;
+}
+
+html[data-theme="light"] .instructor-editor-table th {
+  background: var(--card);
+}
+
+.instructor-sort-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.instructor-sort-header:hover {
+  color: var(--text);
+}
+
+.instructor-sort-arrow {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.instructor-editor-name {
+  font-weight: 600;
+}
+
+/* Profile status badges */
+.instructor-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.instructor-status-complete {
+  background: color-mix(in srgb, var(--success) 16%, transparent);
+  color: var(--success);
+}
+
+.instructor-status-partial {
+  background: color-mix(in srgb, var(--warning) 16%, transparent);
+  color: var(--warning);
+}
+
+.instructor-status-default {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger);
+}
+
+/* Capability badges */
+.cap-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.cap-babies  { background: rgba(96,  165, 250, 0.15); color: #60a5fa; }
+.cap-adults  { background: rgba(74,  222, 128, 0.15); color: #4ade80; }
+.cap-adapted { background: rgba(167, 139, 250, 0.15); color: #a78bfa; }
+.cap-captain { background: color-mix(in srgb, var(--warning) 15%, transparent); color: var(--warning); }
+
+/* Clickable capability toggles in the Manage Instructors table */
+.cap-toggle-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cap-toggle {
+  border: 1px solid transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  margin-right: 0;
+}
+
+.cap-toggle:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.cap-toggle.cap-toggle-off {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border);
+  opacity: 0.7;
+}
+
+.cap-toggle.cap-toggle-off:hover {
+  opacity: 1;
+  border-color: var(--muted);
+}
+
+html[data-theme="light"] .cap-toggle.cap-toggle-off {
+  background: transparent;
+  color: var(--muted);
+}
+
+html[data-theme="light"] .cap-babies  { background: #dbeafe; color: #1e40af; }
+html[data-theme="light"] .cap-adults  { background: #d1fae5; color: #065f46; }
+html[data-theme="light"] .cap-adapted { background: #ede9fe; color: #5b21b6; }
+html[data-theme="light"] .cap-captain { background: #fef3c7; color: #7c4f00; }
+
+/* Edit form modal (nested above main editor) */
+.instructor-edit-form-modal[open] {
+  width: min(640px, calc(100vw - 28px));
+  z-index: var(--z-modal-nested);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.instructor-edit-form-body {
+  display: grid;
+  gap: 16px;
+}
+
+/* "Use database instructors" toggle on the main screen */
+.use-db-instructors-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.use-db-instructors-toggle input {
+  cursor: pointer;
+}
+
+/* Solver-source hint inside Manage Instructors */
+.instructor-editor-solver-hint {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+}
+
+/* Staffing overview panel in the Manage Instructors modal */
+.instructor-staffing-overview {
+  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent, #60a5fa) 6%, transparent);
+}
+
+.instructor-staffing-overview.hidden {
+  display: none;
+}
+
+.staffing-overview-tiles {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.staffing-overview-tile {
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent, #60a5fa) 8%, transparent);
+}
+
+.staffing-overview-tile-value {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.staffing-overview-tile-label {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.staffing-overview-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 12px;
+}
+
+.staffing-overview-heading {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.staffing-overview-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.staffing-overview-legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.staffing-overview-legend-secondary { margin-left: 8px; }
+
+/* Legend chips demonstrate the encoding: filled = primary, faded with an
+   outline = secondary. Neutral gray so they never look like a hue. */
+.staffing-overview-legend-primary {
+  background: var(--muted, #94a3b8);
+}
+
+.staffing-overview-legend-secondary {
+  background: color-mix(in srgb, var(--muted, #94a3b8) 30%, transparent);
+  border: 1px solid var(--muted, #94a3b8);
+}
+
+.staffing-overview-row {
+  display: grid;
+  grid-template-columns: minmax(90px, auto) 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.staffing-overview-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.staffing-overview-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* Grouped bars: two tracks per row sharing the same baseline and scale. */
+.staffing-overview-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.staffing-overview-bar {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--muted, #94a3b8) 14%, transparent);
+  overflow: hidden;
+}
+
+/* Neutral defaults (teaching styles); personality-color rows override the
+   background/outline inline with their true hue. */
+.staffing-overview-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--muted, #94a3b8);
+}
+
+.staffing-overview-bar-fill-secondary {
+  background: color-mix(in srgb, var(--muted, #94a3b8) 30%, transparent);
+  box-shadow: inset 0 0 0 1px var(--muted, #94a3b8);
+}
+
+/* Counts as aligned columns: primary / secondary, scannable down the rows. */
+.staffing-overview-count {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.staffing-overview-count-num {
+  display: inline-block;
+  min-width: 2.2ch;
+  text-align: right;
+}
+
+.staffing-overview-count-sep {
+  color: var(--muted);
+  margin: 0 3px;
+}
+
+.staffing-overview-count-secondary {
+  color: var(--muted);
+}
+
+.staffing-overview-note {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.staffing-overview-empty {
+  color: var(--muted);
+}
+
+/* Drag & drop highlight on the Manage Instructors modal */
+.instructor-editor-dropping {
+  outline: 2px dashed var(--accent, #60a5fa);
+  outline-offset: -8px;
+}
+
+/* Import status line in the Manage Instructors modal */
+.instructor-import-status {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent, #60a5fa) 8%, transparent);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.instructor-import-status.hidden {
+  display: none;
+}
+
+.instructor-import-status > span {
+  flex: 1;
+}
+
+.instructor-import-undo-btn {
+  padding: 2px 10px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.instructor-import-status-busy {
+  font-style: italic;
+}
+
+.instructor-import-status-error {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+/* Instructor import review modal (nested above main editor) */
+.instructor-import-review-modal[open] {
+  width: min(720px, calc(100vw - 28px));
+  z-index: var(--z-modal-nested);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 64px);
+}
+
+.instructor-import-review-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.instructor-import-review-search {
+  flex: 1;
+  min-width: 120px;
+}
+
+.instructor-import-section {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.instructor-import-section-summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 10px;
+  user-select: none;
+}
+
+.instructor-import-section[open] .instructor-import-section-summary {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+
+.instructor-import-section .instructor-import-row {
+  border: none;
+  border-radius: 8px;
+}
+
+.instructor-import-row-missing {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.75;
+}
+
+.instructor-import-review-empty {
+  padding: 18px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.instructor-import-review-list {
+  flex: 1;
+  min-height: 80px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.instructor-import-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.instructor-import-row-header,
+.instructor-import-change-label {
+  cursor: pointer;
+}
+
+.instructor-import-row-skipped {
+  opacity: 0.55;
+}
+
+.instructor-import-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.instructor-import-row-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.instructor-import-row-id {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.instructor-import-changes {
+  margin: 0;
+  padding-left: 4px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+}
+
+.instructor-import-change-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.instructor-import-change-skipped {
+  opacity: 0.5;
+}
+
+.instructor-import-change-field {
+  color: var(--muted);
+}
+
+.instructor-import-change-old {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.instructor-import-change-new {
+  font-weight: 600;
+  color: var(--success);
+}
+
+.instructor-import-warnings {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  color: var(--warning);
+}
+
+.instructor-import-warnings ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+@media (max-width: 720px) {
+  .instructor-editor-modal[open] {
+    width: calc(100vw - 16px);
+  }
+  .instructor-editor-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .instructor-editor-toolbar-actions {
+    flex-wrap: wrap;
+  }
+  .instructor-edit-form-modal[open] {
+    width: calc(100vw - 16px);
+  }
+  .instructor-import-review-modal[open] {
+    width: calc(100vw - 16px);
+  }
+}
