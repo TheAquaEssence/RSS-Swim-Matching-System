@@ -722,6 +722,11 @@ Do not hardcode weights or thresholds inside phase logic.
 
 Regenerate or validate CSV data before solving if reference IDs change.
 
+The production loader rejects non-finite ages, ages outside 0–100, RSS skill
+levels outside 1–12, duplicate entity IDs, malformed pair groups, and pairs
+that violate HC-4. Missing baby, adult, or adapted instructor qualifications
+default to `false`; staff must explicitly confirm those safety capabilities.
+
 Review all matches below 70 confidence.
 
 Review all matches with non-empty flag codes.
@@ -746,7 +751,7 @@ The full session cycle for Jackrabbit-sourced data:
    - Students: upload as the swimmers file in `POST /api/generate`.
 3. **Supply instructors.csv manually:** Jackrabbit has no instructor export. Staff must provide the internal `instructors.csv` separately each session.
 4. **Supply historical_pairings.csv from the prior session:** Jackrabbit has no historical pairings export. After the first session, use `POST /api/generate_historical_pairings` with the session label (e.g., `"2026-Spring"`) to generate `historical_pairings.csv` from the last completed job's `classes_filled.csv`. Download and store this file; upload it as the historical pairings input for the next session. For the very first session, request a one-time class history export from the Jackrabbit account administrator.
-5. **Set skill_level before solving:** Jackrabbit Students exports do not include RSS skill level. Staff must edit the converted swimmers CSV to add each swimmer's level (1–8) before the solver can produce correct class assignments. The import warning will remind staff if this step was skipped.
+5. **Set skill_level before solving:** Jackrabbit Students exports do not include RSS skill level. Staff must edit the converted swimmers CSV to add each swimmer's level (1–12) before the solver can produce correct class assignments. The loader rejects the import placeholder value `0`; the import warning will remind staff if this step was skipped.
 6. **Review non-response flags:** Any swimmer imported from Jackrabbit will have `swimmer_type_id = 0` until survey data is linked. Every match for such a swimmer will carry a `non_response_swimmer_type` review flag prompting staff to update the type.
 
 ### What Jackrabbit Does NOT Export
