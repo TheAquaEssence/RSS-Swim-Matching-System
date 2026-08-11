@@ -244,52 +244,36 @@ def _make_nobaby_instructor(iid):
     )
 
 
-class TestAdaptedCapabilityOverride:
-    """Issue A: HC-2 can be overridden by continuity per client policy."""
+class TestAdaptedCapabilityHardConstraint:
+    """HC-2 is a hard stop even when a swimmer has continuity."""
 
-    def test_adapted_swimmer_matches_nonadapted_continuity_instructor(self):
-        """Adapted swimmer with a non-adapted continuity instructor → match IS made."""
+    def test_adapted_swimmer_does_not_match_nonadapted_continuity_instructor(self):
         swimmer = _make_swimmer(1, special_needs=True)
         instructor = _make_nonadapted_instructor(100)
         history = [_make_history(1, 100, num_sessions=3)]
 
-        matches, unmatched, available, disputes, _ = continuity_pass(
+        matches, unmatched, available, _, blocked_flags = continuity_pass(
             [swimmer], [instructor], history
         )
-        assert len(matches) == 1, "Match should be made via continuity override"
-        assert matches[0]['instructor_id'] == 100
 
-    def test_adapted_swimmer_not_in_unmatched_after_override(self):
-        """After HC-2 override, swimmer should be matched — not in unmatched."""
-        swimmer = _make_swimmer(1, special_needs=True)
+        assert matches == []
+        assert [item.swimmer_id for item in unmatched] == [1]
+        assert [item.instructor_id for item in available] == [100]
+        assert blocked_flags[1] == ['continuity_blocked_by_adapted_capability']
+
+    def test_adapted_block_leaves_instructor_capacity_for_phase_two(self):
+        adapted = _make_swimmer(1, special_needs=True)
+        regular = _make_swimmer(2)
         instructor = _make_nonadapted_instructor(100)
         history = [_make_history(1, 100, num_sessions=3)]
 
-        matches, unmatched, available, disputes, _ = continuity_pass(
-            [swimmer], [instructor], history
+        matches, unmatched, available, _, _ = continuity_pass(
+            [adapted, regular], [instructor], history
         )
-        unmatched_ids = [s.swimmer_id for s in unmatched]
-        assert 1 not in unmatched_ids
 
-    def test_adapted_override_match_has_override_flag(self):
-        """Match dict must include 'continuity_overrides_adapted_capability' flag."""
-        swimmer = _make_swimmer(1, special_needs=True)
-        instructor = _make_nonadapted_instructor(100)
-        history = [_make_history(1, 100, num_sessions=3)]
-
-        matches, _, _, _, _ = continuity_pass([swimmer], [instructor], history)
-        assert len(matches) == 1
-        assert 'continuity_overrides_adapted_capability' in matches[0]['flag_codes']
-
-    def test_adapted_override_match_has_manual_review_flag(self):
-        """Match dict must also include 'manual_policy_review_required' flag."""
-        swimmer = _make_swimmer(1, special_needs=True)
-        instructor = _make_nonadapted_instructor(100)
-        history = [_make_history(1, 100, num_sessions=3)]
-
-        matches, _, _, _, _ = continuity_pass([swimmer], [instructor], history)
-        assert len(matches) == 1
-        assert 'manual_policy_review_required' in matches[0]['flag_codes']
+        assert matches == []
+        assert {item.swimmer_id for item in unmatched} == {1, 2}
+        assert [item.instructor_id for item in available] == [100]
 
     def test_normal_match_has_empty_flag_codes(self):
         """A regular continuity match with no HC issues has flag_codes=[]."""
@@ -301,15 +285,14 @@ class TestAdaptedCapabilityOverride:
         assert len(matches) == 1
         assert matches[0].get('flag_codes') == []
 
-    def test_adapted_swimmer_with_adapted_instructor_no_override_flag(self):
-        """Adapted swimmer matched with an adapted-capable instructor → no override flag."""
+    def test_adapted_swimmer_with_adapted_instructor_matches_normally(self):
         swimmer = _make_swimmer(1, special_needs=True)
         instructor = _make_instructor(100)  # can_teach_adapted=True
         history = [_make_history(1, 100, num_sessions=3)]
 
         matches, _, _, _, _ = continuity_pass([swimmer], [instructor], history)
         assert len(matches) == 1
-        assert 'continuity_overrides_adapted_capability' not in matches[0].get('flag_codes', [])
+        assert matches[0].get('flag_codes') == []
 
     def test_hc3_baby_still_hard_blocks_continuity(self):
         """HC-3 is NOT overridable: baby swimmer with non-baby-capable instructor → no match."""
@@ -323,8 +306,7 @@ class TestAdaptedCapabilityOverride:
         assert len(matches) == 0, "HC-3 must still block — baby swimmer cannot match non-baby-capable instructor"
         assert any(s.swimmer_id == 1 for s in unmatched)
 
-    def test_adapted_override_pair_match(self):
-        """Pair where one swimmer is adapted and instructor is not adapted-capable → match with flags."""
+    def test_pair_with_adapted_swimmer_is_blocked(self):
         swimmer1 = _make_swimmer(1, pair_id=10, special_needs=True)
         swimmer2 = _make_swimmer(2, pair_id=10, special_needs=False)
         instructor = _make_nonadapted_instructor(100)
@@ -333,16 +315,15 @@ class TestAdaptedCapabilityOverride:
             _make_history(2, 100, num_sessions=3),
         ]
 
-        matches, unmatched, available, disputes, _ = continuity_pass(
+        matches, unmatched, available, _, blocked_flags = continuity_pass(
             [swimmer1, swimmer2], [instructor], history
         )
-        assert len(matches) == 1, "Pair should match via continuity override"
-        assert matches[0]['type'] == 'pair'
-        assert 'continuity_overrides_adapted_capability' in matches[0]['flag_codes']
-        assert 'manual_policy_review_required' in matches[0]['flag_codes']
+        assert matches == []
+        assert {item.swimmer_id for item in unmatched} == {1, 2}
+        assert [item.instructor_id for item in available] == [100]
+        assert blocked_flags[1] == ['continuity_blocked_by_adapted_capability']
 
-    def test_pair_both_adapted_override_match(self):
-        """Pair where both swimmers are adapted and instructor is not adapted-capable → match with flags."""
+    def test_pair_with_two_adapted_swimmers_records_both_blocks(self):
         swimmer1 = _make_swimmer(1, pair_id=10, special_needs=True)
         swimmer2 = _make_swimmer(2, pair_id=10, special_needs=True)
         instructor = _make_nonadapted_instructor(100)
@@ -351,11 +332,14 @@ class TestAdaptedCapabilityOverride:
             _make_history(2, 100, num_sessions=3),
         ]
 
-        matches, _, _, _, _ = continuity_pass(
+        matches, _, _, _, blocked_flags = continuity_pass(
             [swimmer1, swimmer2], [instructor], history
         )
-        assert len(matches) == 1
-        assert 'continuity_overrides_adapted_capability' in matches[0]['flag_codes']
+        assert matches == []
+        assert blocked_flags == {
+            1: ['continuity_blocked_by_adapted_capability'],
+            2: ['continuity_blocked_by_adapted_capability'],
+        }
 
     def test_pair_hc3_still_blocks(self):
         """HC-3 remains hard for pairs: baby swimmer + non-baby-capable instructor → no match."""

@@ -10,6 +10,7 @@ The model maximizes total compatibility score while respecting hard constraints:
 - HC-1: Capacity (each instructor teaches at most one entity)
 - HC-2: Adapted routing (special needs swimmers -> adapted-capable instructors)
 - HC-3: Age categories (babies -> baby-capable, adults -> adult-capable)
+- HC-4: Pair compatibility (RSS level difference <= 1, age difference <= 2)
 """
 
 from typing import Dict, List, Tuple
@@ -19,6 +20,7 @@ from core.scoring import CompatibilityScorer
 
 from .config import CPSAT, AGE_THRESHOLDS, NOTES_BOOSTS
 from .data_loader import Swimmer, Instructor, DataLoader
+from .hard_constraints import instructor_is_qualified, pair_satisfies_constraints
 from .notes_parser import parse_notes
 from .phase1_continuity import _separate_swimmers
 
@@ -233,11 +235,7 @@ def _blocked_instructor_names(notes: str | None) -> set[str]:
 
 def _individual_candidate_is_feasible(swimmer: Swimmer, instructor: Instructor) -> bool:
     """Return True when an instructor is legal for an individual swimmer."""
-    if swimmer.has_special_needs and not instructor.can_teach_adapted:
-        return False
-    if swimmer.age < AGE_THRESHOLDS['baby_max'] and not instructor.can_teach_babies:
-        return False
-    if swimmer.age >= AGE_THRESHOLDS['adult_min'] and not instructor.can_teach_adults:
+    if not instructor_is_qualified(swimmer, instructor):
         return False
     instr_name = f"{instructor.first_name} {instructor.last_name}"
     return instr_name not in _blocked_instructor_names(swimmer.notes)
@@ -250,6 +248,8 @@ def _pair_candidate_is_feasible(
 ) -> bool:
     """Return True when an instructor is legal for both swimmers in a pair."""
     return (
+        pair_satisfies_constraints(swimmer1, swimmer2)
+        and
         _individual_candidate_is_feasible(swimmer1, instructor)
         and _individual_candidate_is_feasible(swimmer2, instructor)
     )

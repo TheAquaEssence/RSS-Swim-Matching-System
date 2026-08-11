@@ -13,13 +13,9 @@ Algorithm:
 
 from typing import Dict, List, Tuple, Optional, Set
 from .data_loader import Swimmer, Instructor, HistoricalPairing
+from .hard_constraints import instructor_is_qualified, pair_satisfies_constraints
 from .notes_parser import parse_notes
 from .config import AGE_THRESHOLDS
-
-_ADAPTED_OVERRIDE_FLAGS = [
-    'continuity_overrides_adapted_capability',
-    'manual_policy_review_required',
-]
 
 
 def continuity_pass(
@@ -94,7 +90,7 @@ def continuity_pass(
             unmatched_swimmers.append(swimmer)
             continue
 
-        # HC guard: check HC-3 (hard stop) and HC-2 (soft override with flag)
+        # HC guard: continuity never overrides instructor qualifications.
         match_flags: List[str] = []
         if instructor:
             allowed, hc_flags = _continuity_hc_check(swimmer, instructor)
@@ -131,6 +127,11 @@ def continuity_pass(
     # =========================================================================
 
     for swimmer1, swimmer2 in pairs:
+        if not pair_satisfies_constraints(swimmer1, swimmer2):
+            unmatched_swimmers.append(swimmer1)
+            unmatched_swimmers.append(swimmer2)
+            continue
+
         history1 = history_lookup.get(swimmer1.swimmer_id)
         history2 = history_lookup.get(swimmer2.swimmer_id)
 
@@ -140,7 +141,7 @@ def continuity_pass(
 
             if prev_instr1 == prev_instr2:
                 instr = instructor_lookup.get(prev_instr1)
-                # HC guard: HC-3 is a hard stop; HC-2 can be overridden with flags
+                # HC guard: all instructor qualifications remain hard stops.
                 pair_flags: List[str] = []
                 if instr:
                     allowed1, flags1 = _continuity_hc_check(swimmer1, instr)
@@ -207,16 +208,7 @@ def continuity_pass(
 
 def _hc_allows(swimmer: Swimmer, instructor: Instructor) -> bool:
     """Return True if the instructor is legally allowed to teach this swimmer (HC-2, HC-3)."""
-    # HC-2: adapted swimmers need adapted-capable instructor
-    if swimmer.has_special_needs and not instructor.can_teach_adapted:
-        return False
-    # HC-3: baby swimmers need baby-capable instructor
-    if swimmer.age < AGE_THRESHOLDS['baby_max'] and not instructor.can_teach_babies:
-        return False
-    # HC-3: adult swimmers need adult-capable instructor
-    if swimmer.age >= AGE_THRESHOLDS['adult_min'] and not instructor.can_teach_adults:
-        return False
-    return True
+    return instructor_is_qualified(swimmer, instructor)
 
 
 def _continuity_hc_check(
@@ -224,22 +216,21 @@ def _continuity_hc_check(
 ) -> Tuple[bool, List[str]]:
     """Check HC-2 and HC-3 for a continuity candidate.
 
-    HC-3 (age qualification) is a hard stop — returns (False, []) when it blocks.
-    HC-2 (adapted capability) can be overridden by continuity per client policy —
-    returns (True, [override_flags]) when it would normally block.
+    HC-2 and HC-3 are hard stops. Continuity never overrides instructor
+    qualifications.
 
     Returns:
         (allowed, flag_codes)
     """
-    # HC-3 hard stop: age capability (never overridable by continuity)
+    # HC-3 hard stop: age capability
     if swimmer.age < AGE_THRESHOLDS['baby_max'] and not instructor.can_teach_babies:
         return False, ['continuity_blocked_by_baby_capability']
     if swimmer.age >= AGE_THRESHOLDS['adult_min'] and not instructor.can_teach_adults:
         return False, ['continuity_blocked_by_adult_capability']
 
-    # HC-2 soft override: adapted capability — allow but flag for human review
+    # HC-2 hard stop: adapted capability
     if swimmer.has_special_needs and not instructor.can_teach_adapted:
-        return True, list(_ADAPTED_OVERRIDE_FLAGS)
+        return False, ['continuity_blocked_by_adapted_capability']
 
     return True, []
 
