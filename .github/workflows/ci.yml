@@ -45,3 +45,4 @@ jobs:
           frontend/xai_dashboard/tests/
           solvers/tests/
           data_generation/tests/
+          scripts/tests/

@@ -8,8 +8,8 @@ from core.scoring import CompatibilityScorer
 
 from .config import AGE_THRESHOLDS, CPSAT, NOTES_BOOSTS
 from .data_loader import Class, DataLoader, Instructor, Swimmer
+from .hard_constraints import instructor_is_qualified, pair_satisfies_constraints
 from .notes_parser import parse_notes
-from .phase1_continuity import _ADAPTED_OVERRIDE_FLAGS
 from .phase2_cpsat import _resolve_min_auto_assign_score, _resolve_time_limit_seconds
 
 
@@ -33,6 +33,10 @@ def preassigned_pass_fixed_rosters(
         if instructor_id is None or instructor_id not in instructor_lookup or instructor_id in reserved_instructor_ids:
             unmatched_individual_classes.append((class_obj, swimmer))
             continue
+        instructor = instructor_lookup[instructor_id]
+        if not instructor_is_qualified(swimmer, instructor):
+            unmatched_individual_classes.append((class_obj, swimmer))
+            continue
         reserved_instructor_ids.add(instructor_id)
         preassigned_matches.append({
             "class_id": class_obj.class_id,
@@ -47,6 +51,14 @@ def preassigned_pass_fixed_rosters(
     for class_obj, swimmer1, swimmer2 in pair_classes:
         instructor_id = class_obj.instructor_id
         if instructor_id is None or instructor_id not in instructor_lookup or instructor_id in reserved_instructor_ids:
+            unmatched_pair_classes.append((class_obj, swimmer1, swimmer2))
+            continue
+        instructor = instructor_lookup[instructor_id]
+        if (
+            not pair_satisfies_constraints(swimmer1, swimmer2)
+            or not instructor_is_qualified(swimmer1, instructor)
+            or not instructor_is_qualified(swimmer2, instructor)
+        ):
             unmatched_pair_classes.append((class_obj, swimmer1, swimmer2))
             continue
         reserved_instructor_ids.add(instructor_id)
@@ -138,6 +150,10 @@ def continuity_pass_fixed_rosters(
             unmatched_individual_classes.append((class_obj, swimmer))
 
     for class_obj, swimmer1, swimmer2 in pair_classes:
+        if not pair_satisfies_constraints(swimmer1, swimmer2):
+            unmatched_pair_classes.append((class_obj, swimmer1, swimmer2))
+            continue
+
         history1 = history_lookup.get(swimmer1.swimmer_id)
         history2 = history_lookup.get(swimmer2.swimmer_id)
         if not history1 or not history2 or history1.instructor_id != history2.instructor_id:
@@ -410,18 +426,18 @@ def _build_fixed_class_model(
 
 
 def _individual_candidate_is_feasible(swimmer: Swimmer, instructor: Instructor) -> bool:
-    if swimmer.has_special_needs and not instructor.can_teach_adapted:
-        return False
-    if swimmer.age < AGE_THRESHOLDS["baby_max"] and not instructor.can_teach_babies:
-        return False
-    if swimmer.age >= AGE_THRESHOLDS["adult_min"] and not instructor.can_teach_adults:
+    if not instructor_is_qualified(swimmer, instructor):
         return False
     blocked_names = _blocked_instructor_names(swimmer.notes)
     return f"{instructor.first_name} {instructor.last_name}" not in blocked_names
 
 
 def _pair_candidate_is_feasible(swimmer1: Swimmer, swimmer2: Swimmer, instructor: Instructor) -> bool:
-    return _individual_candidate_is_feasible(swimmer1, instructor) and _individual_candidate_is_feasible(swimmer2, instructor)
+    return (
+        pair_satisfies_constraints(swimmer1, swimmer2)
+        and _individual_candidate_is_feasible(swimmer1, instructor)
+        and _individual_candidate_is_feasible(swimmer2, instructor)
+    )
 
 
 def _blocked_instructor_names(notes: str | None) -> set[str]:
@@ -435,7 +451,7 @@ def _continuity_hc_check(swimmer: Swimmer, instructor: Instructor) -> Tuple[bool
     if swimmer.age >= AGE_THRESHOLDS["adult_min"] and not instructor.can_teach_adults:
         return False, ["continuity_blocked_by_adult_capability"]
     if swimmer.has_special_needs and not instructor.can_teach_adapted:
-        return True, list(_ADAPTED_OVERRIDE_FLAGS)
+        return False, ["continuity_blocked_by_adapted_capability"]
     return True, []
 
 

@@ -28,7 +28,7 @@ def validate_message(message: str) -> list[str]:
 
 def commit_messages(repository: Path) -> list[tuple[str, str]]:
     output = subprocess.run(
-        ["git", "log", "--format=%H%x00%B%x00"],
+        ["git", "log", "--no-merges", "--format=%H%x00%B%x00"],
         cwd=repository,
         check=True,
         capture_output=True,
