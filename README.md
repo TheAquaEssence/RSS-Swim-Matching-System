@@ -11,10 +11,11 @@ stays on the user's machine.
 
 ## Status
 
-The application architecture and Windows package are implemented and tested.
-Public-release gates—including clean-machine installer/uninstaller validation,
-repository privacy review, checksums, and signing decisions—remain tracked in
-the [Electron migration and release checklist](docs/plans/2026-07-17-electron-migration-checklist.md).
+The application architecture and Windows package are implemented and tested,
+including clean-machine installation and removal. The remaining public-release
+gates are the GitHub Support purge of pre-rewrite pull-request refs and the
+first tag-driven installer/checksum publication. Code signing is explicitly
+deferred. See the [Electron migration and release checklist](docs/plans/2026-07-17-electron-migration-checklist.md).
 
 ## How it works
 
@@ -40,22 +41,30 @@ See [Architecture](docs/architecture.md) and
 [Matching Rules](docs/matching-process-rules-and-guidelines.md) for the full
 contracts.
 
-## Run from source
+## Run the Electron desktop app from source
 
-Python 3.14 is the supported development and packaging version.
+Python 3.14 and Node.js 24 are the supported development and packaging
+versions. Install both dependency sets, then start Electron from the repository
+root:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -r requirements-dev.txt
-python start.py
+npm --prefix desktop ci
+npm --prefix desktop start
 ```
 
-The server binds to `127.0.0.1` and opens the application in a browser. The
-tracked synthetic demonstration dataset under `examples/demo/` is safe for
-development and evaluation. Detailed options are in
-[How to Run the App](docs/RUN_APP.md).
+Electron launches the FastAPI backend with browser opening disabled, waits for
+readiness, and displays the same loopback-served interface inside a hardened
+desktop window. Closing the window shuts down the backend.
+
+For browser-only development, run `python start.py`; that command deliberately
+opens the interface in the system's default browser. Use `python start.py
+--no-browser` to start only the backend. The tracked synthetic demonstration
+dataset under `examples/demo/` is safe for development and evaluation.
+Detailed options are in [How to Run the App](docs/RUN_APP.md).
 
 ## Verify
 
