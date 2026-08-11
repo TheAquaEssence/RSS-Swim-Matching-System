@@ -232,6 +232,10 @@ def test_instructor_defaults_module_owns_both_editors():
     assert "function renderInstructorStyleColorEditor(" in source
     assert "function applyInstructorDefaultsProfile(" in source
     assert "const DEFAULT_INSTRUCTOR_APP_PROFILE = {" in source
+    assert "can_teach_NL: true" in source
+    assert "can_teach_babies: false" in source
+    assert "can_teach_adults: false" in source
+    assert "can_teach_adapted: false" in source
 
 
 def test_instructor_defaults_script_loads_before_app():

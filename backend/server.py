@@ -142,9 +142,9 @@ def make_default_settings() -> dict:
             "secondary_style_id": 5,
             "is_team_captain": False,
             "can_teach_NL": True,
-            "can_teach_babies": True,
-            "can_teach_adults": True,
-            "can_teach_adapted": True,
+            "can_teach_babies": False,
+            "can_teach_adults": False,
+            "can_teach_adapted": False,
         },
     }
 

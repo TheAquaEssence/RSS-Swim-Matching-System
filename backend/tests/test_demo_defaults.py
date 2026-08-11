@@ -1,6 +1,15 @@
 from backend import server
 
 
+def test_default_instructor_safety_qualifications_fail_closed():
+    profile = server.make_default_settings()["default_instructor_profile"]
+
+    assert profile["can_teach_NL"] is True
+    assert profile["can_teach_babies"] is False
+    assert profile["can_teach_adults"] is False
+    assert profile["can_teach_adapted"] is False
+
+
 def test_provisioned_demo_history_is_ignored_with_external_inputs(
     monkeypatch, tmp_path
 ):
