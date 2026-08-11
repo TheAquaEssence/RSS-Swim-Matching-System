@@ -18,6 +18,7 @@ from core.scoring import CompatibilityScorer, RankingLoader
 from .data_loader import DataLoader
 from .phase1_continuity import continuity_pass
 from .phase2_cpsat import compatibility_pass
+from .hard_constraints import validate_hard_constraints
 from .phase3_explainability import (
     generate_explanations,
     generate_summary_report,
@@ -148,6 +149,12 @@ def main(data_dir: str = None, output_dir: str = None) -> None:
     # =========================================================================
 
     all_matches = continuity_matches + compatibility_matches
+    validate_hard_constraints(
+        all_matches,
+        swimmers,
+        instructors,
+        data_loader.classes,
+    )
 
     total_assigned = sum(
         2 if m['type'] == 'pair' else 1

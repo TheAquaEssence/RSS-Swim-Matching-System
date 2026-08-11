@@ -72,6 +72,12 @@
       "severity": "review",
       "default_review_action": "verify_instructor_qualification_record"
     },
+    "continuity_blocked_by_adapted_capability": {
+      "title": "Adapted capability blocked continuity",
+      "description": "Swimmer requires adapted instruction and has a continuity instructor who is not adapted-capable — continuity was not preserved",
+      "severity": "review",
+      "default_review_action": "verify_instructor_qualification_record"
+    },
     "continuity_pairing_conflict": {
       "title": "Pairing continuity conflict",
       "description": "Pair lost continuity with their previous instructor because that instructor was assigned to a private continuity swimmer",

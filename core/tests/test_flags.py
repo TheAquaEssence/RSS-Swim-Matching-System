@@ -50,6 +50,7 @@ class TestFlagCodesVocabulary:
         "continuity_capacity_conflict",
         "continuity_blocked_by_adult_capability",
         "continuity_blocked_by_baby_capability",
+        "continuity_blocked_by_adapted_capability",
         "continuity_pairing_conflict",
         "non_response_swimmer_type",
         "default_instructor_profile",
