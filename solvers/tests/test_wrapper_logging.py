@@ -105,6 +105,12 @@ def test_python_cpsat_wrapper_logs_success_and_failure(tmp_path, monkeypatch):
     monkeypatch.setattr(module, "generate_output_csv", lambda matches, classes, path, **kwargs: Path(path).write_text("ok", encoding="utf-8"))
     monkeypatch.setattr(module, "generate_summary_report", lambda *args, **kwargs: "summary")
     monkeypatch.setattr(module, "generate_pdf_report", None)
+    validated_matches = []
+    monkeypatch.setattr(
+        module,
+        "validate_hard_constraints",
+        lambda matches, *args, **kwargs: validated_matches.extend(matches),
+    )
 
     import core.profiles.profile_reader as profile_reader
 
@@ -122,6 +128,8 @@ def test_python_cpsat_wrapper_logs_success_and_failure(tmp_path, monkeypatch):
     assert any(record["event"] == "wrapper_completed" and record["job_id"] == "job_python" for record in success_records)
     assert any(record["event"] == "wrapper_result_written" and record["job_id"] == "job_python" for record in success_records)
     assert json.loads(result_path.read_text(encoding="utf-8"))["ok"] is True
+    assert len(validated_matches) == 1
+    assert validated_matches[0]["swimmer_id"] == 1
 
     reset_logging_state()
     failure_log_root = tmp_path / "logs_failure"

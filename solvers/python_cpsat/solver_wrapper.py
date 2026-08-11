@@ -73,6 +73,7 @@ from core.aqua_logging import configure_component_logger, install_uncaught_excep
 from solvers.python_cpsat.engine.data_loader import DataLoader
 from solvers.python_cpsat.engine.phase1_continuity import continuity_pass
 from solvers.python_cpsat.engine.phase2_cpsat import compatibility_pass, diagnose_unassigned_swimmers
+from solvers.python_cpsat.engine.hard_constraints import validate_hard_constraints
 from solvers.python_cpsat.engine.phase3_explainability import (
     generate_explanations,
     generate_summary_report,
@@ -269,6 +270,12 @@ def main(argv=None):
             optimization_ms = round((time.perf_counter() - optimization_started) * 1000, 2)
 
             all_matches = continuity_matches + compatibility_matches
+            validate_hard_constraints(
+                all_matches,
+                swimmers,
+                instructors,
+                loader.classes,
+            )
 
             assigned_ids = set()
             for m in all_matches:

@@ -563,9 +563,11 @@ PHASE 2 - COMPATIBILITY MATCHING (ranking-based):
   + Average compatibility score: {avg_compatibility:.1f}%
   + {semi_private_count} semi-private classes formed
   + All hard constraints satisfied:
+      - Instructor and class capacity [OK]
       - Adapted swimmers -> adapted-capable instructors [OK]
       - Babies -> baby-capable instructors [OK]
       - Adults -> adult-capable instructors [OK]
+      - Paired swimmers within age and RSS-level limits [OK]
 
 --------------------------------------------------------------------------------
 
