@@ -295,7 +295,7 @@ The swimmer is assigned to their previous instructor if:
 
 1. notes do not block that instructor,
 2. age routing allows the match,
-3. adapted routing either allows the match or is allowed as a flagged continuity override,
+3. adapted routing allows the match,
 4. the instructor still has capacity.
 
 If assigned:
@@ -603,8 +603,7 @@ The system uses shared flag vocabulary from `core/flag_vocabulary.json`.
 
 Flags can come from:
 
-- adapted continuity overrides
-- continuity blocked by baby/adult capability
+- continuity blocked by adapted, baby, or adult capability
 - continuity capacity conflicts
 - continuity pairing conflicts
 - forced assignments
@@ -727,7 +726,7 @@ Review all matches below 70 confidence.
 
 Review all matches with non-empty flag codes.
 
-Manually review adapted continuity overrides.
+Review continuity qualification blocks and correct stale instructor capability records when necessary.
 
 Manually review continuity disputes.
 
@@ -735,7 +734,7 @@ Manually review forced assignments where only one legal instructor exists.
 
 Do not assume `always` in notes is a hard constraint; current code treats it as a strong score boost.
 
-Do not assume HC-4 age/level pair validation is fully enforced by current CP-SAT code; add validation if that rule is required operationally.
+HC-4 age/level pair validation is enforced in every assignment phase and by the final result validator.
 
 ## 24. Jackrabbit Session Cycle
 
