@@ -21,9 +21,9 @@
     secondary_style_id: 5,
     is_team_captain: false,
     can_teach_NL: true,
-    can_teach_babies: true,
-    can_teach_adults: true,
-    can_teach_adapted: true,
+    can_teach_babies: false,
+    can_teach_adults: false,
+    can_teach_adapted: false,
   };
 
   function setInstructorDefaultsMeta(message, isError = false) {
