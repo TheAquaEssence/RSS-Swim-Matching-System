@@ -316,7 +316,9 @@ def test_import_instructors_from_active_staff_defaults_missing_profile_fields():
     assert [row["first_name"] for row in rows] == ["Hannah", "Marcus"]
     assert [row["last_name"] for row in rows] == ["Sullivan", "Chen"]
     assert all(row["primary_style_id"] == "6" for row in rows)
-    assert all(row["can_teach_adapted"] == "1" for row in rows)
+    assert all(row["can_teach_babies"] == "0" for row in rows)
+    assert all(row["can_teach_adults"] == "0" for row in rows)
+    assert all(row["can_teach_adapted"] == "0" for row in rows)
     assert all(row["used_default_profile"] == "1" for row in rows)
     assert any("default instructor profile values" in warning for warning in warnings)
 
