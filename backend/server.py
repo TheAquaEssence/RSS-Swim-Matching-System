@@ -1010,30 +1010,35 @@ def shutdown():
 
 # -- Rankings editor ---------------------------------------------------------
 
+RANKING_EDITOR_CONFIGS = {
+    "swimmer_type_color_rankings": {
+        "rankings_key": "swimmer_type_color_rankings",
+        "lookup_key": "personality_colors",
+        "item_id_col": "color_id",
+        "item_name_col": "color_name",
+        "item_singular": "color",
+        "item_plural": "colors",
+        "kind": "color",
+    },
+    "swimmer_type_style_rankings": {
+        "rankings_key": "swimmer_type_style_rankings",
+        "lookup_key": "instructor_styles",
+        "item_id_col": "style_id",
+        "item_name_col": "style_name",
+        "item_singular": "style",
+        "item_plural": "styles",
+        "kind": "style",
+    },
+}
+
+
 @api_router.post("/api/rankings_editor/load")
 async def rankings_editor_load(request: Request):
     state = _services_from_request(request).state
     body = await request.json()
     purpose = body.get("purpose", "")
 
-    RANKING_CONFIGS = {
-        "swimmer_type_color_rankings": {
-            "rankings_key": "swimmer_type_color_rankings",
-            "lookup_key": "personality_colors",
-            "item_id_col": "color_id",
-            "item_name_col": "color_name",
-            "kind": "color",
-        },
-        "swimmer_type_style_rankings": {
-            "rankings_key": "swimmer_type_style_rankings",
-            "lookup_key": "instructor_styles",
-            "item_id_col": "style_id",
-            "item_name_col": "style_name",
-            "kind": "style",
-        },
-    }
-
-    config = RANKING_CONFIGS.get(purpose)
+    config = RANKING_EDITOR_CONFIGS.get(purpose)
     if not config:
         return JSONResponse({"ok": False, "error": "Invalid purpose"}, status_code=400, headers=NO_CACHE)
 
@@ -1098,7 +1103,10 @@ async def rankings_editor_load(request: Request):
         "ok": True,
         "purpose": purpose,
         "kind": config["kind"],
+        "item_singular": config["item_singular"],
+        "item_plural": config["item_plural"],
         "rankings_path": str(rankings_path),
+        "lookup_path": str(lookup_path),
         "swimmer_types": swimmer_types_out,
     }, headers=NO_CACHE)
 
@@ -1111,39 +1119,159 @@ async def rankings_editor_save(request: Request):
     swimmer_types = body.get("swimmer_types", [])
     items = body.get("items", [])
 
-    RANKING_CONFIGS = {
-        "swimmer_type_color_rankings": {"rankings_key": "swimmer_type_color_rankings", "item_id_col": "color_id"},
-        "swimmer_type_style_rankings": {"rankings_key": "swimmer_type_style_rankings", "item_id_col": "style_id"},
-    }
-
-    config = RANKING_CONFIGS.get(purpose)
+    config = RANKING_EDITOR_CONFIGS.get(purpose)
     if not config:
         return JSONResponse({"ok": False, "error": "Invalid purpose"}, status_code=400, headers=NO_CACHE)
+    if (
+        not isinstance(swimmer_types, list)
+        or not swimmer_types
+        or not isinstance(items, list)
+        or not items
+    ):
+        return JSONResponse(
+            {"ok": False, "error": "Rankings payload must include items and swimmer types"},
+            status_code=400,
+            headers=NO_CACHE,
+        )
 
     rankings_path = get_writable_setting_path(config["rankings_key"], state)
-    if not rankings_path:
-        return JSONResponse({"ok": False, "error": "Rankings file not configured"}, status_code=400, headers=NO_CACHE)
+    lookup_path = get_writable_setting_path(config["lookup_key"], state)
+    if not rankings_path or not lookup_path:
+        return JSONResponse(
+            {"ok": False, "error": "Rankings or lookup file not configured"},
+            status_code=400,
+            headers=NO_CACHE,
+        )
 
     item_id_col = config["item_id_col"]
+    item_name_col = config["item_name_col"]
+    try:
+        lookup_headers, lookup_rows = read_csv_file(lookup_path)
+    except Exception:
+        return JSONResponse(
+            {"ok": False, "error": "Failed to read lookup file"},
+            status_code=500,
+            headers=NO_CACHE,
+        )
+    if item_id_col not in lookup_headers or item_name_col not in lookup_headers:
+        return JSONResponse(
+            {"ok": False, "error": "Lookup file has an invalid schema"},
+            status_code=400,
+            headers=NO_CACHE,
+        )
+
+    existing_by_id = {
+        str(row.get(item_id_col, "")).strip(): row
+        for row in lookup_rows
+        if str(row.get(item_id_col, "")).strip()
+    }
+    used_ids = set(existing_by_id)
+    numeric_ids = [int(value) for value in used_ids if value.isdigit()]
+    next_id = max(numeric_ids, default=0) + 1
+    used_names = {
+        str(row.get(item_name_col, "")).strip().casefold()
+        for row in lookup_rows
+        if str(row.get(item_name_col, "")).strip()
+    }
+    item_ids_by_key: dict[str, str] = {}
+    kept_existing_ids: set[str] = set()
+    new_lookup_rows: list[dict] = []
+    for item in items:
+        if not isinstance(item, dict):
+            return JSONResponse(
+                {"ok": False, "error": "Each rankings item must be an object"},
+                status_code=400,
+                headers=NO_CACHE,
+            )
+        client_key = str(item.get("client_key", "")).strip()
+        name = str(item.get("name", "")).strip()
+        raw_id = str(item.get("id", "") or "").strip()
+        if not client_key or not name or client_key in item_ids_by_key:
+            return JSONResponse(
+                {"ok": False, "error": "Each rankings item needs a unique key and name"},
+                status_code=400,
+                headers=NO_CACHE,
+            )
+
+        if raw_id:
+            if raw_id not in existing_by_id:
+                return JSONResponse(
+                    {"ok": False, "error": "Rankings item references an unknown lookup ID"},
+                    status_code=400,
+                    headers=NO_CACHE,
+                )
+            assigned_id = raw_id
+            kept_existing_ids.add(raw_id)
+        else:
+            normalized_name = name.casefold()
+            if normalized_name in used_names:
+                return JSONResponse(
+                    {"ok": False, "error": "Rankings item name already exists"},
+                    status_code=400,
+                    headers=NO_CACHE,
+                )
+            while str(next_id) in used_ids:
+                next_id += 1
+            assigned_id = str(next_id)
+            next_id += 1
+            used_ids.add(assigned_id)
+            used_names.add(normalized_name)
+            new_row = {header: "" for header in lookup_headers}
+            new_row[item_id_col] = assigned_id
+            new_row[item_name_col] = name
+            new_lookup_rows.append(new_row)
+        item_ids_by_key[client_key] = assigned_id
+
+    expected_keys = set(item_ids_by_key)
     rows = []
     for st in swimmer_types:
+        if not isinstance(st, dict):
+            return JSONResponse(
+                {"ok": False, "error": "Each swimmer type must be an object"},
+                status_code=400,
+                headers=NO_CACHE,
+            )
         tid = st.get("id", "")
-        for idx, key in enumerate(st.get("item_keys", [])):
-            item = next((i for i in items if i.get("client_key") == key), None)
-            if not item:
-                continue
+        item_keys = st.get("item_keys", [])
+        if (
+            not str(tid).strip()
+            or not isinstance(item_keys, list)
+            or len(item_keys) != len(expected_keys)
+            or set(item_keys) != expected_keys
+        ):
+            return JSONResponse(
+                {"ok": False, "error": "Each swimmer type must rank every item exactly once"},
+                status_code=400,
+                headers=NO_CACHE,
+            )
+        for idx, key in enumerate(item_keys):
             rows.append({
                 "swimmer_type_id": str(tid),
-                item_id_col: str(item.get("id", "")),
+                item_id_col: item_ids_by_key[key],
                 "rank": str(idx + 1),
             })
 
+    updated_lookup_rows = [
+        row
+        for row in lookup_rows
+        if str(row.get(item_id_col, "")).strip() in kept_existing_ids
+    ] + new_lookup_rows
     try:
+        write_csv_file(lookup_path, lookup_headers, updated_lookup_rows)
         write_csv_file(rankings_path, ["swimmer_type_id", item_id_col, "rank"], rows)
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500, headers=NO_CACHE)
+    except Exception:
+        return JSONResponse(
+            {"ok": False, "error": "Failed to save rankings files"},
+            status_code=500,
+            headers=NO_CACHE,
+        )
 
-    return JSONResponse({"ok": True, "workbook_synced": False, "workbook_warning": ""}, headers=NO_CACHE)
+    return JSONResponse({
+        "ok": True,
+        "lookup_updated": bool(new_lookup_rows) or len(updated_lookup_rows) != len(lookup_rows),
+        "workbook_synced": False,
+        "workbook_warning": "",
+    }, headers=NO_CACHE)
 
 
 # -- Reference table editor --------------------------------------------------

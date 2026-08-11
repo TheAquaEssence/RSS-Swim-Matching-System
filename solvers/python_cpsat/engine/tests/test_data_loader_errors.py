@@ -200,6 +200,24 @@ class TestFailSafeInputValidation:
         assert instructor.can_teach_adults is False
         assert instructor.can_teach_adapted is False
 
+    def test_blank_reference_metadata_is_allowed(self, data_dirs):
+        data_dir, source, _ = data_dirs
+        colors_path = os.path.join(source, 'personality_colors.csv')
+        colors = pd.read_csv(colors_path)
+        colors['traits'] = ''
+        colors.to_csv(colors_path, index=False)
+        styles_path = os.path.join(source, 'instructor_styles.csv')
+        styles = pd.read_csv(styles_path)
+        styles[['style_code', 'traits', 'expertise_area']] = ''
+        styles.to_csv(styles_path, index=False)
+
+        loader = DataLoader(data_dir)
+        loader.load_all()
+
+        assert loader.personality_colors[1].traits == ''
+        assert loader.instructor_styles[1].style_code == ''
+        assert loader.instructor_styles[1].expertise_area == ''
+
     def test_explicit_instructor_boolean_strings_are_parsed(self, data_dirs):
         data_dir, _, generated = data_dirs
         path = self._csv(generated, 'instructors')
