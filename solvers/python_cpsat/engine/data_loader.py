@@ -142,6 +142,11 @@ def _required_text(value, field_name: str, row_number: int) -> str:
     return str(value).strip()
 
 
+def _optional_text(value) -> str:
+    """Return trimmed descriptive metadata without turning NaN into text."""
+    return str(value).strip() if _has_value(value) else ''
+
+
 def _coerce_bool(
     value,
     field_name: str,
@@ -422,7 +427,7 @@ class DataLoader:
             color = PersonalityColor(
                 color_id=_required_int(row['color_id'], 'color_id', row_number, minimum=1),
                 color_name=_required_text(row['color_name'], 'color_name', row_number),
-                traits=_required_text(row['traits'], 'traits', row_number)
+                traits=_optional_text(row['traits'])
             )
             self.personality_colors[color.color_id] = color
 
@@ -436,12 +441,10 @@ class DataLoader:
         for row_number, (_, row) in enumerate(styles_df.iterrows(), start=2):
             style = InstructorStyle(
                 style_id=_required_int(row['style_id'], 'style_id', row_number, minimum=1),
-                style_code=_required_text(row['style_code'], 'style_code', row_number),
+                style_code=_optional_text(row['style_code']),
                 style_name=_required_text(row['style_name'], 'style_name', row_number),
-                traits=_required_text(row['traits'], 'traits', row_number),
-                expertise_area=_required_text(
-                    row['expertise_area'], 'expertise_area', row_number
-                )
+                traits=_optional_text(row['traits']),
+                expertise_area=_optional_text(row['expertise_area'])
             )
             self.instructor_styles[style.style_id] = style
 
