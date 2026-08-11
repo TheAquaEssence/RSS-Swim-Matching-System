@@ -5,6 +5,7 @@ Loads all CSV input files and creates domain objects.
 Uses ranking tables (not binary compatibility tables).
 """
 
+import math
 import os
 from dataclasses import dataclass
 from datetime import datetime
@@ -12,6 +13,7 @@ from typing import Dict, List, Optional, Tuple
 import pandas as pd
 
 from core.swimmer_types import coerce_swimmer_type_id
+from .config import DATA_VALIDATION, PAIRING_CONSTRAINTS
 
 
 # =============================================================================
@@ -76,17 +78,134 @@ def _has_value(value) -> bool:
     return pd.notna(value) and str(value).strip() != ''
 
 
-def _optional_int(value) -> Optional[int]:
-    """Return int(value) when the cell has data, otherwise None."""
+_NO_DEFAULT = object()
+
+
+def _required_int(
+    value,
+    field_name: str,
+    row_number: int,
+    *,
+    minimum: int | None = None,
+    maximum: int | None = None,
+) -> int:
+    """Parse a required finite integer with a descriptive row-level error."""
+    if not _has_value(value):
+        raise ValueError(f"Row {row_number}: {field_name} is required")
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"Row {row_number}: {field_name} must be an integer") from exc
+    if not math.isfinite(numeric) or not numeric.is_integer():
+        raise ValueError(f"Row {row_number}: {field_name} must be a finite integer")
+    parsed = int(numeric)
+    if minimum is not None and parsed < minimum:
+        raise ValueError(f"Row {row_number}: {field_name} must be at least {minimum}")
+    if maximum is not None and parsed > maximum:
+        raise ValueError(f"Row {row_number}: {field_name} must be at most {maximum}")
+    return parsed
+
+
+def _optional_positive_int(value, field_name: str, row_number: int) -> Optional[int]:
     if not _has_value(value):
         return None
-    return int(value)
+    return _required_int(value, field_name, row_number, minimum=1)
 
 
-def _class_instructor_id(instructors: dict, row) -> Tuple[Optional[int], List[str]]:
+def _required_float(
+    value,
+    field_name: str,
+    row_number: int,
+    *,
+    minimum: float | None = None,
+    maximum: float | None = None,
+) -> float:
+    """Parse a required finite float with optional inclusive bounds."""
+    if not _has_value(value):
+        raise ValueError(f"Row {row_number}: {field_name} is required")
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"Row {row_number}: {field_name} must be numeric") from exc
+    if not math.isfinite(parsed):
+        raise ValueError(f"Row {row_number}: {field_name} must be finite")
+    if minimum is not None and parsed < minimum:
+        raise ValueError(f"Row {row_number}: {field_name} must be at least {minimum}")
+    if maximum is not None and parsed > maximum:
+        raise ValueError(f"Row {row_number}: {field_name} must be at most {maximum}")
+    return parsed
+
+
+def _required_text(value, field_name: str, row_number: int) -> str:
+    if not _has_value(value):
+        raise ValueError(f"Row {row_number}: {field_name} is required")
+    return str(value).strip()
+
+
+def _coerce_bool(
+    value,
+    field_name: str,
+    row_number: int,
+    *,
+    default=_NO_DEFAULT,
+) -> bool:
+    """Parse an explicit boolean; missing qualification fields fail closed."""
+    if not _has_value(value):
+        if default is _NO_DEFAULT:
+            raise ValueError(f"Row {row_number}: {field_name} is required")
+        return bool(default)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        numeric = float(value)
+        if math.isfinite(numeric) and numeric in {0.0, 1.0}:
+            return bool(int(numeric))
+    normalized = str(value).strip().casefold()
+    if normalized in {"1", "true", "yes", "y"}:
+        return True
+    if normalized in {"0", "false", "no", "n"}:
+        return False
+    raise ValueError(
+        f"Row {row_number}: {field_name} must be one of true/false, yes/no, or 1/0"
+    )
+
+
+def _require_columns(df: pd.DataFrame, columns: set[str], description: str) -> None:
+    missing = sorted(columns - set(df.columns))
+    if missing:
+        raise ValueError(
+            f"{description} CSV is missing required column(s): {', '.join(missing)}"
+        )
+
+
+def _reject_duplicate_keys(
+    df: pd.DataFrame,
+    columns: list[str],
+    description: str,
+) -> None:
+    duplicates = df[df.duplicated(subset=columns, keep=False)]
+    if duplicates.empty:
+        return
+    rendered = sorted({
+        "/".join(str(row[column]) for column in columns)
+        for _, row in duplicates.iterrows()
+    })
+    raise ValueError(
+        f"{description} CSV contains duplicate key(s) for "
+        f"{', '.join(columns)}: {', '.join(rendered)}"
+    )
+
+
+def _class_instructor_id(
+    instructors: dict,
+    row,
+    row_number: int,
+) -> Tuple[Optional[int], List[str]]:
     """Resolve class instructor from either generated or partner export schema."""
     if 'instructor_id' in row.index and _has_value(row['instructor_id']):
-        return int(row['instructor_id']), []
+        return _required_int(
+            row['instructor_id'], 'instructor_id', row_number, minimum=1
+        ), []
     if 'instructor_name' in row.index and _has_value(row['instructor_name']):
         return _resolve_instructor_id(instructors, str(row['instructor_name']))
     return None, []
@@ -258,72 +377,12 @@ class DataLoader:
         loader._load_reference_tables()
         loader._load_ranking_tables()
 
-        # Load entities from individual paths
-        df = pd.read_csv(instructors_path)
-        for _, row in df.iterrows():
-            instructor = Instructor(
-                instructor_id=int(row['instructor_id']),
-                first_name=row['first_name'],
-                last_name=row['last_name'],
-                primary_color_id=int(row['primary_color_id']),
-                secondary_color_id=int(row['secondary_color_id']),
-                primary_style_id=int(row['primary_style_id']),
-                secondary_style_id=int(row['secondary_style_id']),
-                is_team_captain=bool(row['is_team_captain']),
-                can_teach_NL=bool(row['can_teach_NL']),
-                can_teach_babies=bool(row['can_teach_babies']),
-                can_teach_adults=bool(row['can_teach_adults']),
-                can_teach_adapted=bool(row['can_teach_adapted'])
-            )
-            loader.instructors[instructor.instructor_id] = instructor
-
-        df = pd.read_csv(swimmers_path)
-        for _, row in df.iterrows():
-            pair_id = None
-            if pd.notna(row['pair_id']) and row['pair_id'] != '':
-                pair_id = int(row['pair_id'])
-            swimmer = Swimmer(
-                swimmer_id=int(row['swimmer_id']),
-                first_name=row['first_name'],
-                last_name=row['last_name'],
-                swimmer_type_id=loader._coerce_swimmer_type_id(row.get('swimmer_type_id')),
-                skill_level=int(row['skill_level']),
-                age=float(row['age']),
-                has_special_needs=bool(row['has_special_needs']),
-                notes=str(row['notes']) if pd.notna(row['notes']) else '',
-                pair_id=pair_id
-            )
-            loader.swimmers[swimmer.swimmer_id] = swimmer
-
-        df = pd.read_csv(classes_path)
-        loader.fixed_roster_mode_requested = (
-            'swimmer_1_id' in df.columns or 'swimmer_2_id' in df.columns
-        )
-        for _, row in df.iterrows():
-            instructor_id, resolution_flags = _class_instructor_id(loader.instructors, row)
-            c = Class(
-                class_id=int(row['class_id']),
-                day_of_week=_normalize_day(str(row['day_of_week'])),
-                start_time=_normalize_time(str(row['start_time'])),
-                end_time=_normalize_time(str(row['end_time'])),
-                instructor_id=instructor_id,
-                swimmer_1_id=_optional_int(row['swimmer_1_id']) if 'swimmer_1_id' in row.index else None,
-                swimmer_2_id=_optional_int(row['swimmer_2_id']) if 'swimmer_2_id' in row.index else None,
-            )
-            loader.classes[c.class_id] = c
-            if resolution_flags:
-                loader.class_resolution_flags[c.class_id] = list(resolution_flags)
-
+        # Load entities through the same strict parsing path used by load_all().
+        loader._load_instructors_from_path(instructors_path)
+        loader._load_swimmers_from_path(swimmers_path)
+        loader._load_classes_from_path(classes_path)
         if historical_path:
-            df = pd.read_csv(historical_path)
-            for _, row in df.iterrows():
-                pairing = HistoricalPairing(
-                    swimmer_id=int(row['swimmer_id']),
-                    instructor_id=int(row['instructor_id']),
-                    session=row['session'],
-                    num_sessions=int(row['num_sessions'])
-                )
-                loader.historical_pairings.append(pairing)
+            loader._load_historical_pairings_from_path(historical_path)
 
         loader._validate_data()
         return loader
@@ -357,30 +416,46 @@ class DataLoader:
     def _load_reference_tables(self) -> None:
         """Load personality colors, instructor styles, and swimmer types."""
         colors_df = self._read_csv(os.path.join(self.source_dir, 'personality_colors.csv'), "personality colors reference table")
-        for _, row in colors_df.iterrows():
+        _require_columns(colors_df, {'color_id', 'color_name', 'traits'}, "personality colors")
+        _reject_duplicate_keys(colors_df, ['color_id'], "personality colors")
+        for row_number, (_, row) in enumerate(colors_df.iterrows(), start=2):
             color = PersonalityColor(
-                color_id=int(row['color_id']),
-                color_name=row['color_name'],
-                traits=row['traits']
+                color_id=_required_int(row['color_id'], 'color_id', row_number, minimum=1),
+                color_name=_required_text(row['color_name'], 'color_name', row_number),
+                traits=_required_text(row['traits'], 'traits', row_number)
             )
             self.personality_colors[color.color_id] = color
 
         styles_df = self._read_csv(os.path.join(self.source_dir, 'instructor_styles.csv'), "instructor styles reference table")
-        for _, row in styles_df.iterrows():
+        _require_columns(
+            styles_df,
+            {'style_id', 'style_code', 'style_name', 'traits', 'expertise_area'},
+            "instructor styles",
+        )
+        _reject_duplicate_keys(styles_df, ['style_id'], "instructor styles")
+        for row_number, (_, row) in enumerate(styles_df.iterrows(), start=2):
             style = InstructorStyle(
-                style_id=int(row['style_id']),
-                style_code=row['style_code'],
-                style_name=row['style_name'],
-                traits=row['traits'],
-                expertise_area=row['expertise_area']
+                style_id=_required_int(row['style_id'], 'style_id', row_number, minimum=1),
+                style_code=_required_text(row['style_code'], 'style_code', row_number),
+                style_name=_required_text(row['style_name'], 'style_name', row_number),
+                traits=_required_text(row['traits'], 'traits', row_number),
+                expertise_area=_required_text(
+                    row['expertise_area'], 'expertise_area', row_number
+                )
             )
             self.instructor_styles[style.style_id] = style
 
         types_df = self._read_csv(os.path.join(self.source_dir, 'swimmer_types.csv'), "swimmer types reference table")
-        for _, row in types_df.iterrows():
+        _require_columns(types_df, {'swimmer_type_id', 'swimmer_type_name'}, "swimmer types")
+        _reject_duplicate_keys(types_df, ['swimmer_type_id'], "swimmer types")
+        for row_number, (_, row) in enumerate(types_df.iterrows(), start=2):
             swimmer_type = SwimmerType(
-                swimmer_type_id=int(row['swimmer_type_id']),
-                swimmer_type_name=row['swimmer_type_name']
+                swimmer_type_id=_required_int(
+                    row['swimmer_type_id'], 'swimmer_type_id', row_number, minimum=1
+                ),
+                swimmer_type_name=_required_text(
+                    row['swimmer_type_name'], 'swimmer_type_name', row_number
+                )
             )
             self.swimmer_types[swimmer_type.swimmer_type_id] = swimmer_type
 
@@ -390,17 +465,39 @@ class DataLoader:
             os.path.join(self.source_dir, 'swimmer_type_color_rankings.csv'),
             "swimmer type-color rankings"
         )
-        for _, row in color_rank_df.iterrows():
-            key = (int(row['swimmer_type_id']), int(row['color_id']))
-            self.color_rankings[key] = int(row['rank'])
+        _require_columns(
+            color_rank_df, {'swimmer_type_id', 'color_id', 'rank'}, "color rankings"
+        )
+        _reject_duplicate_keys(
+            color_rank_df, ['swimmer_type_id', 'color_id'], "color rankings"
+        )
+        for row_number, (_, row) in enumerate(color_rank_df.iterrows(), start=2):
+            key = (
+                _required_int(row['swimmer_type_id'], 'swimmer_type_id', row_number, minimum=1),
+                _required_int(row['color_id'], 'color_id', row_number, minimum=1),
+            )
+            self.color_rankings[key] = _required_int(
+                row['rank'], 'rank', row_number, minimum=1
+            )
 
         style_rank_df = self._read_csv(
             os.path.join(self.source_dir, 'swimmer_type_style_rankings.csv'),
             "swimmer type-style rankings"
         )
-        for _, row in style_rank_df.iterrows():
-            key = (int(row['swimmer_type_id']), int(row['style_id']))
-            self.style_rankings[key] = int(row['rank'])
+        _require_columns(
+            style_rank_df, {'swimmer_type_id', 'style_id', 'rank'}, "style rankings"
+        )
+        _reject_duplicate_keys(
+            style_rank_df, ['swimmer_type_id', 'style_id'], "style rankings"
+        )
+        for row_number, (_, row) in enumerate(style_rank_df.iterrows(), start=2):
+            key = (
+                _required_int(row['swimmer_type_id'], 'swimmer_type_id', row_number, minimum=1),
+                _required_int(row['style_id'], 'style_id', row_number, minimum=1),
+            )
+            self.style_rankings[key] = _required_int(
+                row['rank'], 'rank', row_number, minimum=1
+            )
 
     def _coerce_swimmer_type_id(self, raw_value) -> int:
         swimmer_types = {
@@ -418,61 +515,159 @@ class DataLoader:
 
     def _load_instructors(self) -> None:
         """Load instructors from CSV."""
-        df = self._read_csv(os.path.join(self.generated_dir, 'instructors.csv'), "instructors")
-        for _, row in df.iterrows():
+        self._load_instructors_from_path(
+            os.path.join(self.generated_dir, 'instructors.csv')
+        )
+
+    def _load_instructors_from_path(self, filepath) -> None:
+        df = self._read_csv(str(filepath), "instructors")
+        _require_columns(
+            df,
+            {
+                'instructor_id',
+                'first_name',
+                'last_name',
+                'primary_color_id',
+                'secondary_color_id',
+                'primary_style_id',
+                'secondary_style_id',
+            },
+            "instructors",
+        )
+        _reject_duplicate_keys(df, ['instructor_id'], "instructors")
+        for row_number, (_, row) in enumerate(df.iterrows(), start=2):
             instructor = Instructor(
-                instructor_id=int(row['instructor_id']),
-                first_name=row['first_name'],
-                last_name=row['last_name'],
-                primary_color_id=int(row['primary_color_id']),
-                secondary_color_id=int(row['secondary_color_id']),
-                primary_style_id=int(row['primary_style_id']),
-                secondary_style_id=int(row['secondary_style_id']),
-                is_team_captain=bool(row['is_team_captain']),
-                can_teach_NL=bool(row['can_teach_NL']),
-                can_teach_babies=bool(row['can_teach_babies']),
-                can_teach_adults=bool(row['can_teach_adults']),
-                can_teach_adapted=bool(row['can_teach_adapted'])
+                instructor_id=_required_int(
+                    row['instructor_id'], 'instructor_id', row_number, minimum=1
+                ),
+                first_name=_required_text(row['first_name'], 'first_name', row_number),
+                last_name=_required_text(row['last_name'], 'last_name', row_number),
+                primary_color_id=_required_int(
+                    row['primary_color_id'], 'primary_color_id', row_number, minimum=1
+                ),
+                secondary_color_id=_required_int(
+                    row['secondary_color_id'], 'secondary_color_id', row_number, minimum=1
+                ),
+                primary_style_id=_required_int(
+                    row['primary_style_id'], 'primary_style_id', row_number, minimum=1
+                ),
+                secondary_style_id=_required_int(
+                    row['secondary_style_id'], 'secondary_style_id', row_number, minimum=1
+                ),
+                is_team_captain=_coerce_bool(
+                    row.get('is_team_captain'), 'is_team_captain', row_number, default=False
+                ),
+                can_teach_NL=_coerce_bool(
+                    row.get('can_teach_NL'), 'can_teach_NL', row_number, default=True
+                ),
+                can_teach_babies=_coerce_bool(
+                    row.get('can_teach_babies'), 'can_teach_babies', row_number, default=False
+                ),
+                can_teach_adults=_coerce_bool(
+                    row.get('can_teach_adults'), 'can_teach_adults', row_number, default=False
+                ),
+                can_teach_adapted=_coerce_bool(
+                    row.get('can_teach_adapted'), 'can_teach_adapted', row_number, default=False
+                ),
             )
             self.instructors[instructor.instructor_id] = instructor
 
     def _load_swimmers(self) -> None:
         """Load swimmers from CSV."""
-        df = self._read_csv(os.path.join(self.generated_dir, 'swimmers.csv'), "swimmers")
-        for _, row in df.iterrows():
-            pair_id = None
-            if pd.notna(row['pair_id']) and row['pair_id'] != '':
-                pair_id = int(row['pair_id'])
+        self._load_swimmers_from_path(
+            os.path.join(self.generated_dir, 'swimmers.csv')
+        )
 
+    def _load_swimmers_from_path(self, filepath) -> None:
+        df = self._read_csv(str(filepath), "swimmers")
+        _require_columns(
+            df,
+            {
+                'swimmer_id',
+                'first_name',
+                'last_name',
+                'skill_level',
+                'age',
+                'has_special_needs',
+            },
+            "swimmers",
+        )
+        _reject_duplicate_keys(df, ['swimmer_id'], "swimmers")
+        for row_number, (_, row) in enumerate(df.iterrows(), start=2):
             swimmer = Swimmer(
-                swimmer_id=int(row['swimmer_id']),
-                first_name=row['first_name'],
-                last_name=row['last_name'],
+                swimmer_id=_required_int(
+                    row['swimmer_id'], 'swimmer_id', row_number, minimum=1
+                ),
+                first_name=_required_text(row['first_name'], 'first_name', row_number),
+                last_name=_required_text(row['last_name'], 'last_name', row_number),
                 swimmer_type_id=self._coerce_swimmer_type_id(row.get('swimmer_type_id')),
-                skill_level=int(row['skill_level']),
-                age=float(row['age']),
-                has_special_needs=bool(row['has_special_needs']),
-                notes=str(row['notes']) if pd.notna(row['notes']) else '',
-                pair_id=pair_id
+                skill_level=_required_int(
+                    row['skill_level'],
+                    'skill_level',
+                    row_number,
+                    minimum=DATA_VALIDATION['min_skill_level'],
+                    maximum=DATA_VALIDATION['max_skill_level'],
+                ),
+                age=_required_float(
+                    row['age'],
+                    'age',
+                    row_number,
+                    minimum=DATA_VALIDATION['min_age'],
+                    maximum=DATA_VALIDATION['max_age'],
+                ),
+                has_special_needs=_coerce_bool(
+                    row['has_special_needs'], 'has_special_needs', row_number
+                ),
+                notes=(
+                    str(row.get('notes')).strip()
+                    if _has_value(row.get('notes'))
+                    else ''
+                ),
+                pair_id=_optional_positive_int(
+                    row.get('pair_id'), 'pair_id', row_number
+                ),
             )
             self.swimmers[swimmer.swimmer_id] = swimmer
 
     def _load_classes(self) -> None:
         """Load class templates from CSV."""
-        df = self._read_csv(os.path.join(self.generated_dir, 'classes.csv'), "classes")
+        self._load_classes_from_path(os.path.join(self.generated_dir, 'classes.csv'))
+
+    def _load_classes_from_path(self, filepath) -> None:
+        df = self._read_csv(str(filepath), "classes")
+        _require_columns(
+            df,
+            {'class_id', 'day_of_week', 'start_time', 'end_time'},
+            "classes",
+        )
+        _reject_duplicate_keys(df, ['class_id'], "classes")
         self.fixed_roster_mode_requested = (
             'swimmer_1_id' in df.columns or 'swimmer_2_id' in df.columns
         )
-        for _, row in df.iterrows():
-            instructor_id, resolution_flags = _class_instructor_id(self.instructors, row)
+        for row_number, (_, row) in enumerate(df.iterrows(), start=2):
+            instructor_id, resolution_flags = _class_instructor_id(
+                self.instructors, row, row_number
+            )
             cls = Class(
-                class_id=int(row['class_id']),
-                day_of_week=_normalize_day(str(row['day_of_week'])),
-                start_time=_normalize_time(str(row['start_time'])),
-                end_time=_normalize_time(str(row['end_time'])),
+                class_id=_required_int(
+                    row['class_id'], 'class_id', row_number, minimum=1
+                ),
+                day_of_week=_normalize_day(
+                    _required_text(row['day_of_week'], 'day_of_week', row_number)
+                ),
+                start_time=_normalize_time(
+                    _required_text(row['start_time'], 'start_time', row_number)
+                ),
+                end_time=_normalize_time(
+                    _required_text(row['end_time'], 'end_time', row_number)
+                ),
                 instructor_id=instructor_id,
-                swimmer_1_id=_optional_int(row['swimmer_1_id']) if 'swimmer_1_id' in row.index else None,
-                swimmer_2_id=_optional_int(row['swimmer_2_id']) if 'swimmer_2_id' in row.index else None,
+                swimmer_1_id=_optional_positive_int(
+                    row.get('swimmer_1_id'), 'swimmer_1_id', row_number
+                ),
+                swimmer_2_id=_optional_positive_int(
+                    row.get('swimmer_2_id'), 'swimmer_2_id', row_number
+                ),
             )
             self.classes[cls.class_id] = cls
             if resolution_flags:
@@ -480,13 +675,30 @@ class DataLoader:
 
     def _load_historical_pairings(self) -> None:
         """Load historical swimmer-instructor pairings."""
-        df = self._read_csv(os.path.join(self.generated_dir, 'historical_pairings.csv'), "historical pairings")
-        for _, row in df.iterrows():
+        self._load_historical_pairings_from_path(
+            os.path.join(self.generated_dir, 'historical_pairings.csv')
+        )
+
+    def _load_historical_pairings_from_path(self, filepath) -> None:
+        df = self._read_csv(str(filepath), "historical pairings")
+        _require_columns(
+            df,
+            {'swimmer_id', 'instructor_id', 'session', 'num_sessions'},
+            "historical pairings",
+        )
+        _reject_duplicate_keys(df, ['swimmer_id'], "historical pairings")
+        for row_number, (_, row) in enumerate(df.iterrows(), start=2):
             pairing = HistoricalPairing(
-                swimmer_id=int(row['swimmer_id']),
-                instructor_id=int(row['instructor_id']),
-                session=row['session'],
-                num_sessions=int(row['num_sessions'])
+                swimmer_id=_required_int(
+                    row['swimmer_id'], 'swimmer_id', row_number, minimum=1
+                ),
+                instructor_id=_required_int(
+                    row['instructor_id'], 'instructor_id', row_number, minimum=1
+                ),
+                session=_required_text(row['session'], 'session', row_number),
+                num_sessions=_required_int(
+                    row['num_sessions'], 'num_sessions', row_number, minimum=0
+                ),
             )
             self.historical_pairings.append(pairing)
 
@@ -525,6 +737,45 @@ class DataLoader:
                 errors.append(
                     f"Swimmer {swimmer.swimmer_id} has invalid swimmer_type_id: "
                     f"{swimmer.swimmer_type_id}"
+                )
+            if not math.isfinite(swimmer.age) or not (
+                DATA_VALIDATION['min_age'] <= swimmer.age <= DATA_VALIDATION['max_age']
+            ):
+                errors.append(
+                    f"Swimmer {swimmer.swimmer_id} has invalid age: {swimmer.age}"
+                )
+            if not (
+                DATA_VALIDATION['min_skill_level']
+                <= swimmer.skill_level
+                <= DATA_VALIDATION['max_skill_level']
+            ):
+                errors.append(
+                    f"Swimmer {swimmer.swimmer_id} has invalid skill_level: "
+                    f"{swimmer.skill_level}"
+                )
+
+        pair_groups: Dict[int, List[Swimmer]] = {}
+        for swimmer in self.swimmers.values():
+            if swimmer.pair_id is not None:
+                pair_groups.setdefault(swimmer.pair_id, []).append(swimmer)
+        for pair_id, pair_members in pair_groups.items():
+            if len(pair_members) != 2:
+                errors.append(
+                    f"Pair {pair_id} has {len(pair_members)} swimmers (expected exactly 2)"
+                )
+                continue
+            swimmer_1, swimmer_2 = pair_members
+            level_diff = abs(swimmer_1.skill_level - swimmer_2.skill_level)
+            age_diff = abs(swimmer_1.age - swimmer_2.age)
+            if level_diff > PAIRING_CONSTRAINTS['max_level_diff']:
+                errors.append(
+                    f"Pair {pair_id} exceeds maximum skill-level difference: "
+                    f"{level_diff} > {PAIRING_CONSTRAINTS['max_level_diff']}"
+                )
+            if age_diff > PAIRING_CONSTRAINTS['max_age_diff']:
+                errors.append(
+                    f"Pair {pair_id} exceeds maximum age difference: "
+                    f"{age_diff:g} > {PAIRING_CONSTRAINTS['max_age_diff']}"
                 )
 
         for cls in self.classes.values():

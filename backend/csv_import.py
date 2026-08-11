@@ -580,9 +580,9 @@ def import_instructors(partner_csv_text: str, default_profile: dict | None = Non
             default_value = bool(profile.get(field, {
                 "is_team_captain": False,
                 "can_teach_NL": True,
-                "can_teach_babies": True,
-                "can_teach_adults": True,
-                "can_teach_adapted": True,
+                "can_teach_babies": False,
+                "can_teach_adults": False,
+                "can_teach_adapted": False,
             }[field]))
             parsed_value, did_default = _normalize_profile_bool(row.get(field, ""), default_value)
             normalized_flags[field] = int(parsed_value)
