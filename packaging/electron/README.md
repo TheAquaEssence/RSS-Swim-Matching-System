@@ -56,9 +56,12 @@ control metadata from the backend resource tree.
 ## Continuous integration
 
 `.github/workflows/windows-package.yml` runs the full
-`packaging/electron/build_windows.ps1` pipeline on `windows-latest` for pushes
-to `dev`/`main` and for pull requests, then uploads the unsigned NSIS installer
-and the unpacked application tree as build artifacts (10-day retention).
+`packaging/electron/build_windows.ps1` pipeline on `windows-latest` when
+manually dispatched or when a `v*.*.*` version tag is pushed. It uploads only
+the unsigned NSIS installer as a short-lived build artifact (1-day retention);
+tagged runs then publish that installer, release notes, and checksums as a
+GitHub release. Routine pushes and pull requests continue to use the regular
+CI workflow without retaining the large Windows package outputs.
 
 What the CI job proves:
 
