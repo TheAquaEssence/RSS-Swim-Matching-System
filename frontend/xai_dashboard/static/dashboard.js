@@ -15,6 +15,8 @@ const state = {
 
 const charts = {};  // Chart.js instances keyed by name
 let _currentMatchData = null;  // stored for audit modal
+let _lastFocusedElement = null;
+let _lastAuditFocusedElement = null;
 
 const cache = {
   overview: null,        // cached overview API response
@@ -33,6 +35,7 @@ function applyDashboardTheme(theme) {
     button.textContent = `${nextTheme[0].toUpperCase()}${nextTheme.slice(1)} mode`;
     button.setAttribute('aria-label', `Switch to ${nextTheme} mode`);
   }
+  updateChartTheme(resolved);
 }
 
 function loadDashboardTheme() {
@@ -41,11 +44,16 @@ function loadDashboardTheme() {
   return window.matchMedia?.('(prefers-color-scheme: light)')?.matches ? 'light' : 'dark';
 }
 
+function updateChartTheme(theme) {
+  const isLight = theme === 'light';
+  Chart.defaults.color = isLight ? '#556070' : '#a6b0c3';
+  Chart.defaults.borderColor = isLight ? 'rgba(20, 24, 33, 0.12)' : 'rgba(255, 255, 255, 0.1)';
+  Object.values(charts).forEach(chart => chart.update('none'));
+}
+
 applyDashboardTheme(loadDashboardTheme());
 
 // ==================== CHART DEFAULTS ====================
-Chart.defaults.color = '#e2e8f0';
-Chart.defaults.borderColor = '#334155';
 const escapeHtml = window.AquaUi.escapeHtml;
 const normalizeConfidence = window.AquaUi.normalizeConfidence;
 const FLAG_TITLE_OVERRIDES = {
@@ -246,20 +254,32 @@ function showView(viewId) {
   const target = document.getElementById('view-' + viewId);
   if (target) target.classList.remove('hidden');
 
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
   const tab = document.querySelector(`.tab[data-view="${viewId}"]`);
-  if (tab) tab.classList.add('active');
+  if (tab) {
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+  }
 
   state.view = viewId;
+  history.replaceState(null, '', `#${viewId}`);
 
-  if (viewId === 'overview') loadOverview();
-  if (viewId === 'explorer') renderExplorer();
+  if (viewId === 'overview') void loadOverview();
+  if (viewId === 'explorer') {
+    if (state.matches.length === 0) void loadOverview().then(() => renderExplorer());
+    else renderExplorer();
+  }
 }
 
 function openDetailPanel(idx) {
+  _lastFocusedElement = document.activeElement;
   state.selectedMatchIdx = idx;
   document.getElementById('detail-panel').classList.remove('hidden');
   document.getElementById('panel-backdrop').classList.remove('hidden');
+  document.getElementById('btn-close-panel').focus();
   loadMatchDetail(idx);
 }
 
@@ -269,6 +289,8 @@ function closeDetailPanel() {
   document.getElementById('panel-backdrop').classList.add('hidden');
   destroyChart('breakdown');
   destroyChart('alternatives');
+  if (_lastFocusedElement instanceof HTMLElement) _lastFocusedElement.focus();
+  _lastFocusedElement = null;
 }
 
 // ==================== HEARTBEAT ====================
@@ -302,6 +324,17 @@ document.addEventListener('DOMContentLoaded', () => {
     tab.onclick = () => showView(tab.dataset.view);
   });
 
+  document.getElementById('btn-review-all').onclick = () => {
+    clearExplorerFilters();
+    showView('explorer');
+  };
+  document.getElementById('btn-review-flagged').onclick = () => {
+    clearExplorerFilters();
+    state.filters.flaggedOnly = true;
+    syncExplorerControls();
+    showView('explorer');
+  };
+
   // Close detail panel
   document.getElementById('btn-close-panel').onclick = closeDetailPanel;
   document.getElementById('panel-backdrop').onclick = closeDetailPanel;
@@ -312,8 +345,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-      closeAuditModal();
-      closeDetailPanel();
+      const auditIsOpen = !document.getElementById('audit-modal').classList.contains('hidden');
+      if (auditIsOpen) closeAuditModal();
+      else closeDetailPanel();
     }
   });
 
@@ -321,14 +355,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-reload').onclick = async () => {
     await apiPost('/xai/api/reload', {});
     invalidateOverviewState();
-    loadOverview();
+    await loadOverview();
+    if (state.view === 'explorer') renderExplorer();
   };
 
   // Filter inputs (wired in explorer section)
   wireExplorerFilters();
 
-  // Load initial data
-  loadOverview();
+  // Load the requested review surface while keeping data fresh.
+  showView(location.hash === '#explorer' ? 'explorer' : 'overview');
 });
 
 window.addEventListener('pageshow', () => {
@@ -415,6 +450,7 @@ function buildConfidenceChart(dist) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         x: { title: { display: true, text: 'Confidence Range' } },
@@ -456,6 +492,7 @@ function buildTypeChart(breakdown) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { position: 'bottom' } },
     },
   });
@@ -478,9 +515,12 @@ function buildFlaggedTable(flagged) {
   const tbody = document.querySelector('#flagged-table tbody');
   const emptyMsg = document.getElementById('flagged-empty');
   const badge = document.getElementById('flagged-count');
+  const reviewButton = document.getElementById('btn-review-flagged');
 
   tbody.innerHTML = '';
   badge.textContent = flagged.length;
+  reviewButton.disabled = flagged.length === 0;
+  reviewButton.setAttribute('aria-disabled', flagged.length === 0 ? 'true' : 'false');
 
   if (flagged.length === 0) {
     emptyMsg.style.display = '';
@@ -494,6 +534,15 @@ function buildFlaggedTable(flagged) {
     const tr = document.createElement('tr');
     tr.className = 'clickable-row';
     tr.onclick = () => openDetailPanel(f.idx);
+    tr.tabIndex = 0;
+    tr.setAttribute('role', 'button');
+    tr.setAttribute('aria-label', `Review ${f.swimmer_name} matched with ${f.instructor_name}`);
+    tr.onkeydown = event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openDetailPanel(f.idx);
+      }
+    };
     const conf = f.confidence;
     tr.innerHTML = `
       <td>${escapeHtml(f.swimmer_name)}</td>
@@ -506,6 +555,18 @@ function buildFlaggedTable(flagged) {
 }
 
 // ==================== MATCH EXPLORER ====================
+function syncExplorerControls() {
+  document.getElementById('filter-search').value = state.filters.search;
+  document.getElementById('filter-type').value = state.filters.type;
+  document.getElementById('filter-format').value = state.filters.format;
+  document.getElementById('filter-flagged').checked = state.filters.flaggedOnly;
+}
+
+function clearExplorerFilters() {
+  state.filters = { search: '', type: '', format: '', flaggedOnly: false };
+  syncExplorerControls();
+}
+
 function wireExplorerFilters() {
   const search = document.getElementById('filter-search');
   const type = document.getElementById('filter-type');
@@ -524,12 +585,21 @@ function wireExplorerFilters() {
   type.onchange = update;
   format.onchange = update;
   flagged.onchange = update;
+  document.getElementById('btn-clear-filters').onclick = () => {
+    clearExplorerFilters();
+    renderExplorer();
+    search.focus();
+  };
 
   // View toggle
   document.querySelectorAll('.toggle-btn').forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.toggle-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+      });
       btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
       state.explorerMode = btn.dataset.mode;
       renderExplorer();
     };
@@ -537,7 +607,8 @@ function wireExplorerFilters() {
 
   // Sortable columns
   document.querySelectorAll('.sortable').forEach(th => {
-    th.onclick = () => {
+    th.tabIndex = 0;
+    const changeSort = () => {
       const col = th.dataset.sort;
       if (state.sortCol === col) {
         state.sortAsc = !state.sortAsc;
@@ -546,6 +617,13 @@ function wireExplorerFilters() {
         state.sortAsc = true;
       }
       renderExplorer();
+    };
+    th.onclick = changeSort;
+    th.onkeydown = event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        changeSort();
+      }
     };
   });
 }
@@ -599,6 +677,10 @@ function renderExplorer() {
   const tableView = document.getElementById('explorer-table-view');
   const cardView = document.getElementById('explorer-card-view');
   const emptyMsg = document.getElementById('explorer-empty');
+  const count = document.getElementById('explorer-result-count');
+  count.textContent = matches.length === state.matches.length
+    ? `${matches.length} decision${matches.length === 1 ? '' : 's'}`
+    : `${matches.length} of ${state.matches.length} decisions`;
 
   if (matches.length === 0) {
     tableView.classList.add('hidden');
@@ -621,8 +703,10 @@ function renderExplorer() {
   // Update sort indicators
   document.querySelectorAll('.sortable').forEach(th => {
     th.classList.remove('sort-asc', 'sort-desc');
+    th.setAttribute('aria-sort', 'none');
     if (th.dataset.sort === state.sortCol) {
       th.classList.add(state.sortAsc ? 'sort-asc' : 'sort-desc');
+      th.setAttribute('aria-sort', state.sortAsc ? 'ascending' : 'descending');
     }
   });
 }
@@ -635,6 +719,15 @@ function renderExplorerTable(matches) {
     const tr = document.createElement('tr');
     tr.className = 'clickable-row';
     tr.onclick = () => openDetailPanel(m._idx);
+    tr.tabIndex = 0;
+    tr.setAttribute('role', 'button');
+    tr.setAttribute('aria-label', `Inspect ${getSwimmerLabel(m)} matched with ${m.instructor_name || m.instructor_id || 'instructor'}`);
+    tr.onkeydown = event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openDetailPanel(m._idx);
+      }
+    };
 
     const conf = normalizeConfidence(m.confidence);
     const matchType = m.match_type || 'compatibility';
@@ -667,6 +760,15 @@ function renderExplorerCards(matches) {
     card.className = 'match-card';
     card.style.borderLeftColor = borderColor;
     card.onclick = () => openDetailPanel(m._idx);
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `Inspect ${getSwimmerLabel(m)} matched with ${m.instructor_name || 'instructor'}`);
+    card.onkeydown = event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openDetailPanel(m._idx);
+      }
+    };
 
     card.innerHTML = `
       <div class="card-header">
@@ -694,7 +796,7 @@ async function loadMatchDetail(idx) {
       : api(`/xai/api/match/${idx}/alternatives`).then(r => {
           if (r.ok) cache.alternatives[idx] = r;
           return r;
-        });
+        }).catch(() => ({ ok: false, alternatives: [] }));
     const [detailData, altData] = await Promise.all([detailPromise, altPromise]);
 
     if (!detailData.ok) return;
@@ -732,9 +834,16 @@ async function loadMatchDetail(idx) {
     renderDetailFlags(match);
 
     // Layer 2: Scoring breakdown
+    const breakdownCanvas = document.getElementById('chart-breakdown');
     if (breakdown) {
+      breakdownCanvas.style.display = '';
       buildBreakdownChart(breakdown);
       buildBreakdownTable(breakdown);
+    } else {
+      destroyChart('breakdown');
+      breakdownCanvas.style.display = 'none';
+      document.querySelector('#breakdown-table tbody').innerHTML =
+        '<tr><td class="detail-unavailable">Score components are unavailable because the saved profile data for this run is incomplete.</td></tr>';
     }
 
     // Store data for audit modal
@@ -747,14 +856,21 @@ async function loadMatchDetail(idx) {
       swimmer_label: (() => {
         const s1 = match.swimmer_1_name || match.swimmer_name || match.swimmer_id || '';
         const s2 = match.swimmer_2_name || match.swimmer_id_2 || '';
-        return s2 ? `${escapeHtml(s1)} & ${escapeHtml(s2)}` : escapeHtml(s1);
+        return s2 ? `${s1} & ${s2}` : String(s1);
       })()
     };
 
     // Layer 3: Alternatives
+    const alternativesCanvas = document.getElementById('chart-alternatives');
     if (altData.ok) {
+      alternativesCanvas.style.display = '';
       buildAlternativesChart(altData.current, altData.alternatives || []);
       buildAlternativesList(altData.current, altData.alternatives || []);
+    } else {
+      destroyChart('alternatives');
+      alternativesCanvas.style.display = 'none';
+      document.getElementById('alternatives-list').innerHTML =
+        '<p class="empty-msg">Alternative instructors are unavailable because the saved profile data for this run is incomplete.</p>';
     }
 
   } catch (err) {
@@ -831,6 +947,7 @@ function buildBreakdownTable(breakdown) {
 
 function openAuditModal() {
   if (!_currentMatchData) return;
+  _lastAuditFocusedElement = document.activeElement;
   const modal = document.getElementById('audit-modal');
   const backdrop = document.getElementById('audit-backdrop');
   // Set subtitle
@@ -843,11 +960,14 @@ function openAuditModal() {
   buildAuditTables(_currentMatchData.breakdown, _currentMatchData.alternatives);
   modal.classList.remove('hidden');
   backdrop.classList.remove('hidden');
+  document.getElementById('btn-close-audit').focus();
 }
 
 function closeAuditModal() {
   document.getElementById('audit-modal').classList.add('hidden');
   document.getElementById('audit-backdrop').classList.add('hidden');
+  if (_lastAuditFocusedElement instanceof HTMLElement) _lastAuditFocusedElement.focus();
+  _lastAuditFocusedElement = null;
 }
 
 function buildAuditTables(current, alternatives) {

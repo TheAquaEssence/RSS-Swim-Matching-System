@@ -140,3 +140,42 @@ def test_dashboard_renders_detail_review_flags():
     template = (DASHBOARD_JS.parent.parent / "templates" / "index.html").read_text(encoding="utf-8")
     assert "renderDetailFlags(match)" in source
     assert "detail-flags-list" in template
+
+
+def test_stage_three_prioritizes_review_queue_and_preserves_workspace_routes():
+    template = (DASHBOARD_JS.parent.parent / "templates" / "index.html").read_text(encoding="utf-8")
+
+    assert '/xai/static/review-workspace.css' in template
+    assert 'class="product-nav-link" href="/#results-section"' in template
+    assert '<span>Results</span>' in template
+    assert 'id="btn-review-flagged"' in template
+    assert 'id="btn-review-all"' in template
+    assert template.index('class="card review-queue-card"') < template.index('class="analysis-column"')
+
+
+def test_stage_three_explorer_has_clear_filters_and_live_result_count():
+    source = DASHBOARD_JS.read_text(encoding="utf-8")
+    template = (DASHBOARD_JS.parent.parent / "templates" / "index.html").read_text(encoding="utf-8")
+
+    assert 'id="btn-clear-filters"' in template
+    assert 'id="explorer-result-count" class="result-count" aria-live="polite"' in template
+    assert "function clearExplorerFilters()" in source
+    assert "function syncExplorerControls()" in source
+    assert "count.textContent =" in source
+
+
+def test_stage_three_decision_rows_are_keyboard_accessible():
+    source = DASHBOARD_JS.read_text(encoding="utf-8")
+
+    assert "tr.tabIndex = 0;" in source
+    assert "card.tabIndex = 0;" in source
+    assert "event.key === 'Enter' || event.key === ' '" in source
+    assert "th.setAttribute('aria-sort'" in source
+
+
+def test_stage_three_detail_survives_unavailable_alternative_profiles():
+    source = DASHBOARD_JS.read_text(encoding="utf-8")
+
+    assert ".catch(() => ({ ok: false, alternatives: [] }))" in source
+    assert "Score components are unavailable" in source
+    assert "Alternative instructors are unavailable" in source
