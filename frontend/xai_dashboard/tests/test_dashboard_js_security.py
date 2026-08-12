@@ -100,9 +100,22 @@ def test_dashboard_uses_shared_product_navigation():
     """XAI retains a clear return route and identifies the active product area."""
     template = (DASHBOARD_JS.parent.parent / "templates" / "index.html").read_text(encoding="utf-8")
     assert 'nav class="product-nav" aria-label="Primary navigation"' in template
-    assert 'class="product-nav-link" href="/">Matching</a>' in template
-    assert 'href="/xai/" aria-current="page">Explainability</a>' in template
+    assert 'class="product-nav-link" href="/"' in template
+    assert '<span>Matching</span>' in template
+    assert 'class="product-nav-link active" href="/xai/" aria-current="page"' in template
+    assert '<span>Explainability</span>' in template
     assert 'aria-label="Return to Aqua Essence matching"' in template
+
+
+def test_dashboard_uses_shared_desktop_workspace_shell():
+    template = (DASHBOARD_JS.parent.parent / "templates" / "index.html").read_text(encoding="utf-8")
+
+    assert 'href="/styles/workspace.css' in template
+    assert 'class="skip-link" href="#main-content"' in template
+    assert 'class="app-shell"' in template
+    assert 'class="app-sidebar" aria-label="Application sidebar"' in template
+    assert 'class="app-workspace"' in template
+    assert 'class="content" id="main-content"' in template
 
 
 def test_dashboard_icon_buttons_have_accessible_names_and_explicit_types():

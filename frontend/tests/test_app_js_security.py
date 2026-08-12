@@ -17,6 +17,7 @@ STYLESHEET_PATHS = (
     "./styles/sessions.css",
     "./styles/instructor-editor.css",
     "./styles/ux-refresh.css",
+    "./styles/workspace.css",
 )
 
 
@@ -99,13 +100,28 @@ def test_primary_navigation_integrates_explainability_without_duplicate_action()
     generate_source = (FRONTEND_DIR / "generate_flow.js").read_text(encoding="utf-8")
 
     assert 'nav class="product-nav" aria-label="Primary navigation"' in html
-    assert 'href="/" aria-current="page">Matching</a>' in html
+    assert 'class="product-nav-link active" href="/" aria-current="page"' in html
+    assert '<span>Matching</span>' in html
     assert 'id="explainabilityNavLink" href="/xai/"' in html
     assert 'aria-disabled="true" aria-describedby="explainabilityNavHint"' in html
+    assert 'id="dataSettingsNavLink" href="#advancedSection"' in html
     assert 'id="xaiDashboardButton"' not in html
     assert 'setExplainabilityAvailable(true);' in generate_source
     assert 'fetch("/api/launch_dashboard"' not in generate_source
     assert 'link.getAttribute("aria-disabled") === "true"' in app_source
+
+
+def test_desktop_workspace_shell_is_shared_and_accessible():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    workspace_css = (FRONTEND_DIR / "styles" / "workspace.css").read_text(encoding="utf-8")
+
+    assert 'class="skip-link" href="#main-content"' in html
+    assert 'class="app-shell"' in html
+    assert 'class="app-sidebar" aria-label="Application sidebar"' in html
+    assert 'class="app-workspace"' in html
+    assert 'class="app-main" id="main-content"' in html
+    assert "grid-template-columns: var(--workspace-sidebar-width) minmax(0, 1fr)" in workspace_css
+    assert "min-width: 980px" in workspace_css
 
 
 def test_app_delegates_profile_drawer_and_drops_its_state():

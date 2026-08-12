@@ -24,10 +24,33 @@ function setExplainabilityAvailable(isAvailable) {
 
 function wireProductNavigation() {
   const link = document.getElementById("explainabilityNavLink");
-  if (!link) return;
-  link.addEventListener("click", (event) => {
-    if (link.getAttribute("aria-disabled") === "true") event.preventDefault();
+  if (link) {
+    link.addEventListener("click", (event) => {
+      if (link.getAttribute("aria-disabled") === "true") event.preventDefault();
+    });
+  }
+
+  const dataSettingsLink = document.getElementById("dataSettingsNavLink");
+  const advancedSection = document.getElementById("advancedSection");
+  if (!dataSettingsLink || !advancedSection) return;
+
+  const showDataSettings = () => {
+    advancedSection.open = true;
+    const headerHeight = document.querySelector(".app-header")?.getBoundingClientRect().height || 0;
+    const targetTop = window.scrollY + advancedSection.getBoundingClientRect().top - headerHeight - 20;
+    window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+  };
+
+  dataSettingsLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    window.history.replaceState(null, "", "#advancedSection");
+    showDataSettings();
   });
+
+  if (window.location.hash === "#advancedSection") {
+    // Let the browser finish its native hash jump before applying the sticky-header offset.
+    window.setTimeout(showDataSettings, 100);
+  }
 }
 
 function setReopenPdfButton(pdfUrl) {

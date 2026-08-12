@@ -12,40 +12,69 @@
   <link rel="stylesheet" href="./styles/sessions.css" />
   <link rel="stylesheet" href="./styles/instructor-editor.css" />
   <link rel="stylesheet" href="./styles/ux-refresh.css" />
+  <link rel="stylesheet" href="./styles/workspace.css" />
 </head>
 
 <body>
-  <header class="app-header">
-    <div class="app-brand">
-      <h1 class="app-title">Aqua Essence</h1>
-      <p class="app-subtitle">Swimmer to Instructor Matching</p>
-    </div>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="app-shell">
+    <aside class="app-sidebar" aria-label="Application sidebar">
+      <a class="app-brand" href="/" aria-label="Aqua Essence home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M3 8.5c2.1 0 2.1-1.5 4.2-1.5s2.1 1.5 4.2 1.5S13.5 7 15.6 7s2.1 1.5 4.2 1.5M3 13c2.1 0 2.1-1.5 4.2-1.5s2.1 1.5 4.2 1.5 2.1-1.5 4.2-1.5 2.1 1.5 4.2 1.5M3 17.5c2.1 0 2.1-1.5 4.2-1.5s2.1 1.5 4.2 1.5 2.1-1.5 4.2-1.5 2.1 1.5 4.2 1.5" />
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <span class="app-title">Aqua Essence</span>
+          <span class="app-subtitle">Swim matching</span>
+        </span>
+      </a>
+      <div class="sidebar-section-label">Workspace</div>
     <nav class="product-nav" aria-label="Primary navigation">
-      <a class="product-nav-link active" href="/" aria-current="page">Matching</a>
+      <a class="product-nav-link active" href="/" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">M</span>
+        <span>Matching</span>
+      </a>
       <a class="product-nav-link" id="explainabilityNavLink" href="/xai/"
-        aria-disabled="true" aria-describedby="explainabilityNavHint">Explainability</a>
+        aria-disabled="true" aria-describedby="explainabilityNavHint">
+        <span class="nav-icon" aria-hidden="true">E</span>
+        <span>Explainability</span>
+      </a>
+      <a class="product-nav-link" id="dataSettingsNavLink" href="#advancedSection">
+        <span class="nav-icon" aria-hidden="true">D</span>
+        <span>Data &amp; settings</span>
+      </a>
       <span class="visually-hidden" id="explainabilityNavHint">Available after a matching result is generated.</span>
     </nav>
-    <div class="header-right">
+      <div class="sidebar-footer">
+        <div class="header-status">
+          <span class="status-dot" id="hostStatusDot"></span>
+          <span id="hostStatusText">Backend: checking...</span>
+        </div>
+      </div>
+    </aside>
+
+    <section class="app-workspace">
+      <header class="app-header">
+        <div class="workspace-context">
+          <span class="workspace-eyebrow">Operator workspace</span>
+          <strong>Swimmer matching</strong>
+        </div>
+        <div class="header-right">
       <label class="operator-field" title="Optional — your name is recorded with changes you make (instructor edits, imports)">
         <span>Operator</span>
         <input type="text" id="operatorNameInput" placeholder="Your name" maxlength="80" autocomplete="off" />
       </label>
 
-      <div class="header-status">
-        <span class="status-dot" id="hostStatusDot"></span>
-        <span id="hostStatusText">Host: checking...</span>
-      </div>
-
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light mode">
         <span class="theme-icon" aria-hidden="true"></span>
         <span class="theme-text" id="themeText">Light mode</span>
       </button>
-    </div>
+        </div>
+      </header>
 
-  </header>
-
-  <main class="app-main">
+  <main class="app-main" id="main-content">
     <section class="card setup-card">
       <div class="section-heading">
         <div>
@@ -300,6 +329,8 @@
       </details>
     </section>
   </main>
+    </section>
+  </div>
 
   <!-- Profile side drawer -->
   <div id="drawer-backdrop" class="drawer-backdrop"></div>

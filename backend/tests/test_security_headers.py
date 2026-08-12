@@ -107,6 +107,7 @@ def test_static_js_and_css_are_no_cache(client):
         "/styles/sessions.css",
         "/styles/instructor-editor.css",
         "/styles/ux-refresh.css",
+        "/styles/workspace.css",
         "/xai/static/dashboard.js",
         "/xai/static/dashboard.css",
         "/xai/static/ux-refresh.css",
