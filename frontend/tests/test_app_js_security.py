@@ -18,6 +18,7 @@ STYLESHEET_PATHS = (
     "./styles/instructor-editor.css",
     "./styles/ux-refresh.css",
     "./styles/workspace.css",
+    "./styles/matching-workspace.css",
 )
 
 
@@ -100,15 +101,17 @@ def test_primary_navigation_integrates_explainability_without_duplicate_action()
     generate_source = (FRONTEND_DIR / "generate_flow.js").read_text(encoding="utf-8")
 
     assert 'nav class="product-nav" aria-label="Primary navigation"' in html
-    assert 'class="product-nav-link active" href="/" aria-current="page"' in html
+    assert 'id="matchingNavLink" href="#matchingView" aria-current="page"' in html
     assert '<span>Matching</span>' in html
+    assert 'id="resultsNavLink" href="#results-section"' in html
+    assert 'aria-disabled="true" aria-describedby="resultsNavHint"' in html
     assert 'id="explainabilityNavLink" href="/xai/"' in html
     assert 'aria-disabled="true" aria-describedby="explainabilityNavHint"' in html
     assert 'id="dataSettingsNavLink" href="#advancedSection"' in html
     assert 'id="xaiDashboardButton"' not in html
     assert 'setExplainabilityAvailable(true);' in generate_source
     assert 'fetch("/api/launch_dashboard"' not in generate_source
-    assert 'link.getAttribute("aria-disabled") === "true"' in app_source
+    assert 'explainabilityLink.getAttribute("aria-disabled") === "true"' in app_source
 
 
 def test_desktop_workspace_shell_is_shared_and_accessible():
@@ -122,6 +125,33 @@ def test_desktop_workspace_shell_is_shared_and_accessible():
     assert 'class="app-main" id="main-content"' in html
     assert "grid-template-columns: var(--workspace-sidebar-width) minmax(0, 1fr)" in workspace_css
     assert "min-width: 980px" in workspace_css
+
+
+def test_stage_two_uses_distinct_matching_results_and_data_views():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    app_source = APP_JS.read_text(encoding="utf-8")
+    generate_source = (FRONTEND_DIR / "generate_flow.js").read_text(encoding="utf-8")
+
+    assert 'id="matchingView" data-workspace-view="matching"' in html
+    assert 'id="results-section" data-workspace-view="results" hidden' in html
+    assert 'id="dataSettingsView" data-workspace-view="data" hidden' in html
+    assert 'id="advancedSection" class="data-settings-details" open' in html
+    assert "function showWorkspaceView(" in app_source
+    assert 'showWorkspaceView("results");' in generate_source
+    assert "function setResultsAvailable(" in app_source
+
+
+def test_stage_two_results_filters_are_wired_without_changing_result_contract():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    source = (FRONTEND_DIR / "generate_flow.js").read_text(encoding="utf-8")
+
+    assert 'id="resultsSearchInput"' in html
+    assert 'id="resultsReviewFilter"' in html
+    assert 'id="resultsFilterSummary" aria-live="polite"' in html
+    assert "function applyResultsFilters()" in source
+    assert "function wireResultsFilters()" in source
+    assert "row.dataset.reviewSeverity = severity;" in source
+    assert "wireResultsFilters();" in source
 
 
 def test_app_delegates_profile_drawer_and_drops_its_state():

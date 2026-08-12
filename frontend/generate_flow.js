@@ -289,7 +289,23 @@ function setGenerateEnabled(settings) {
   const swimmersPath = settings?.last_selected_files?.swimmers ?? "";
   const instructorsPath = settings?.last_selected_files?.instructors ?? "";
   const instructorsReady = Boolean(instructorsPath) || Boolean(settings?.use_db_instructors);
-  generateButton.disabled = !(classesPath && swimmersPath && instructorsReady);
+  const isReady = Boolean(classesPath && swimmersPath && instructorsReady);
+  generateButton.disabled = !isReady;
+
+  const sourceStatus = document.getElementById("sourceValidationStatus");
+  if (sourceStatus) {
+    sourceStatus.textContent = isReady ? "Sources ready" : "Sources incomplete";
+    sourceStatus.classList.toggle("status-badge-ready", isReady);
+  }
+
+  const readinessStatus = document.getElementById("runReadinessStatus");
+  if (readinessStatus) {
+    readinessStatus.textContent = isReady
+      ? "All required sources are selected. The run is ready to generate."
+      : "Select classes, swimmers, and an instructor source to continue.";
+    readinessStatus.classList.toggle("run-status-ready", isReady);
+  }
+
   dataSourcesSummarySettings = settings;
   refreshDbInstructorCount(settings);
   renderDataSourcesSummary();
@@ -302,6 +318,7 @@ function renderResults(result) {
   if (!section || !summary || !tbody) return;
 
   setExplainabilityAvailable(true);
+  setResultsAvailable(true);
   window.AquaProfileDrawer.setLatestMatchResult(result);
   const s = result.summary ?? {};
   const avg = formatConfidence(s.avg_confidence);
@@ -326,6 +343,7 @@ function renderResults(result) {
     row.setAttribute("aria-label", `Open review details for ${window.AquaProfileDrawer.matchSwimmerNames(m) || "match"}`);
     const flags = window.AquaProfileDrawer.normalizeFlags(m);
     const severity = window.AquaProfileDrawer.getHighestFlagSeverity(flags, m.review_severity);
+    row.dataset.reviewSeverity = severity;
     let swimmers;
     if (m.type === "pair") {
       swimmers =
@@ -381,6 +399,7 @@ function renderResults(result) {
         row.setAttribute("aria-label", `Open review details for ${u.swimmer_name ?? "unassigned swimmer"}`);
         const flags = window.AquaProfileDrawer.normalizeFlags(u);
         const severity = window.AquaProfileDrawer.getHighestFlagSeverity(flags, u.review_severity);
+        row.dataset.reviewSeverity = severity;
         const bestMatch = u.best_available_instructor_name
           ? `${u.best_available_instructor_name} (${typeof u.best_available_score === "number" ? u.best_available_score.toFixed(1) : u.best_available_score}%)`
           : "";
@@ -404,6 +423,66 @@ function renderResults(result) {
   }
 
   section.classList.remove("hidden");
+  applyResultsFilters();
+}
+
+function applyResultsFilters() {
+  const searchInput = document.getElementById("resultsSearchInput");
+  const reviewFilter = document.getElementById("resultsReviewFilter");
+  const summary = document.getElementById("resultsFilterSummary");
+  const emptyState = document.getElementById("resultsEmptyState");
+  const assignmentsTableWrap = document.getElementById("resultsAssignmentsTableWrap");
+  const query = String(searchInput?.value || "").trim().toLowerCase();
+  const filter = String(reviewFilter?.value || "all");
+  const matchRows = Array.from(document.querySelectorAll("#results-body tr"));
+  const unassignedRows = Array.from(document.querySelectorAll("#unassigned-body tr"));
+
+  let visibleCount = 0;
+  let visibleMatches = 0;
+  const rowMatchesSearch = (row) => !query || String(row.textContent || "").toLowerCase().includes(query);
+
+  matchRows.forEach((row) => {
+    const severity = row.dataset.reviewSeverity || "none";
+    const matchesFilter = filter === "all"
+      || (filter === "review" && severity !== "none")
+      || (filter === "clear" && severity === "none");
+    const isVisible = filter !== "unassigned" && matchesFilter && rowMatchesSearch(row);
+    row.hidden = !isVisible;
+    if (isVisible) {
+      visibleCount += 1;
+      visibleMatches += 1;
+    }
+  });
+
+  let visibleUnassigned = 0;
+  unassignedRows.forEach((row) => {
+    const matchesFilter = filter === "all"
+      || filter === "unassigned"
+      || filter === "review";
+    const isVisible = filter !== "clear" && matchesFilter && rowMatchesSearch(row);
+    row.hidden = !isVisible;
+    if (isVisible) {
+      visibleCount += 1;
+      visibleUnassigned += 1;
+    }
+  });
+
+  const unassignedSection = document.getElementById("unassigned-section");
+  if (unassignedSection) {
+    unassignedSection.classList.toggle("hidden", unassignedRows.length === 0 || visibleUnassigned === 0);
+  }
+  if (assignmentsTableWrap) assignmentsTableWrap.hidden = visibleMatches === 0;
+
+  const totalCount = matchRows.length + unassignedRows.length;
+  if (summary) summary.textContent = `${visibleCount} of ${totalCount} result${totalCount === 1 ? "" : "s"}`;
+  if (emptyState) emptyState.hidden = visibleCount !== 0;
+}
+
+function wireResultsFilters() {
+  const searchInput = document.getElementById("resultsSearchInput");
+  const reviewFilter = document.getElementById("resultsReviewFilter");
+  searchInput?.addEventListener("input", applyResultsFilters);
+  reviewFilter?.addEventListener("change", applyResultsFilters);
 }
 
 function getConfidenceLevel(conf) {
@@ -418,6 +497,7 @@ function getConfidenceLevel(conf) {
 function wireGenerateFlow() {
   const output = getElementByIdOrThrow("output");
   const generateButton = getElementByIdOrThrow("generateButton");
+  wireResultsFilters();
 
   generateButton.addEventListener("click", async () => {
     output.classList.remove("hidden");
@@ -454,6 +534,7 @@ function wireGenerateFlow() {
 
       if (result.matches || result.summary) {
         renderResults(result);
+        showWorkspaceView("results");
         if (!diagnosticsHtml && !warningsHtml) {
           output.classList.add("hidden");
         }

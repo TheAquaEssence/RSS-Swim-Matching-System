@@ -22,35 +22,93 @@ function setExplainabilityAvailable(isAvailable) {
   link.setAttribute("aria-disabled", String(!Boolean(isAvailable)));
 }
 
+function setResultsAvailable(isAvailable) {
+  const link = document.getElementById("resultsNavLink");
+  if (!link) return;
+  link.setAttribute("aria-disabled", String(!Boolean(isAvailable)));
+}
+
+const WORKSPACE_VIEW_CONFIG = Object.freeze({
+  matching: { hash: "#matchingView", eyebrow: "Operator workspace", title: "Swimmer matching", navId: "matchingNavLink" },
+  results: { hash: "#results-section", eyebrow: "Latest solver run", title: "Matching results", navId: "resultsNavLink" },
+  data: { hash: "#advancedSection", eyebrow: "Configuration", title: "Data & settings", navId: "dataSettingsNavLink" },
+});
+
+function showWorkspaceView(viewName, { updateHash = true } = {}) {
+  const config = WORKSPACE_VIEW_CONFIG[viewName];
+  if (!config) return false;
+
+  const resultsLink = document.getElementById("resultsNavLink");
+  if (viewName === "results" && resultsLink?.getAttribute("aria-disabled") === "true") return false;
+
+  document.querySelectorAll("[data-workspace-view]").forEach((view) => {
+    view.hidden = view.dataset.workspaceView !== viewName;
+  });
+
+  Object.values(WORKSPACE_VIEW_CONFIG).forEach((entry) => {
+    const link = document.getElementById(entry.navId);
+    if (!link) return;
+    const isCurrent = entry.navId === config.navId;
+    link.classList.toggle("active", isCurrent);
+    if (isCurrent) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+
+  const contextEyebrow = document.getElementById("workspaceContextEyebrow");
+  const contextTitle = document.getElementById("workspaceContextTitle");
+  if (contextEyebrow) contextEyebrow.textContent = config.eyebrow;
+  if (contextTitle) contextTitle.textContent = config.title;
+
+  if (viewName === "data") {
+    const advancedSection = document.getElementById("advancedSection");
+    if (advancedSection) advancedSection.open = true;
+  }
+
+  if (updateHash) window.history.replaceState(null, "", config.hash);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  return true;
+}
+
+function syncWorkspaceViewFromHash() {
+  const hash = window.location.hash;
+  if (hash === "#advancedSection" || hash.startsWith("#settings-")) {
+    showWorkspaceView("data", { updateHash: false });
+    if (hash.startsWith("#settings-")) {
+      window.setTimeout(() => document.querySelector(hash)?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+    }
+    return;
+  }
+  if (hash === "#results-section" && showWorkspaceView("results", { updateHash: false })) return;
+  showWorkspaceView("matching", { updateHash: false });
+}
+
 function wireProductNavigation() {
-  const link = document.getElementById("explainabilityNavLink");
-  if (link) {
-    link.addEventListener("click", (event) => {
-      if (link.getAttribute("aria-disabled") === "true") event.preventDefault();
+  const explainabilityLink = document.getElementById("explainabilityNavLink");
+  if (explainabilityLink) {
+    explainabilityLink.addEventListener("click", (event) => {
+      if (explainabilityLink.getAttribute("aria-disabled") === "true") event.preventDefault();
     });
   }
 
-  const dataSettingsLink = document.getElementById("dataSettingsNavLink");
-  const advancedSection = document.getElementById("advancedSection");
-  if (!dataSettingsLink || !advancedSection) return;
-
-  const showDataSettings = () => {
-    advancedSection.open = true;
-    const headerHeight = document.querySelector(".app-header")?.getBoundingClientRect().height || 0;
-    const targetTop = window.scrollY + advancedSection.getBoundingClientRect().top - headerHeight - 20;
-    window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
-  };
-
-  dataSettingsLink.addEventListener("click", (event) => {
+  const matchingLink = document.getElementById("matchingNavLink");
+  matchingLink?.addEventListener("click", (event) => {
     event.preventDefault();
-    window.history.replaceState(null, "", "#advancedSection");
-    showDataSettings();
+    showWorkspaceView("matching");
   });
 
-  if (window.location.hash === "#advancedSection") {
-    // Let the browser finish its native hash jump before applying the sticky-header offset.
-    window.setTimeout(showDataSettings, 100);
-  }
+  const resultsLink = document.getElementById("resultsNavLink");
+  resultsLink?.addEventListener("click", (event) => {
+    event.preventDefault();
+    showWorkspaceView("results");
+  });
+
+  const dataSettingsLink = document.getElementById("dataSettingsNavLink");
+  dataSettingsLink?.addEventListener("click", (event) => {
+    event.preventDefault();
+    showWorkspaceView("data");
+  });
+
+  syncWorkspaceViewFromHash();
 }
 
 function setReopenPdfButton(pdfUrl) {
@@ -243,6 +301,7 @@ async function initializeUserInterface() {
     settingsFiles.refreshUiFromHost(settings),
     loadLatestGeneratedResult(),
   ]);
+  syncWorkspaceViewFromHash();
   loadLastPdfFromStorage();
   loadLastFilledClassesFromStorage();
 
