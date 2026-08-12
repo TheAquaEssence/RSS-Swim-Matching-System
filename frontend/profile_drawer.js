@@ -6,6 +6,7 @@
   const esc = window.AquaUi.escapeHtml;
   let drawerOpen = false;
   let latestMatchResult = null;
+  let lastDrawerTrigger = null;
 
   const FLAG_SEVERITY_ORDER = { none: 0, info: 1, review: 2, urgent: 3 };
   const FLAG_SEVERITY_LABELS = {
@@ -38,6 +39,7 @@
       review: { theme: "review-theme", title: "Review Details" },
     };
     const mode = drawerModes[type] || drawerModes.review;
+    lastDrawerTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
     header.className = "drawer-header";
     header.classList.add(mode.theme);
@@ -45,7 +47,10 @@
     setDrawerContent(contentNode);
     backdrop.classList.add("open");
     drawer.classList.add("open");
+    backdrop.setAttribute("aria-hidden", "false");
+    drawer.setAttribute("aria-hidden", "false");
     drawerOpen = true;
+    document.getElementById("drawer-close")?.focus();
   }
 
   function closeDrawer() {
@@ -53,7 +58,11 @@
     const backdrop = document.getElementById("drawer-backdrop");
     if (drawer) drawer.classList.remove("open");
     if (backdrop) backdrop.classList.remove("open");
+    drawer?.setAttribute("aria-hidden", "true");
+    backdrop?.setAttribute("aria-hidden", "true");
     drawerOpen = false;
+    if (lastDrawerTrigger?.isConnected) lastDrawerTrigger.focus();
+    lastDrawerTrigger = null;
   }
 
   function createDiv(className, text) {

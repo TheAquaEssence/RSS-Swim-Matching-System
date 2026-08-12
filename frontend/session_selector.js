@@ -125,6 +125,9 @@ function initSessionSelector() {
         // ── Year header row ──
         const header = document.createElement("div");
         header.className = "session-year-header";
+        header.tabIndex = 0;
+        header.setAttribute("role", "button");
+        header.setAttribute("aria-expanded", isLatest ? "true" : "false");
 
         const yearCb = document.createElement("input");
         yearCb.type      = "checkbox";
@@ -151,6 +154,8 @@ function initSessionSelector() {
         // ── Year body (session rows) ──
         const body = document.createElement("div");
         body.className = "session-year-body" + (isLatest ? "" : " hidden");
+        body.id = `historical-session-year-${yr.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+        header.setAttribute("aria-controls", body.id);
 
         sessions.forEach((s) => {
           const row = document.createElement("label");
@@ -248,10 +253,19 @@ function initSessionSelector() {
         });
 
         // Header click (not on the checkbox) collapses/expands body
-        header.addEventListener("click", (e) => {
-          if (e.target === yearCb) return; // handled by checkbox itself
+        const toggleYear = () => {
           const collapsed = body.classList.toggle("hidden");
           arrow.classList.toggle("open", !collapsed);
+          header.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        };
+        header.addEventListener("click", (e) => {
+          if (e.target === yearCb) return; // handled by checkbox itself
+          toggleYear();
+        });
+        header.addEventListener("keydown", (e) => {
+          if (e.target === yearCb || (e.key !== "Enter" && e.key !== " ")) return;
+          e.preventDefault();
+          toggleYear();
         });
 
         syncYearCheckbox(yearCb, body);
@@ -277,9 +291,11 @@ function initSessionSelector() {
         // Show/hide the whole year group; auto-expand body when search is active
         group.style.display = anyVisible ? "" : "none";
         if (q && anyVisible) {
-          group.querySelector(".session-year-body")?.classList.remove("hidden");
+          const body = group.querySelector(".session-year-body");
+          body?.classList.remove("hidden");
           const arrow = group.querySelector(".session-year-arrow");
           if (arrow) arrow.classList.add("open");
+          group.querySelector(".session-year-header")?.setAttribute("aria-expanded", "true");
         }
       });
     }
@@ -298,6 +314,8 @@ function initSessionSelector() {
         const open = !panel.classList.contains("hidden");
         panel.classList.toggle("hidden", open);
         toggleBtn.textContent = open ? "Choose sessions" : "Hide sessions";
+        toggleBtn.setAttribute("aria-expanded", open ? "false" : "true");
+        if (!open) searchEl?.focus();
       });
     }
 

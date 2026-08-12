@@ -19,6 +19,7 @@ STYLESHEET_PATHS = (
     "./styles/ux-refresh.css",
     "./styles/workspace.css",
     "./styles/matching-workspace.css",
+    "./styles/interaction-workspace.css",
 )
 
 
@@ -152,6 +153,32 @@ def test_stage_two_results_filters_are_wired_without_changing_result_contract():
     assert "function wireResultsFilters()" in source
     assert "row.dataset.reviewSeverity = severity;" in source
     assert "wireResultsFilters();" in source
+
+
+def test_stage_four_unifies_secondary_workflows_and_drawer_accessibility():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    drawer_source = PROFILE_DRAWER_JS.read_text(encoding="utf-8")
+    interaction_css = (FRONTEND_DIR / "styles" / "interaction-workspace.css").read_text(encoding="utf-8")
+
+    assert 'href="./styles/interaction-workspace.css"' in html
+    assert 'id="profile-drawer" class="profile-drawer" role="dialog" aria-modal="true"' in html
+    assert 'aria-labelledby="drawer-title" aria-hidden="true"' in html
+    assert 'drawer.setAttribute("aria-hidden", "false");' in drawer_source
+    assert 'if (lastDrawerTrigger?.isConnected) lastDrawerTrigger.focus();' in drawer_source
+    assert ".rankings-editor-modal[open]" in interaction_css
+    assert ".session-selector-panel" in interaction_css
+
+
+def test_stage_four_session_selector_exposes_expansion_state():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    source = (FRONTEND_DIR / "session_selector.js").read_text(encoding="utf-8")
+
+    assert 'aria-expanded="false" aria-controls="historicalSessionsPanel"' in html
+    assert 'aria-label="Search historical sessions"' in html
+    assert 'header.setAttribute("role", "button");' in source
+    assert 'header.setAttribute("aria-expanded", isLatest ? "true" : "false");' in source
+    assert 'toggleBtn.setAttribute("aria-expanded", open ? "false" : "true");' in source
+    assert 'e.key !== "Enter" && e.key !== " "' in source
 
 
 def test_app_delegates_profile_drawer_and_drops_its_state():

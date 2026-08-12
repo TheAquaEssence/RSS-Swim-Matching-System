@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./styles/ux-refresh.css" />
   <link rel="stylesheet" href="./styles/workspace.css" />
   <link rel="stylesheet" href="./styles/matching-workspace.css" />
+  <link rel="stylesheet" href="./styles/interaction-workspace.css" />
 </head>
 
 <body>
@@ -279,15 +280,17 @@
               <div class="file-meta" id="historicalDbMeta">Loading sessions from database…</div>
             </div>
             <div class="file-row-right">
-              <button class="button button-secondary" id="historicalSessionsToggle" type="button">Choose sessions</button>
+              <button class="button button-secondary" id="historicalSessionsToggle" type="button"
+                aria-expanded="false" aria-controls="historicalSessionsPanel">Choose sessions</button>
             </div>
           </div>
 
           <!-- Session selector panel (hidden by default) -->
-          <div id="historicalSessionsPanel" class="hidden">
+          <div id="historicalSessionsPanel" class="session-selector-panel hidden" role="region"
+            aria-labelledby="historicalSessionsToggle">
             <div class="session-selector-search-row">
               <input id="historicalSessionSearch" class="session-selector-search" type="search"
-                placeholder="Search sessions…" autocomplete="off" />
+                placeholder="Search sessions…" autocomplete="off" aria-label="Search historical sessions" />
               <button class="button button-ghost" id="historicalSelectAll"  type="button">All</button>
               <button class="button button-ghost" id="historicalSelectNone" type="button">None</button>
             </div>
@@ -413,8 +416,9 @@
   </div>
 
   <!-- Profile side drawer -->
-  <div id="drawer-backdrop" class="drawer-backdrop"></div>
-  <aside id="profile-drawer" class="profile-drawer">
+  <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
+  <aside id="profile-drawer" class="profile-drawer" role="dialog" aria-modal="true"
+    aria-labelledby="drawer-title" aria-hidden="true">
     <div class="drawer-header" id="drawer-header">
       <span class="drawer-title" id="drawer-title">Profile</span>
       <button class="drawer-close" id="drawer-close" type="button" aria-label="Close profile">&times;</button>

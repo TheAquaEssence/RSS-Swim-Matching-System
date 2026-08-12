@@ -1,0 +1,555 @@
+/* Stage four: unified desktop drawers, dialogs, selectors, and transient states. */
+
+:root {
+  --overlay-scrim: rgba(5, 8, 14, 0.66);
+  --overlay-shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
+  --overlay-header: color-mix(in srgb, var(--card-2) 92%, transparent);
+}
+
+html[data-theme="light"] {
+  --overlay-scrim: rgba(40, 35, 29, 0.34);
+  --overlay-shadow: 0 26px 70px rgba(55, 45, 35, 0.18);
+}
+
+/* Shared profile and review drawer */
+.drawer-backdrop {
+  z-index: var(--z-drawer-backdrop);
+  background: var(--overlay-scrim);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  transition: opacity 0.2s ease;
+}
+
+.profile-drawer {
+  width: min(460px, 44vw);
+  min-width: 420px;
+  border-left: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: -18px 0 50px rgba(0, 0, 0, 0.28);
+  transition: transform 0.22s ease;
+}
+
+.drawer-header {
+  min-height: var(--workspace-header-height);
+  padding: 16px 20px;
+  border-color: var(--border);
+  background: var(--overlay-header);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.drawer-header.swimmer-theme,
+.drawer-header.instructor-theme,
+.drawer-header.review-theme {
+  background: var(--overlay-header);
+}
+
+.drawer-header.swimmer-theme {
+  box-shadow: inset 3px 0 0 #60a5fa;
+}
+
+.drawer-header.instructor-theme {
+  box-shadow: inset 3px 0 0 var(--success);
+}
+
+.drawer-header.review-theme {
+  box-shadow: inset 3px 0 0 var(--warning);
+}
+
+.drawer-header .drawer-title {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.drawer-close {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  background: var(--card-2);
+  font-size: 20px;
+}
+
+.drawer-close:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--primary) 8%, var(--card-2));
+}
+
+html[data-theme="light"] .drawer-close:hover {
+  background: color-mix(in srgb, var(--primary) 7%, var(--card-2));
+}
+
+.drawer-content {
+  padding: 20px;
+}
+
+.drawer-error {
+  padding: 24px 16px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  background: var(--card-2);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.profile-field {
+  display: grid;
+  grid-template-columns: minmax(118px, 0.7fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: baseline;
+  margin: 0;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-field-label {
+  margin: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.profile-field-value {
+  font-size: 14px;
+  font-weight: 500;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.profile-section-title {
+  margin: 20px 0 0;
+  padding: 16px 0 6px;
+  color: var(--primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+.profile-section-title:first-child {
+  margin-top: 0;
+}
+
+.profile-notes,
+.flag-card {
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: var(--text);
+  background: var(--card-2);
+}
+
+.profile-notes {
+  margin-top: 6px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--primary);
+  font-style: normal;
+  line-height: 1.5;
+}
+
+.flag-card {
+  padding: 13px 14px;
+}
+
+/* One visual model for every native editor dialog. */
+.rankings-editor-modal::backdrop {
+  background: var(--overlay-scrim);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.rankings-editor-modal[open] {
+  width: min(760px, calc(100vw - 64px));
+  max-height: calc(100vh - 64px);
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text);
+  background: var(--card);
+  box-shadow: var(--overlay-shadow);
+}
+
+.rankings-editor-header {
+  flex: 0 0 auto;
+  min-height: 76px;
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--overlay-header);
+}
+
+.rankings-editor-title {
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.rankings-editor-subtitle {
+  max-width: 780px;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.rankings-editor-toolbar {
+  flex: 0 0 auto;
+  min-height: 72px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.rankings-editor-hint {
+  margin: 14px 20px 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+  border-radius: 10px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--primary) 6%, var(--card-2));
+  line-height: 1.45;
+}
+
+.rankings-editor-add-row {
+  flex: 0 0 auto;
+  margin: 12px 20px 0;
+}
+
+.rankings-editor-picker {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rankings-editor-picker select,
+.rankings-editor-input,
+.reference-editor-field input,
+.reference-editor-field textarea,
+.instructor-defaults-field select,
+.instructor-style-color-editor-select {
+  min-height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  background: var(--card-2);
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.rankings-editor-picker select:focus-visible,
+.rankings-editor-input:focus-visible,
+.reference-editor-field input:focus-visible,
+.reference-editor-field textarea:focus-visible,
+.instructor-defaults-field select:focus-visible,
+.instructor-style-color-editor-select:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--border));
+  box-shadow: var(--focus-ring);
+}
+
+.rankings-editor-meta {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.rankings-editor-error {
+  flex: 0 0 auto;
+  margin: 12px 20px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.rankings-editor-list {
+  flex: 1 1 auto;
+  min-height: 100px;
+  margin: 12px 20px 16px;
+  padding: 0;
+  gap: 7px;
+  overflow-y: auto;
+}
+
+.rankings-editor-item {
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 11px;
+  background: var(--card-2);
+}
+
+.rankings-editor-rank {
+  min-width: 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+
+.rankings-editor-item-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rankings-editor-item-controls {
+  gap: 5px;
+}
+
+.rankings-editor-icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.rankings-editor-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  flex: 0 0 auto;
+  min-height: 66px;
+  margin-top: auto;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--overlay-header);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.reference-editor-form-modal[open],
+.instructor-edit-form-modal[open] {
+  width: min(620px, calc(100vw - 64px));
+}
+
+.reference-editor-form-fields,
+.instructor-edit-form-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 18px 20px;
+  overflow-y: auto;
+}
+
+.reference-editor-field {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.instructor-defaults-modal[open] {
+  width: min(720px, calc(100vw - 64px));
+}
+
+.instructor-defaults-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 18px 20px;
+  overflow-y: auto;
+}
+
+.instructor-defaults-panel .card-hint {
+  margin: 0 0 16px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--warning) 22%, var(--border));
+  border-radius: 10px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--warning) 6%, var(--card-2));
+}
+
+.instructor-defaults-field,
+.instructor-defaults-check {
+  border-radius: 10px;
+}
+
+.instructor-defaults-check {
+  padding: 10px 11px;
+  border: 1px solid var(--border);
+  background: var(--card-2);
+}
+
+.instructor-style-color-editor-modal[open] {
+  width: min(1180px, calc(100vw - 64px));
+}
+
+.instructor-style-color-editor-table-wrap,
+.instructor-editor-table-wrap {
+  flex: 1 1 auto;
+  min-height: 120px;
+  margin: 0 20px 16px;
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.instructor-style-color-editor-table th,
+.instructor-editor-table th,
+html[data-theme="light"] .instructor-style-color-editor-table th,
+html[data-theme="light"] .instructor-editor-table th {
+  background: var(--card-2);
+}
+
+.instructor-editor-modal[open] {
+  width: min(1040px, calc(100vw - 64px));
+  max-height: calc(100vh - 64px);
+}
+
+.instructor-editor-toolbar {
+  padding-block: 12px;
+}
+
+.instructor-editor-toolbar-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+#instructor-editor-meta,
+#instructor-style-color-editor-meta {
+  padding-inline: 20px;
+}
+
+.instructor-staffing-overview,
+.instructor-editor-solver-hint,
+.instructor-import-status {
+  margin: 10px 20px 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.instructor-import-review-modal[open] {
+  width: min(760px, calc(100vw - 64px));
+  max-height: calc(100vh - 64px);
+}
+
+.instructor-import-review-modal > .rankings-editor-meta {
+  padding: 12px 20px 0;
+  text-align: left;
+}
+
+.instructor-import-review-toolbar {
+  flex: 0 0 auto;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.instructor-import-review-list {
+  margin: 14px 20px 16px;
+  padding: 7px;
+  border-radius: 12px;
+}
+
+.instructor-import-section,
+.instructor-import-row {
+  border-radius: 10px;
+  background: var(--card-2);
+}
+
+/* Historical-session selection is a local secondary workflow, not a loose list. */
+.session-selector-panel {
+  margin: 0 0 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-2);
+}
+
+.session-selector-search-row {
+  margin-bottom: 10px;
+}
+
+.session-selector-search {
+  min-height: 40px;
+  padding: 8px 11px;
+  border-radius: 9px;
+  background: var(--card);
+}
+
+.session-selector-list {
+  max-height: 340px;
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.session-year-header {
+  min-height: 44px;
+  padding: 10px 12px;
+  background: var(--card-2);
+}
+
+.session-year-header:hover,
+.session-year-header:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--primary) 8%, var(--card-2));
+}
+
+.session-year-header:focus-visible {
+  box-shadow: inset var(--focus-ring);
+}
+
+.session-selector-row {
+  min-height: 40px;
+  padding: 8px 12px 8px 32px;
+}
+
+.session-row-action {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+.session-row-action:hover,
+.session-row-action:focus-visible {
+  border-color: var(--border);
+  background: var(--card-2);
+}
+
+/* Consistent focus and state treatment across transient controls. */
+.drawer-close:focus-visible,
+.rankings-editor-icon-button:focus-visible,
+.session-row-action:focus-visible,
+.profile-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.rankings-editor-actions .button:disabled,
+.rankings-editor-toolbar .button:disabled,
+.instructor-editor-toolbar .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 1180px) {
+  .profile-drawer {
+    width: min(440px, 48vw);
+    min-width: 400px;
+  }
+
+  .instructor-editor-modal[open],
+  .instructor-style-color-editor-modal[open] {
+    width: calc(100vw - 48px);
+    max-height: calc(100vh - 48px);
+  }
+
+  .staffing-overview-tiles {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-drawer,
+  .drawer-backdrop,
+  .session-year-body {
+    transition: none;
+  }
+}

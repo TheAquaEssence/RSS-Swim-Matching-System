@@ -112,6 +112,7 @@ def test_vendored_assets_are_served(client):
         "/styles/ux-refresh.css": "text/css",
         "/styles/workspace.css": "text/css",
         "/styles/matching-workspace.css": "text/css",
+        "/styles/interaction-workspace.css": "text/css",
         "/vendor/fonts/outfit/outfit-latin-400-normal.woff2": "font/woff2",
         "/vendor/fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2": "font/woff2",
         "/xai/static/ux-refresh.css": "text/css",
