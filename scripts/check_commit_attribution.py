@@ -1,4 +1,4 @@
-"""Enforce privacy-safe identities and co-author trailers on public commits."""
+"""Enforce privacy-safe identities and approved co-author trailers."""
 
 from __future__ import annotations
 
@@ -37,9 +37,13 @@ class CommitRecord:
 def validate_message(message: str) -> list[str]:
     trailers = TRAILER.findall(message)
     errors: list[str] = []
-    if set(trailers) != REQUIRED_TRAILERS or len(trailers) != len(REQUIRED_TRAILERS):
+    if trailers and (
+        set(trailers) != REQUIRED_TRAILERS
+        or len(trailers) != len(REQUIRED_TRAILERS)
+    ):
         errors.append(
-            "commit must contain exactly the two approved Co-Authored-By trailers"
+            "Co-Authored-By trailers must be absent or contain exactly the two "
+            "approved GitHub no-reply identities"
         )
     return errors
 

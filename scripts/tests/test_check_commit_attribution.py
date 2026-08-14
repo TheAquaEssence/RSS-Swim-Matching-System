@@ -18,9 +18,18 @@ def test_validate_message_accepts_exact_approved_trailers():
     assert check_commit_attribution.validate_message(APPROVED_MESSAGE) == []
 
 
-def test_validate_message_rejects_missing_trailers():
-    assert check_commit_attribution.validate_message("Public change") == [
-        "commit must contain exactly the two approved Co-Authored-By trailers"
+def test_validate_message_accepts_no_trailers():
+    assert check_commit_attribution.validate_message("Public change") == []
+
+
+def test_validate_message_rejects_partial_or_unapproved_trailers():
+    message = """Public change
+
+Co-Authored-By: Unapproved Person <person@users.noreply.github.com>
+"""
+    assert check_commit_attribution.validate_message(message) == [
+        "Co-Authored-By trailers must be absent or contain exactly the two "
+        "approved GitHub no-reply identities"
     ]
 
 
