@@ -42,7 +42,7 @@ The Python loaders accept either of these class formats:
 
 When `instructor_id` is present and non-empty, it is used directly.
 
-When `instructor_name` is present, the loader resolves names like `Olivia R.` by matching:
+When `instructor_name` is present, the loader resolves names like `Synthetic A.` by matching:
 
 - first name exactly, and
 - last initial against the start of the instructor last name.
@@ -243,9 +243,9 @@ Notes are parsed by semicolon-delimited clauses.
 
 Examples:
 
-- `prefer Olivia Robertson`
-- `avoid Ava Anderson`
-- `always Olivia Robertson; never Ava Anderson`
+- `prefer Synthetic Instructor A`
+- `avoid Synthetic Instructor B`
+- `always Synthetic Instructor A; never Synthetic Instructor B`
 
 `no` is treated as a synonym for `avoid`.
 
@@ -745,20 +745,17 @@ HC-4 age/level pair validation is enforced in every assignment phase and by the 
 
 The full session cycle for Jackrabbit-sourced data:
 
-1. **Export from Jackrabbit:** Export Classes and Students as CSV from the Jackrabbit dashboard.
-2. **Upload to the app:** The FastAPI backend auto-detects the partner format and converts transparently.
-   - Classes: upload as the classes file in `POST /api/generate`.
-   - Students: upload as the swimmers file in `POST /api/generate`.
-3. **Supply instructors.csv manually:** Jackrabbit has no instructor export. Staff must provide the internal `instructors.csv` separately each session.
-4. **Supply historical_pairings.csv from the prior session:** Jackrabbit has no historical pairings export. After the first session, use `POST /api/generate_historical_pairings` with the session label (e.g., `"2026-Spring"`) to generate `historical_pairings.csv` from the last completed job's `classes_filled.csv`. Download and store this file; upload it as the historical pairings input for the next session. For the very first session, request a one-time class history export from the Jackrabbit account administrator.
-5. **Set skill_level before solving:** Jackrabbit Students exports do not include RSS skill level. Staff must edit the converted swimmers CSV to add each swimmer's level (1–12) before the solver can produce correct class assignments. The loader rejects the import placeholder value `0`; the import warning will remind staff if this step was skipped.
-6. **Review non-response flags:** Any swimmer imported from Jackrabbit will have `swimmer_type_id = 0` until survey data is linked. Every match for such a swimmer will carry a `non_response_swimmer_type` review flag prompting staff to update the type.
+1. **Capture in Jackrabbit:** Use the browser extension on the Students and AllClasses pages. Use the Staff page when historical continuity data is needed.
+2. **Download one bundle:** Choose **Download Aqua Essence bundle** to create `aqua_essence_jackrabbit_export.json` (format version 1).
+3. **Import in desktop:** Choose **Import export**. The app validates and converts the bundled students, classes, and staff CSVs, selects the sources, adds only missing instructors, and imports historical pairings.
+4. **Review incomplete fields:** Resolve any swimmer whose `Skill Level` or special-needs value was not exported. Complete new instructor identities and review non-response swimmer types. The import does not infer these values, and matching is blocked while an imported instructor profile remains incomplete.
+5. **Generate:** Run the matcher after the source readiness indicators are valid.
 
-### What Jackrabbit Does NOT Export
+### Fields that still need review
 
 | Data | Status |
 |---|---|
-| `instructors.csv` | Not exported. Must be managed separately by staff. |
-| `historical_pairings.csv` | Not exported. Generate from prior session output via `POST /api/generate_historical_pairings`. |
+| Instructor teaching/profile attributes | Jackrabbit staff identities are bundled or supplemented from class xIDs. Missing color, style, status, position, and qualification values remain incomplete without overwriting curated database profiles. Incomplete profiles cannot be matched until an operator completes them. |
+| Historical pairings | Bundled when staff history has been captured; otherwise the pairing CSV is header-only. |
 | `swimmer_type_id` | Not exported. Defaults to 0 (non-response) until survey data is linked. |
-| `skill_level` (RSS level) | Not exported. Must be supplied manually before solving. |
+| `skill_level` (RSS level) | Uses exported `Skill Level` only. Missing values remain blank and must be supplied before solving. |

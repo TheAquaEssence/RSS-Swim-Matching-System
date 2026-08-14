@@ -7,6 +7,7 @@
 - [Architecture](architecture.md)
 - [Architecture and release decisions](decisions.md)
 - [User manual](../USER_MANUAL.md)
+- [Desktop interface and design system](desktop-interface-design-system.md)
 - [Matching rules and guidelines](matching-process-rules-and-guidelines.md)
 - [CP-SAT specification](CP_SAT_specification.md)
 - [Privacy and data retention](privacy-and-data-retention.md)

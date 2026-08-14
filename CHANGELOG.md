@@ -5,6 +5,28 @@ All notable user-visible changes are recorded here. Versioning follows
 
 ## Unreleased
 
+### Added
+
+- Added strict import support for Jackrabbit Exporter 1.1.0 format-version-1
+  JSON bundles, including header-only optional data, staff identity
+  supplementation, multi-instructor class assignments, and leading-zero xID
+  preservation. Identity-only staff remain fail-closed and must be completed
+  before matching.
+
+### Changed
+
+- Redesigned the desktop interface around dedicated Matching, Results, Data &
+  settings, and Explainability workspaces while preserving the existing light
+  and dark color themes.
+- Unified review drawers, editors, historical-session controls, result filters,
+  and loading, empty, error, focus, and disabled states.
+
+### Accessibility
+
+- Added keyboard-operable secondary workflows, focus restoration for dialogs
+  and drawers, view-heading focus management, descriptive window titles, live
+  status announcements, reduced-motion behavior, and duplicate-run prevention.
+
 ## 0.1.0 — 2026-07-21
 
 ### Added

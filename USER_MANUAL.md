@@ -16,13 +16,14 @@ If you use Excel workbooks, the app reads the first worksheet in the file. If yo
 
 ## 2. Starting The App
 
-For normal use, start the application by double-clicking `AquaEssence.exe`.
-
-The app starts by itself and opens the browser UI automatically.
+For normal use, start the application from the Aqua Essence desktop or Start
+menu shortcut. The app opens in its own desktop window and starts its local
+matching service automatically.
 
 You do not need to run Python commands, open `index.html`, or start the server manually.
 
-You also do not need to run any `.bat` file to start the main app. In the current repo, batch files are used for internal helper processes such as solver or dashboard launch support, not as the primary user-facing app launcher.
+You do not need to run a `.bat` file. Source-development launch instructions
+are separate from the normal operator workflow.
 
 ## 3. Core Files You Need
 
@@ -34,7 +35,7 @@ For a real matching run, start with these three files:
 | `swimmers.csv` | Yes | Defines the swimmers to place into classes | Jackrabbit students export |
 | `instructors.csv` | Yes | Defines the active teaching staff available for matching | Jackrabbit ActiveStaff export |
 
-You can also supply these optional files in **Advanced inputs (optional)**:
+You can also supply these optional files in **Data & settings**:
 
 | File | Required | Purpose |
 | --- | --- | --- |
@@ -49,37 +50,41 @@ You can also supply these optional files in **Advanced inputs (optional)**:
 
 ### Step 1: Open the app
 
-Launch Aqua Essence and wait for the browser UI to load.
+Launch Aqua Essence and wait until the status in the lower-left corner reads
+**Host: online**.
 
 ### Step 2: Select the three core files
 
-In the main screen:
+In the **Matching** workspace:
 
 1. Select `classes.csv`
 2. Select `swimmers.csv`
 3. Select `instructors.csv`
 
-The **Generate solution** button becomes available only when all three are selected.
+The **Generate matching** button becomes available only when all required
+sources are ready. You can also choose **Use database instructors** instead of
+selecting an instructor file.
 
 ### Step 3: Add optional files if you have them
 
-Open **Advanced inputs (optional)** and select any additional reference files or historical pairings you want to use.
+Open **Data & settings** from the left navigation. Review historical sessions,
+reference data, rankings, and instructor defaults, then return to **Matching**.
 
 Notes:
 
 - If you do not select `historical_pairings.csv`, the app can proceed with an empty history file.
 - The app remembers your last selected files and restores them on the next launch.
 
-### Step 4: Click `Generate solution`
+### Step 4: Click `Generate matching`
 
-When you click **Generate solution**, Aqua Essence:
+When you click **Generate matching**, Aqua Essence:
 
 1. Validates the selected files.
 2. Detects whether each selected file is already in the internal format or is a Jackrabbit partner export.
 3. Converts partner exports automatically when needed.
 4. Normalizes swimmer and instructor data before solving.
 5. Runs the selected solver.
-6. Loads the results into the browser UI.
+6. Opens the **Results** workspace.
 
 ### Step 5: Review the outputs
 
@@ -90,156 +95,75 @@ After a successful run, the UI shows:
 - An unassigned swimmers table when applicable
 - A button to download the filled classes CSV
 - A button to open the latest matching report PDF, when produced
-- A button to open the XAI dashboard
+- An **Explain decisions** action and an **Explainability** workspace
 
-You can also click swimmer and instructor names in the results to open profile details.
+Select a result row to open its review drawer, or select a swimmer or instructor
+name to open profile details. Use the result search and review-status filter to
+narrow a large run.
 
 ## 5. Jackrabbit Export Requirements
 
-This section is important when you export data from Jackrabbit.
+Use **Import export** for the supported Jackrabbit Exporter workflow. Select the
+file named `aqua_essence_jackrabbit_export.json` produced by Jackrabbit Exporter
+1.1.0. Aqua Essence accepts bundle format `aqua-essence-jackrabbit-export`,
+format version 1 only.
 
-The app uses the header names exactly as they appear in the partner exports. Your sample files show the names Jackrabbit is currently using. When exporting, make sure those columns are included.
+The bundle must contain exactly these four embedded CSV files:
 
-### 5.1 Classes Export
+- `jackrabbit_students.csv` — required and must contain usable student rows
+- `jackrabbit_classes.csv` — required and must contain usable class rows
+- `jackrabbit_staff.csv` — optional data; a header-only file is valid
+- `jackrabbit_pairings.csv` — optional history; a header-only file is valid
 
-Sample file used: `single_classes.xlsx`
+The app validates the locked version-1 headers before changing the selected run
+sources. It preserves quoted commas, doubled quotes, embedded line breaks, and
+leading zeroes in every external ID. For classes with multiple instructors,
+each `Class ID`/`instructor_id` assignment remains a separate row with the
+original Class ID.
 
-Important Jackrabbit headers:
+After import, review every warning:
 
-- `Current Classes` or `Class`
-- `Description`
-- `Session`
-- `Location`
-- `Days`
-- `Start Time`
-- `End Time`
-- `Instructors`
-- `Open`
-- `Size`
-- `Status`
-- `Cat 1`
-- `Start Date`
-- `End Date`
+- A missing `Skill Level` or `Special Needs` value stays blank; Aqua Essence
+  does not infer it from another field.
+- Imported swimmers use `Non-Response / Unknown` until intake or survey data is
+  supplied.
+- Staff data supplies identity only. Existing desktop-curated instructor
+  profiles are preserved. New or partial instructor identities must have their
+  colors, styles, and teaching qualifications completed in **Data & settings**
+  before matching can run.
+- Invalid or duplicate optional historical-pairing rows are skipped and counted
+  in the import warnings.
 
-Recommended rule:
-
-- Export all of the columns above, especially `Current Classes`, `Instructors`, schedule fields, capacity fields, and `Status`.
-
-How Aqua Essence uses them:
-
-- `Current Classes` or `Class` becomes the class name
-- `Instructors` is used to build one internal row per instructor
-- `Status` must be `Active` for the row to be imported
-- `Open` and `Size` are preserved for class capacity context
-
-### 5.2 Students Export
-
-Sample file used: `single_students.xlsx`
-
-Important Jackrabbit headers:
-
-- `Student First Name`
-- `Student Last Name`
-- `Family`
-- `Status`
-- `DOB`
-- `Age`
-- `Current Classes`
-- `Notes`
-- `Disabilities`
-- `Special Needs`
-
-Minimum fields the importer requires:
-
-- `Student First Name`
-- `Student Last Name`
-- `Family`
-- `Status`
-- `Age`
-
-Fields you should always include in practice:
-
-- `Current Classes`
-- `Special Needs`
-- `Notes`
-- `DOB`
-- `Disabilities`
-
-Why these are important:
-
-- `Current Classes` is used to connect each swimmer to the class they are registered in. If this column is missing or inconsistent with the selected classes file, the swimmer may not be rostered correctly.
-- `Special Needs` should be exported explicitly. Do not rely on `Notes` alone for this flag.
-- `Notes` can carry useful free-text information, such as preference notes, but a numeric note count is not treated as a special-needs signal.
-
-Important limitations of the current Jackrabbit import:
-
-- Jackrabbit does not provide `skill_level` for the solver in the current import path, so imported swimmers default to `skill_level = 0`.
-- Imported swimmers also default to the swimmer type `Non-Response / Unknown` until survey or intake data is supplied.
-
-Operational recommendation:
-
-- After importing Jackrabbit students data, verify that RSS levels and swimmer types are correct before relying on the output for final scheduling decisions.
-
-### 5.3 ActiveStaff Export
-
-Sample file used: `ActiveStaff.xlsx`
-
-Important Jackrabbit headers:
-
-- `Name`
-- `Status`
-- `Position`
-- `Classes`
-- `Instructor`
-
-Profile columns that may also appear in an enriched staff file:
-
-- `primary_color_id`
-- `secondary_color_id`
-- `primary_style_id`
-- `secondary_style_id`
-- `is_team_captain`
-- `can_teach_NL`
-- `can_teach_babies`
-- `can_teach_adults`
-- `can_teach_adapted`
-- `used_default_profile`
-
-Minimum fields the importer requires:
-
-- `Name`
-- `Status`
-
-How Aqua Essence filters staff rows:
-
-- Only active rows are imported.
-- If `Position` is present, only teaching roles are imported.
-- Accepted teaching roles are:
-  - `Instructor`
-  - `Instructor Team Captain`
-  - `Youth Leader`
-  - `Aquafit Instructor`
-  - `Coach`
-- If `Position` is not present, the importer falls back to the `Instructor` truthy flag.
-
-Important note:
-
-- If color, style, or certification fields are missing, the app fills them from the configured default instructor profile and flags those instructors for review.
+The app still supports selecting standalone internal or legacy partner files
+manually. That is a separate compatibility workflow; it is not the Jackrabbit
+Exporter 1.1.0 bundle contract.
 
 ## 6. Recommended Jackrabbit Export Checklist
 
+For the normal desktop workflow, capture students and classes in the browser
+extension, optionally capture staff and pairing history, then choose **Download
+Aqua Essence bundle**. In Aqua Essence, choose **Import export** and select
+`aqua_essence_jackrabbit_export.json`. The app validates the bundle, selects
+the run sources, adds missing instructors without replacing edited profiles,
+and imports any historical pairings. The bundle always contains all four
+version-1 CSV names; staff and historical pairings may contain only their
+header row.
+
 Before running a real session, verify:
 
-- The classes export includes `Current Classes` or `Class`, `Instructors`, `Status`, `Days`, `Start Time`, `End Time`, `Open`, `Size`, `Session`, `Start Date`, and `End Date`.
-- The students export includes `Current Classes` and `Special Needs`.
-- The students export includes `Notes`, but staff understand that `Notes` is not a replacement for `Special Needs`.
-- The staff export includes active teaching staff only, or at minimum has reliable `Status` and `Position` values.
-- Class names in the students export match the class names in the classes export exactly.
-- Instructor names in the classes export match the names in the instructor file closely enough to resolve correctly.
+- The import summary reports the expected student, class, staff, and historical
+  pairing counts.
+- Every warning about missing skill levels and special-needs values has been
+  reviewed.
+- Every new instructor has an explicitly completed profile and teaching
+  qualifications.
+- Every multi-instructor class shows each expected Class ID/instructor ID row.
+- The source summary shows the imported classes, swimmers, and database
+  instructors as ready.
 
 ## 7. Editing Swimmer Types, Colors, Styles, And Rankings
 
-Open **Advanced inputs (optional)** to manage the reference data that drives compatibility scoring.
+Open **Data & settings** to manage the reference data that drives compatibility scoring.
 
 ### 7.1 Add Or Edit Personality Colors
 
@@ -315,7 +239,7 @@ This is especially useful when:
 
 ### 7.7 Edit The Default Instructor Profile
 
-In **Advanced inputs (optional)**, click **Edit** beside **Default instructor profile**.
+In **Data & settings**, click **Edit** beside **Default instructor profile**.
 
 This controls the fallback values used when an instructor row is missing:
 
@@ -387,15 +311,16 @@ Each completed run creates a job folder under `jobs/` and may include:
 - `matching_report.pdf`
 - `profiles.json`
 
-These files are the source for the UI downloads, reports, and clickable profile views.
-They can contain personal and support/medical information and are not deleted
-automatically. Follow
+These files are the source for the UI downloads, reports, and clickable profile
+views. They can contain personal and support/medical information. App-owned job
+folders are retained for 30 days by default; exports saved elsewhere are not
+removed by Aqua Essence. Follow
 [Privacy and Data Retention](docs/privacy-and-data-retention.md) for storage,
 manual cleanup, and public-release rules.
 
 ## 11. Troubleshooting
 
-### `Generate solution` is disabled
+### `Generate matching` is disabled
 
 Make sure all three core files are selected:
 
@@ -441,11 +366,12 @@ Check:
 
 For the cleanest workflow:
 
-1. Export fresh classes, students, and staff files from Jackrabbit.
-2. Verify that the required Jackrabbit columns are included, especially `Current Classes` and `Special Needs` in the students export.
-3. Load the files into Aqua Essence.
-4. Update instructor styles and colors if needed.
-5. Confirm swimmer types, colors, styles, and rankings are current.
-6. Generate the solution.
+1. Capture fresh students and classes with Jackrabbit Exporter 1.1.0; capture
+   staff and pairing history when available.
+2. Download `aqua_essence_jackrabbit_export.json` and import it into Aqua Essence.
+3. Review the import counts, warnings, and selected sources.
+4. Complete missing swimmer fields and every new instructor profile.
+5. Confirm swimmer types, colors, styles, qualifications, and rankings are current.
+6. Generate the matching.
 7. Review flags, unassigned swimmers, and low-confidence matches.
 8. Download the filled classes CSV and matching report for operational use.
