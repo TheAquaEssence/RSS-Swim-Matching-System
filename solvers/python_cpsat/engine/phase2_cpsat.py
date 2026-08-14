@@ -210,7 +210,14 @@ def diagnose_unassigned_swimmers(
 def _best_candidate(candidates: List[Tuple[float, Instructor]]) -> Tuple[float, Instructor] | None:
     if not candidates:
         return None
-    return max(candidates, key=lambda item: (item[0], -item[1].instructor_id))
+    return min(
+        candidates,
+        key=lambda item: (
+            -item[0],
+            int(item[1].instructor_id),
+            str(item[1].instructor_id),
+        ),
+    )
 
 
 def _quality_floor_diagnostic(
