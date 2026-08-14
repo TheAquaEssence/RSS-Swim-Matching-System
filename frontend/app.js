@@ -29,12 +29,16 @@ function setResultsAvailable(isAvailable) {
 }
 
 const WORKSPACE_VIEW_CONFIG = Object.freeze({
-  matching: { hash: "#matchingView", eyebrow: "Operator workspace", title: "Swimmer matching", navId: "matchingNavLink" },
-  results: { hash: "#results-section", eyebrow: "Latest solver run", title: "Matching results", navId: "resultsNavLink" },
-  data: { hash: "#advancedSection", eyebrow: "Configuration", title: "Data & settings", navId: "dataSettingsNavLink" },
+  matching: { hash: "#matchingView", eyebrow: "Operator workspace", title: "Swimmer matching", documentTitle: "Matching | Aqua Essence", navId: "matchingNavLink" },
+  results: { hash: "#results-section", eyebrow: "Latest solver run", title: "Matching results", documentTitle: "Results | Aqua Essence", navId: "resultsNavLink" },
+  data: { hash: "#advancedSection", eyebrow: "Configuration", title: "Data & settings", documentTitle: "Data & settings | Aqua Essence", navId: "dataSettingsNavLink" },
 });
 
-function showWorkspaceView(viewName, { updateHash = true } = {}) {
+function preferredScrollBehavior() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? "auto" : "smooth";
+}
+
+function showWorkspaceView(viewName, { updateHash = true, focusHeading = true } = {}) {
   const config = WORKSPACE_VIEW_CONFIG[viewName];
   if (!config) return false;
 
@@ -58,6 +62,7 @@ function showWorkspaceView(viewName, { updateHash = true } = {}) {
   const contextTitle = document.getElementById("workspaceContextTitle");
   if (contextEyebrow) contextEyebrow.textContent = config.eyebrow;
   if (contextTitle) contextTitle.textContent = config.title;
+  document.title = config.documentTitle;
 
   if (viewName === "data") {
     const advancedSection = document.getElementById("advancedSection");
@@ -65,21 +70,29 @@ function showWorkspaceView(viewName, { updateHash = true } = {}) {
   }
 
   if (updateHash) window.history.replaceState(null, "", config.hash);
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: preferredScrollBehavior() });
+  if (focusHeading) {
+    const activeView = document.querySelector(`[data-workspace-view="${viewName}"]`);
+    const heading = activeView?.querySelector("h1");
+    if (heading) {
+      heading.tabIndex = -1;
+      window.setTimeout(() => heading.focus({ preventScroll: true }), 0);
+    }
+  }
   return true;
 }
 
 function syncWorkspaceViewFromHash() {
   const hash = window.location.hash;
   if (hash === "#advancedSection" || hash.startsWith("#settings-")) {
-    showWorkspaceView("data", { updateHash: false });
+    showWorkspaceView("data", { updateHash: false, focusHeading: false });
     if (hash.startsWith("#settings-")) {
-      window.setTimeout(() => document.querySelector(hash)?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+      window.setTimeout(() => document.querySelector(hash)?.scrollIntoView({ behavior: preferredScrollBehavior(), block: "start" }), 0);
     }
     return;
   }
-  if (hash === "#results-section" && showWorkspaceView("results", { updateHash: false })) return;
-  showWorkspaceView("matching", { updateHash: false });
+  if (hash === "#results-section" && showWorkspaceView("results", { updateHash: false, focusHeading: false })) return;
+  showWorkspaceView("matching", { updateHash: false, focusHeading: false });
 }
 
 function wireProductNavigation() {

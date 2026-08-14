@@ -343,6 +343,13 @@ body {
   scroll-margin-top: calc(var(--workspace-header-height) + 20px);
 }
 
+/* Workspace headings receive focus after view changes for screen-reader
+   orientation; they are not interactive controls or part of the tab order. */
+.workspace-view h1[tabindex="-1"]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 .card,
 .stat-card,
 .filter-bar {

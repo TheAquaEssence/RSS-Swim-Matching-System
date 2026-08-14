@@ -187,9 +187,11 @@ async function runRendererSmoke({ executablePath, userDataPath, artifactsPath })
 
     await page.getByRole("link", { name: "Matching", exact: true }).click();
     await page.waitForURL((url) => url.pathname === "/");
+    await page.locator("#resultsNavLink").click();
     await page.locator("#results-section").waitFor({ state: "visible" });
 
-    await page.locator("#advancedSection > summary").click();
+    await page.locator("#dataSettingsNavLink").click();
+    await page.locator("#dataSettingsView").waitFor({ state: "visible" });
     await page.locator("#manageInstructorsButton").click();
     await page.locator("#instructor-editor-modal").waitFor({ state: "visible" });
     const previewResponsePromise = page.waitForResponse(
@@ -210,6 +212,8 @@ async function runRendererSmoke({ executablePath, userDataPath, artifactsPath })
     }
     await page.locator("#instructor-editor-close").click();
 
+    await page.locator("#resultsNavLink").click();
+    await page.locator("#results-section").waitFor({ state: "visible" });
     const pdfExport = await captureRendererExport(page, "#reopenPdfButton");
     fs.writeFileSync(pdfPath, Buffer.from(pdfExport.bytes));
     report.exportBytes.pdf = await waitForDownloadedFile(pdfPath);

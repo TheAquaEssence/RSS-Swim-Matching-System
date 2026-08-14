@@ -229,6 +229,7 @@ function renderGenerateErrorHtml(result) {
 // (setGenerateEnabled) and whenever the session selection changes.
 let dataSourcesSummarySettings = null;
 let dataSourcesDbInstructorCount = null;
+let generationInProgress = false;
 
 function renderDataSourcesSummary() {
   const el = document.getElementById("dataSourcesSummary");
@@ -290,7 +291,7 @@ function setGenerateEnabled(settings) {
   const instructorsPath = settings?.last_selected_files?.instructors ?? "";
   const instructorsReady = Boolean(instructorsPath) || Boolean(settings?.use_db_instructors);
   const isReady = Boolean(classesPath && swimmersPath && instructorsReady);
-  generateButton.disabled = !isReady;
+  generateButton.disabled = generationInProgress || !isReady;
 
   const sourceStatus = document.getElementById("sourceValidationStatus");
   if (sourceStatus) {
@@ -500,6 +501,11 @@ function wireGenerateFlow() {
   wireResultsFilters();
 
   generateButton.addEventListener("click", async () => {
+    if (generationInProgress) return;
+    generationInProgress = true;
+    generateButton.disabled = true;
+    generateButton.setAttribute("aria-busy", "true");
+    generateButton.textContent = "Generating matching\u2026";
     output.classList.remove("hidden");
     output.innerHTML = '<div class="status-generating"><span class="status-spinner" aria-hidden="true"></span><span>Generating matching\u2026</span></div>';
 
@@ -551,6 +557,11 @@ function wireGenerateFlow() {
     } catch (e) {
       output.classList.remove("hidden");
       output.innerHTML = `<div class="status-error"><span class="status-icon" aria-hidden="true">\u2717</span><span>${esc(String(e))}</span></div>`;
+    } finally {
+      generationInProgress = false;
+      generateButton.removeAttribute("aria-busy");
+      generateButton.textContent = "Generate matching";
+      setGenerateEnabled(dataSourcesSummarySettings);
     }
   });
 }
