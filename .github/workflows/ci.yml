@@ -36,13 +36,27 @@ jobs:
         run: ruff check .
 
       - name: Run tests
-        run: >
-          python -m pytest -q
-          solvers/python_cpsat/engine/tests/
-          core/scoring/tests/
-          core/tests/
-          backend/tests/
-          frontend/xai_dashboard/tests/
-          solvers/tests/
-          data_generation/tests/
-          scripts/tests/
+        run: python -m pytest -q
+
+  desktop:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24" # current LTS
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci --ignore-scripts
+
+      - name: Run tests
+        working-directory: desktop
+        run: npm test
+
+      - name: Check JavaScript
+        working-directory: desktop
+        run: npm run check

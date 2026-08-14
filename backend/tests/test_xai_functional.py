@@ -99,11 +99,14 @@ def test_index_returns_html(client):
     resp = client.get("/xai/")
     assert resp.status_code == 200
     assert "html" in resp.text.lower()
-    assert 'href="/">Matching</a>' in resp.text
-    assert 'href="/xai/" aria-current="page">Explainability</a>' in resp.text
+    assert 'class="product-nav-link" href="/"' in resp.text
+    assert '<span>Matching</span>' in resp.text
+    assert 'class="product-nav-link active" href="/xai/" aria-current="page"' in resp.text
+    assert '<span>Explainability</span>' in resp.text
     assert 'src="/shared/ui_utils.js"' in resp.text
     assert 'src="/xai/static/dashboard.js' in resp.text
     assert 'href="/xai/static/dashboard.css' in resp.text
+    assert 'href="/styles/workspace.css' in resp.text
 
 
 def test_api_matches_returns_real_data(client):

@@ -107,9 +107,13 @@ def test_static_js_and_css_are_no_cache(client):
         "/styles/sessions.css",
         "/styles/instructor-editor.css",
         "/styles/ux-refresh.css",
+        "/styles/workspace.css",
+        "/styles/matching-workspace.css",
+        "/styles/interaction-workspace.css",
         "/xai/static/dashboard.js",
         "/xai/static/dashboard.css",
         "/xai/static/ux-refresh.css",
+        "/xai/static/review-workspace.css",
     )
     for path in paths:
         resp = client.get(path)

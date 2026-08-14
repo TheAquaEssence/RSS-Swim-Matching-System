@@ -139,7 +139,7 @@ class TestDataLoader:
         loader.load_all()
         pairing = loader.get_historical_pairing(1)
         assert pairing is not None
-        assert pairing.instructor_id == 1
+        assert pairing.instructor_id == "1"
         assert pairing.num_sessions == 3
 
     def test_no_compatibility_tables(self, data_dir):

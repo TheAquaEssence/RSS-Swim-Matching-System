@@ -110,9 +110,13 @@ def test_vendored_assets_are_served(client):
     expectations = {
         "/vendor/fonts/fonts.css": "text/css",
         "/styles/ux-refresh.css": "text/css",
+        "/styles/workspace.css": "text/css",
+        "/styles/matching-workspace.css": "text/css",
+        "/styles/interaction-workspace.css": "text/css",
         "/vendor/fonts/outfit/outfit-latin-400-normal.woff2": "font/woff2",
         "/vendor/fonts/jetbrains-mono/jetbrains-mono-latin-400-normal.woff2": "font/woff2",
         "/xai/static/ux-refresh.css": "text/css",
+        "/xai/static/review-workspace.css": "text/css",
         "/xai/static/vendor/chartjs/chart.umd.min.js": "javascript",
     }
     for path, content_type in expectations.items():
@@ -139,6 +143,8 @@ def test_xai_template_uses_local_chartjs():
     assert "/xai/static/vendor/chartjs/chart.umd.min.js" in text
     assert '/vendor/fonts/fonts.css' in text
     assert '/xai/static/ux-refresh.css' in text
+    assert '/styles/workspace.css' in text
+    assert '/xai/static/review-workspace.css' in text
 
 
 def test_fonts_css_declares_expected_families():

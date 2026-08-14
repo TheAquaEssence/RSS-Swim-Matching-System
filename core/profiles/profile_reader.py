@@ -36,9 +36,24 @@ def _safe_int(val: Any) -> int:
     return int(float(val))
 
 
+def _safe_id(val: Any) -> str:
+    """Return an external identifier without numeric coercion."""
+    identifier = str(val).strip()
+    if not identifier:
+        raise ValueError("External identifier cannot be blank")
+    return identifier
+
+
 def _safe_bool(val: Any) -> bool:
-    """Convert a 0/1 value to bool."""
-    return bool(int(float(val)))
+    """Convert common CSV boolean encodings without numeric ID coercion."""
+    if isinstance(val, bool):
+        return val
+    normalized = str(val).strip().casefold()
+    if normalized in {"1", "true", "yes", "y"}:
+        return True
+    if normalized in {"0", "false", "no", "n", ""}:
+        return False
+    raise ValueError(f"Invalid boolean value: {val!r}")
 
 
 def build_profiles(
@@ -64,16 +79,16 @@ def build_profiles(
     style_lookup = _load_lookup(styles_path, "style_id", "style_name")
 
     # Build swimmer profiles
-    swimmers_df = pd.read_csv(swimmers_path)
+    swimmers_df = pd.read_csv(swimmers_path, dtype=str, keep_default_na=False)
     swimmers = {}
     type_lookup = {int(key): value for key, value in type_lookup.items()}
     for _, row in swimmers_df.iterrows():
         type_id = coerce_swimmer_type_id(row.get("swimmer_type_id"), type_lookup)
         if type_id is None:
             type_id = _safe_int(row["swimmer_type_id"])
-        sid = str(_safe_int(row["swimmer_id"]))
+        sid = _safe_id(row["swimmer_id"])
         swimmers[sid] = {
-            "swimmer_id": _safe_int(row["swimmer_id"]),
+            "swimmer_id": sid,
             "first_name": str(row["first_name"]),
             "last_name": str(row["last_name"]),
             "name": f"{row['first_name']} {row['last_name']}",
@@ -87,16 +102,16 @@ def build_profiles(
         }
 
     # Build instructor profiles
-    instructors_df = pd.read_csv(instructors_path)
+    instructors_df = pd.read_csv(instructors_path, dtype=str, keep_default_na=False)
     instructors = {}
     for _, row in instructors_df.iterrows():
         pc_id = _safe_int(row["primary_color_id"])
         sc_id = _safe_int(row["secondary_color_id"])
         ps_id = _safe_int(row["primary_style_id"])
         ss_id = _safe_int(row["secondary_style_id"])
-        iid = str(_safe_int(row["instructor_id"]))
+        iid = _safe_id(row["instructor_id"])
         instructors[iid] = {
-            "instructor_id": _safe_int(row["instructor_id"]),
+            "instructor_id": iid,
             "first_name": str(row["first_name"]),
             "last_name": str(row["last_name"]),
             "name": f"{row['first_name']} {row['last_name']}",

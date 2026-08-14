@@ -79,6 +79,73 @@ def test_repeat_initialization_does_not_change_version_or_data(tmp_path):
         ).fetchone()[0] == "Grace"
 
 
+def test_schema_3_upgrades_pairing_ids_to_text_and_is_restart_safe(tmp_path):
+    path = tmp_path / "schema-2.db"
+    with sqlite3.connect(str(path)) as con:
+        con.execute(
+            "CREATE TABLE sessions ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, label TEXT NOT NULL, "
+            "imported_at TEXT NOT NULL, imported_by TEXT)"
+        )
+        con.execute(
+            "CREATE TABLE pairings ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "session_id INTEGER NOT NULL REFERENCES sessions(id), "
+            "swimmer_id INTEGER NOT NULL, instructor_id INTEGER NOT NULL, "
+            "class_slot TEXT, source TEXT NOT NULL DEFAULT 'solver')"
+        )
+        con.execute(
+            "INSERT INTO sessions (id, label, imported_at) "
+            "VALUES (7, 'Synthetic Legacy Session', '2026-01-01T00:00:00+00:00')"
+        )
+        con.execute(
+            "INSERT INTO pairings "
+            "(id, session_id, swimmer_id, instructor_id, class_slot, source) "
+            "VALUES (11, 7, 101, 301, 'Monday 16:00', 'solver')"
+        )
+        con.execute("PRAGMA user_version = 2")
+
+    db.init_db(path)
+    db.init_db(path)
+
+    assert _schema_version(path) == db.CURRENT_SCHEMA_VERSION
+    with sqlite3.connect(str(path)) as con:
+        con.row_factory = sqlite3.Row
+        column_types = {
+            row["name"]: row["type"] for row in con.execute("PRAGMA table_info(pairings)")
+        }
+        pairing = con.execute(
+            "SELECT id, session_id, swimmer_id, instructor_id, class_id, class_slot, source "
+            "FROM pairings"
+        ).fetchone()
+        indexes = {
+            row[0]
+            for row in con.execute(
+                "SELECT name FROM sqlite_master "
+                "WHERE type = 'index' AND tbl_name = 'pairings'"
+            )
+        }
+
+    assert column_types["swimmer_id"] == "TEXT"
+    assert column_types["instructor_id"] == "TEXT"
+    assert column_types["class_id"] == "TEXT"
+    assert dict(pairing) == {
+        "id": 11,
+        "session_id": 7,
+        "swimmer_id": "101",
+        "instructor_id": "301",
+        "class_id": None,
+        "class_slot": "Monday 16:00",
+        "source": "solver",
+    }
+    assert {
+        "idx_pairings_swimmer",
+        "idx_pairings_instructor",
+        "idx_pairings_session",
+        "idx_pairings_unique",
+    } <= indexes
+
+
 def test_future_schema_version_is_rejected_without_modification(tmp_path):
     path = tmp_path / "future.db"
     future_version = db.CURRENT_SCHEMA_VERSION + 7

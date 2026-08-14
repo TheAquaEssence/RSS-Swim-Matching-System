@@ -36,6 +36,8 @@ data/app_samples/
 # Generated/synthetic CSVs (randomly generated, not committed).
 data/generated/
 data/scaling/
+# Versioned Jackrabbit desktop imports may contain swimmer/staff PII.
+data/imports/
 # Legacy pre-ranking reference data and coordinator workbooks — kept locally
 # only; combined.xlsx and partner exports may contain real names.
 # See docs/reference-data-provenance.md.

@@ -181,6 +181,37 @@ class TestConfidenceCategory:
 
 class TestOutputCSVDisputeColumn:
 
+    def test_duplicate_class_ids_do_not_copy_another_instructors_assignment(self, tmp_path):
+        from solvers.python_cpsat.engine.data_loader import Class
+        from solvers.python_cpsat.engine.phase3_explainability import generate_output_csv
+
+        classes = {
+            "00021": Class("00021", "Monday", "16:00", "16:30", "00301"),
+            "00021::00302::2": Class(
+                "00021", "Monday", "16:00", "16:30", "00302"
+            ),
+        }
+        assignment = {
+            "class_id": "00021",
+            "type": "individual",
+            "match_type": "continuity",
+            "swimmer_id": "00101",
+            "swimmer": _make_swimmer("00101"),
+            "instructor_id": "00301",
+            "instructor_name": "Synthetic Instructor A",
+            "confidence": 90.0,
+            "reason_summary": "Synthetic continuity",
+            "compatibility_score": None,
+        }
+
+        output_path = str(tmp_path / "multi-instructor.csv")
+        df = generate_output_csv([assignment], classes, output_path)
+
+        assert list(df["class_id"]) == ["00021", "00021"]
+        rows_by_instructor = {str(row["instructor_id"]): row for _, row in df.iterrows()}
+        assert rows_by_instructor["00301"]["swimmer_1_id"] == "00101"
+        assert rows_by_instructor["00302"]["swimmer_1_id"] == ""
+
     def test_dispute_column_present_in_csv(self, tmp_path):
         """Output CSV must include continuity_dispute column."""
         import pandas as pd

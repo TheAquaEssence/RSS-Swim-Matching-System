@@ -344,6 +344,19 @@ class TestMinimumAutoAssignScore:
 
         assert diagnostics == {}
 
+    def test_best_candidate_supports_string_instructor_ids(self):
+        candidates = [
+            (20.0, _make_instructor("010")),
+            (20.0, _make_instructor("002")),
+            (10.0, _make_instructor("001")),
+        ]
+
+        best = phase2_cpsat._best_candidate(candidates)
+
+        assert best is not None
+        assert best[0] == 20.0
+        assert best[1].instructor_id == "002"
+
 
 class TestWarmStartHint:
 

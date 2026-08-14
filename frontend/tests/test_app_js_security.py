@@ -17,6 +17,9 @@ STYLESHEET_PATHS = (
     "./styles/sessions.css",
     "./styles/instructor-editor.css",
     "./styles/ux-refresh.css",
+    "./styles/workspace.css",
+    "./styles/matching-workspace.css",
+    "./styles/interaction-workspace.css",
 )
 
 
@@ -99,13 +102,111 @@ def test_primary_navigation_integrates_explainability_without_duplicate_action()
     generate_source = (FRONTEND_DIR / "generate_flow.js").read_text(encoding="utf-8")
 
     assert 'nav class="product-nav" aria-label="Primary navigation"' in html
-    assert 'href="/" aria-current="page">Matching</a>' in html
+    assert 'id="matchingNavLink" href="#matchingView" aria-current="page"' in html
+    assert '<span>Matching</span>' in html
+    assert 'id="resultsNavLink" href="#results-section"' in html
+    assert 'aria-disabled="true" aria-describedby="resultsNavHint"' in html
     assert 'id="explainabilityNavLink" href="/xai/"' in html
     assert 'aria-disabled="true" aria-describedby="explainabilityNavHint"' in html
+    assert 'id="dataSettingsNavLink" href="#advancedSection"' in html
     assert 'id="xaiDashboardButton"' not in html
     assert 'setExplainabilityAvailable(true);' in generate_source
     assert 'fetch("/api/launch_dashboard"' not in generate_source
-    assert 'link.getAttribute("aria-disabled") === "true"' in app_source
+    assert 'explainabilityLink.getAttribute("aria-disabled") === "true"' in app_source
+
+
+def test_desktop_workspace_shell_is_shared_and_accessible():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    workspace_css = (FRONTEND_DIR / "styles" / "workspace.css").read_text(encoding="utf-8")
+
+    assert 'class="skip-link" href="#main-content"' in html
+    assert 'class="app-shell"' in html
+    assert 'class="app-sidebar" aria-label="Application sidebar"' in html
+    assert 'class="app-workspace"' in html
+    assert 'class="app-main" id="main-content"' in html
+    assert "grid-template-columns: var(--workspace-sidebar-width) minmax(0, 1fr)" in workspace_css
+    assert "min-width: 980px" in workspace_css
+
+
+def test_stage_two_uses_distinct_matching_results_and_data_views():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    app_source = APP_JS.read_text(encoding="utf-8")
+    generate_source = (FRONTEND_DIR / "generate_flow.js").read_text(encoding="utf-8")
+
+    assert 'id="matchingView" data-workspace-view="matching"' in html
+    assert 'id="results-section" data-workspace-view="results" hidden' in html
+    assert 'id="dataSettingsView" data-workspace-view="data" hidden' in html
+    assert 'id="advancedSection" class="data-settings-details" open' in html
+    assert "function showWorkspaceView(" in app_source
+    assert 'showWorkspaceView("results");' in generate_source
+    assert "function setResultsAvailable(" in app_source
+
+
+def test_stage_two_results_filters_are_wired_without_changing_result_contract():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    source = (FRONTEND_DIR / "generate_flow.js").read_text(encoding="utf-8")
+
+    assert 'id="resultsSearchInput"' in html
+    assert 'id="resultsReviewFilter"' in html
+    assert 'id="resultsFilterSummary" aria-live="polite"' in html
+    assert "function applyResultsFilters()" in source
+    assert "function wireResultsFilters()" in source
+    assert "row.dataset.reviewSeverity = severity;" in source
+    assert "wireResultsFilters();" in source
+
+
+def test_stage_four_unifies_secondary_workflows_and_drawer_accessibility():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    drawer_source = PROFILE_DRAWER_JS.read_text(encoding="utf-8")
+    interaction_css = (FRONTEND_DIR / "styles" / "interaction-workspace.css").read_text(encoding="utf-8")
+
+    assert 'href="./styles/interaction-workspace.css"' in html
+    assert 'id="profile-drawer" class="profile-drawer" role="dialog" aria-modal="true"' in html
+    assert 'aria-labelledby="drawer-title" aria-hidden="true"' in html
+    assert 'drawer.setAttribute("aria-hidden", "false");' in drawer_source
+    assert 'if (lastDrawerTrigger?.isConnected) lastDrawerTrigger.focus();' in drawer_source
+    assert ".rankings-editor-modal[open]" in interaction_css
+    assert ".session-selector-panel" in interaction_css
+
+
+def test_stage_four_session_selector_exposes_expansion_state():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    source = (FRONTEND_DIR / "session_selector.js").read_text(encoding="utf-8")
+
+    assert 'aria-expanded="false" aria-controls="historicalSessionsPanel"' in html
+    assert 'aria-label="Search historical sessions"' in html
+    assert 'header.setAttribute("role", "button");' in source
+    assert 'header.setAttribute("aria-expanded", isLatest ? "true" : "false");' in source
+    assert 'toggleBtn.setAttribute("aria-expanded", open ? "false" : "true");' in source
+    assert 'e.key !== "Enter" && e.key !== " "' in source
+
+
+def test_stage_five_workspace_navigation_manages_focus_title_and_motion():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    source = APP_JS.read_text(encoding="utf-8")
+    workspace_css = (FRONTEND_DIR / "styles" / "workspace.css").read_text(encoding="utf-8")
+
+    assert 'role="status" aria-live="polite" aria-atomic="true"' in html
+    assert 'id="hostStatusDot" aria-hidden="true"' in html
+    assert 'for="classesBrowseButton"' in html
+    assert 'documentTitle: "Matching | Aqua Essence"' in source
+    assert "document.title = config.documentTitle;" in source
+    assert "function preferredScrollBehavior()" in source
+    assert 'window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches' in source
+    assert "behavior: preferredScrollBehavior()" in source
+    assert 'heading.focus({ preventScroll: true })' in source
+    assert 'focusHeading: false' in source
+    assert '.workspace-view h1[tabindex="-1"]:focus' in workspace_css
+
+
+def test_stage_five_generate_action_prevents_duplicate_runs():
+    source = (FRONTEND_DIR / "generate_flow.js").read_text(encoding="utf-8")
+
+    assert "let generationInProgress = false;" in source
+    assert "if (generationInProgress) return;" in source
+    assert 'generateButton.setAttribute("aria-busy", "true");' in source
+    assert 'generateButton.removeAttribute("aria-busy");' in source
+    assert "setGenerateEnabled(dataSourcesSummarySettings);" in source
 
 
 def test_app_delegates_profile_drawer_and_drops_its_state():

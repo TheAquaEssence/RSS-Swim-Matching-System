@@ -114,6 +114,27 @@ Before creating a public GitHub release or source archive:
 6. If sensitive data ever entered Git history, treat it as disclosed: remove it
    with an approved history-rewrite process, rotate any exposed credentials,
    notify affected parties as required, and verify forks/caches where possible.
+7. Require GitHub-provided no-reply addresses for commit authors, committers,
+   and approved co-author trailers. Run
+   `python scripts/check_commit_attribution.py` before publishing.
+
+## Public commit-identity status
+
+Public commit authors and committers must use either an ID-based
+`users.noreply.github.com` address or GitHub's `noreply@github.com` service
+identity. `scripts/check_commit_attribution.py` enforces that rule across the
+complete current-branch history, including merge commits. It also requires the
+two approved privacy-safe co-author trailers on every non-merge commit. CI runs
+the check on pushes and pull requests.
+
+On 2026-08-11, the public branch history was rewritten to replace previously
+published personal author addresses with the account's ID-based no-reply
+address. A fresh clone of `main` contains no personal-address matches and both
+CI and secret scanning pass. GitHub's read-only pull-request refs for PRs #1–#6
+still retain the pre-rewrite objects, so the public-release privacy gate remains
+open until GitHub Support confirms those refs and cached commit views have been
+purged. Collaborators must re-clone or carefully rebase onto rewritten `main`;
+merging an old clone can restore the removed history.
 
 A user-facing "delete all local data" control is still pending. Until it is
 implemented, operators must perform whole-app-data cleanup manually as

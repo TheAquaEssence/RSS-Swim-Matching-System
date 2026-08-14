@@ -19,7 +19,7 @@ from ortools.sat.python import cp_model
 from core.scoring import CompatibilityScorer
 
 from .config import CPSAT, AGE_THRESHOLDS, NOTES_BOOSTS
-from .data_loader import Swimmer, Instructor, DataLoader
+from .data_loader import DataLoader, EntityId, Instructor, Swimmer
 from .hard_constraints import instructor_is_qualified, pair_satisfies_constraints
 from .notes_parser import parse_notes
 from .phase1_continuity import _separate_swimmers
@@ -150,7 +150,7 @@ def diagnose_unassigned_swimmers(
     scorer: CompatibilityScorer,
     data_loader: DataLoader,
     config: Dict | None = None,
-) -> Dict[int, Dict]:
+) -> Dict[EntityId, Dict]:
     """Return diagnostics for unassigned swimmers blocked by the quality floor.
 
     A swimmer is flagged only when at least one legal candidate exists, but every
@@ -166,7 +166,7 @@ def diagnose_unassigned_swimmers(
     compatibility_scores, _ = _compute_all_scores(
         individuals, pairs, available_instructors, scorer, data_loader
     )
-    diagnostics: Dict[int, Dict] = {}
+    diagnostics: Dict[EntityId, Dict] = {}
 
     for swimmer in individuals:
         if swimmer.swimmer_id not in unassigned_ids:
@@ -210,7 +210,14 @@ def diagnose_unassigned_swimmers(
 def _best_candidate(candidates: List[Tuple[float, Instructor]]) -> Tuple[float, Instructor] | None:
     if not candidates:
         return None
-    return max(candidates, key=lambda item: (item[0], -item[1].instructor_id))
+    return min(
+        candidates,
+        key=lambda item: (
+            -item[0],
+            int(item[1].instructor_id),
+            str(item[1].instructor_id),
+        ),
+    )
 
 
 def _quality_floor_diagnostic(
@@ -261,7 +268,7 @@ def _build_greedy_hint(
     instructors: List[Instructor],
     compatibility_scores: Dict,
     min_auto_assign_score: float | None = None,
-) -> Tuple[Dict[int, int], Dict[Tuple[int, int], int]]:
+) -> Tuple[Dict[EntityId, EntityId], Dict[Tuple[EntityId, EntityId], EntityId]]:
     """Build a quick feasible assignment hint for CP-SAT."""
     threshold = CPSAT['min_auto_assign_score'] if min_auto_assign_score is None else min_auto_assign_score
     entities = []
@@ -321,9 +328,9 @@ def _build_greedy_hint(
         )
     )
 
-    assigned_instructors: set[int] = set()
-    hinted_individuals: Dict[int, int] = {}
-    hinted_pairs: Dict[Tuple[int, int], int] = {}
+    assigned_instructors: set[EntityId] = set()
+    hinted_individuals: Dict[EntityId, EntityId] = {}
+    hinted_pairs: Dict[Tuple[EntityId, EntityId], EntityId] = {}
 
     for entity in entities:
         available_ids = [
@@ -335,21 +342,21 @@ def _build_greedy_hint(
 
         if entity['kind'] == 'individual':
             swimmer_id = entity['key']
-            chosen_id = max(
+            chosen_id = min(
                 available_ids,
                 key=lambda instructor_id: (
-                    compatibility_scores[('individual', swimmer_id, instructor_id)],
-                    -instructor_id,
+                    -compatibility_scores[('individual', swimmer_id, instructor_id)],
+                    str(instructor_id),
                 ),
             )
             hinted_individuals[swimmer_id] = chosen_id
         else:
             pair_key = entity['key']
-            chosen_id = max(
+            chosen_id = min(
                 available_ids,
                 key=lambda instructor_id: (
-                    compatibility_scores[('pair', pair_key, instructor_id)],
-                    -instructor_id,
+                    -compatibility_scores[('pair', pair_key, instructor_id)],
+                    str(instructor_id),
                 ),
             )
             hinted_pairs[pair_key] = chosen_id
@@ -363,8 +370,8 @@ def _apply_solution_hint(
     model: cp_model.CpModel,
     x: Dict,
     y: Dict,
-    hinted_individuals: Dict[int, int],
-    hinted_pairs: Dict[Tuple[int, int], int],
+    hinted_individuals: Dict[EntityId, EntityId],
+    hinted_pairs: Dict[Tuple[EntityId, EntityId], EntityId],
 ) -> None:
     """Attach a partial feasible hint to the CP-SAT model."""
     for swimmer_id, instructor_id in hinted_individuals.items():
@@ -442,7 +449,9 @@ def _compute_all_scores(
     return scores, pair_details
 
 
-def _get_pair_key(swimmer1: Swimmer, swimmer2: Swimmer) -> Tuple[int, int]:
+def _get_pair_key(
+    swimmer1: Swimmer, swimmer2: Swimmer
+) -> Tuple[EntityId, EntityId]:
     """Get a consistent key for a pair (sorted by swimmer_id)."""
     ids = sorted([swimmer1.swimmer_id, swimmer2.swimmer_id])
     return (ids[0], ids[1])

@@ -16,6 +16,30 @@ from core.swimmer_types import coerce_swimmer_type_id
 from .config import DATA_VALIDATION, PAIRING_CONSTRAINTS
 
 
+EntityId = str | int
+
+
+class _IdDict(dict):
+    """Entity mapping that keeps stored IDs as strings with legacy int lookup."""
+
+    @staticmethod
+    def _normalized_key(key):
+        if isinstance(key, int) and not isinstance(key, bool):
+            return str(key)
+        if isinstance(key, tuple):
+            return tuple(_IdDict._normalized_key(part) for part in key)
+        return key
+
+    def __getitem__(self, key):
+        return super().__getitem__(self._normalized_key(key))
+
+    def get(self, key, default=None):
+        return super().get(self._normalized_key(key), default)
+
+    def __contains__(self, key):
+        return super().__contains__(self._normalized_key(key))
+
+
 # =============================================================================
 # FORMAT HELPERS (real partner export format)
 # =============================================================================
@@ -61,7 +85,7 @@ def _normalized_instructor_candidates(instructors: dict, name: str) -> Tuple[Lis
     return exact_matches, abbreviated_matches
 
 
-def _resolve_instructor_id(instructors: dict, name: str) -> Tuple[int, List[str]]:
+def _resolve_instructor_id(instructors: dict, name: str) -> Tuple[EntityId, List[str]]:
     """Resolve an instructor name using exact or abbreviated forms."""
     exact_matches, abbreviated_matches = _normalized_instructor_candidates(instructors, name)
     if exact_matches:
@@ -110,6 +134,22 @@ def _optional_positive_int(value, field_name: str, row_number: int) -> Optional[
     if not _has_value(value):
         return None
     return _required_int(value, field_name, row_number, minimum=1)
+
+
+def _required_id(value, field_name: str, row_number: int) -> str:
+    """Validate a numeric external identifier without numeric coercion."""
+    if not _has_value(value):
+        raise ValueError(f"Row {row_number}: {field_name} is required")
+    identifier = str(value).strip()
+    if not identifier.isascii() or not identifier.isdigit():
+        raise ValueError(f"Row {row_number}: {field_name} must be a numeric string")
+    return identifier
+
+
+def _optional_id(value, field_name: str, row_number: int) -> Optional[str]:
+    if not _has_value(value):
+        return None
+    return _required_id(value, field_name, row_number)
 
 
 def _required_float(
@@ -205,12 +245,10 @@ def _class_instructor_id(
     instructors: dict,
     row,
     row_number: int,
-) -> Tuple[Optional[int], List[str]]:
+) -> Tuple[Optional[EntityId], List[str]]:
     """Resolve class instructor from either generated or partner export schema."""
     if 'instructor_id' in row.index and _has_value(row['instructor_id']):
-        return _required_int(
-            row['instructor_id'], 'instructor_id', row_number, minimum=1
-        ), []
+        return _required_id(row['instructor_id'], 'instructor_id', row_number), []
     if 'instructor_name' in row.index and _has_value(row['instructor_name']):
         return _resolve_instructor_id(instructors, str(row['instructor_name']))
     return None, []
@@ -223,7 +261,7 @@ def _class_instructor_id(
 @dataclass
 class Swimmer:
     """Represents a swimmer to be matched with an instructor."""
-    swimmer_id: int
+    swimmer_id: EntityId
     first_name: str
     last_name: str
     swimmer_type_id: int
@@ -249,7 +287,7 @@ class Swimmer:
 @dataclass
 class Instructor:
     """Represents an instructor who can teach swimmers."""
-    instructor_id: int
+    instructor_id: EntityId
     first_name: str
     last_name: str
     primary_color_id: int
@@ -270,20 +308,20 @@ class Instructor:
 @dataclass
 class Class:
     """Represents a class slot or fixed swimmer roster awaiting instructor assignment."""
-    class_id: int
+    class_id: EntityId
     day_of_week: str
     start_time: str
     end_time: str
-    instructor_id: Optional[int]
-    swimmer_1_id: Optional[int] = None
-    swimmer_2_id: Optional[int] = None
+    instructor_id: Optional[EntityId]
+    swimmer_1_id: Optional[EntityId] = None
+    swimmer_2_id: Optional[EntityId] = None
 
 
 @dataclass
 class HistoricalPairing:
     """Represents a historical swimmer-instructor relationship."""
-    swimmer_id: int
-    instructor_id: int
+    swimmer_id: EntityId
+    instructor_id: EntityId
     session: str
     num_sessions: int
 
@@ -331,9 +369,9 @@ class DataLoader:
         self.generated_dir = os.path.join(data_dir, 'generated')
 
         # Entity data
-        self.instructors: Dict[int, Instructor] = {}
-        self.swimmers: Dict[int, Swimmer] = {}
-        self.classes: Dict[int, Class] = {}
+        self.instructors: Dict[EntityId, Instructor] = _IdDict()
+        self.swimmers: Dict[EntityId, Swimmer] = _IdDict()
+        self.classes: Dict[object, Class] = _IdDict()
         self.historical_pairings: List[HistoricalPairing] = []
 
         # Reference data
@@ -344,7 +382,7 @@ class DataLoader:
         # Ranking tables (v2 — replaces compatibility tables)
         self.color_rankings: Dict[Tuple[int, int], int] = {}
         self.style_rankings: Dict[Tuple[int, int], int] = {}
-        self.class_resolution_flags: Dict[int, List[str]] = {}
+        self.class_resolution_flags: Dict[EntityId, List[str]] = {}
         self.fixed_roster_mode_requested = False
 
     @classmethod
@@ -366,9 +404,9 @@ class DataLoader:
         loader.generated_dir = None
 
         # Initialize containers
-        loader.instructors = {}
-        loader.swimmers = {}
-        loader.classes = {}
+        loader.instructors = _IdDict()
+        loader.swimmers = _IdDict()
+        loader.classes = _IdDict()
         loader.historical_pairings = []
         loader.personality_colors = {}
         loader.instructor_styles = {}
@@ -414,7 +452,7 @@ class DataLoader:
                 f"Run 'python data_generation/run_all.py --seed 42' to generate data."
             )
         try:
-            return pd.read_csv(filepath)
+            return pd.read_csv(filepath, dtype=str, keep_default_na=False)
         except Exception as e:
             raise ValueError(f"Failed to parse {filepath} ({description}): {e}") from e
 
@@ -540,9 +578,7 @@ class DataLoader:
         _reject_duplicate_keys(df, ['instructor_id'], "instructors")
         for row_number, (_, row) in enumerate(df.iterrows(), start=2):
             instructor = Instructor(
-                instructor_id=_required_int(
-                    row['instructor_id'], 'instructor_id', row_number, minimum=1
-                ),
+                instructor_id=_required_id(row['instructor_id'], 'instructor_id', row_number),
                 first_name=_required_text(row['first_name'], 'first_name', row_number),
                 last_name=_required_text(row['last_name'], 'last_name', row_number),
                 primary_color_id=_required_int(
@@ -598,9 +634,7 @@ class DataLoader:
         _reject_duplicate_keys(df, ['swimmer_id'], "swimmers")
         for row_number, (_, row) in enumerate(df.iterrows(), start=2):
             swimmer = Swimmer(
-                swimmer_id=_required_int(
-                    row['swimmer_id'], 'swimmer_id', row_number, minimum=1
-                ),
+                swimmer_id=_required_id(row['swimmer_id'], 'swimmer_id', row_number),
                 first_name=_required_text(row['first_name'], 'first_name', row_number),
                 last_name=_required_text(row['last_name'], 'last_name', row_number),
                 swimmer_type_id=self._coerce_swimmer_type_id(row.get('swimmer_type_id')),
@@ -643,7 +677,15 @@ class DataLoader:
             {'class_id', 'day_of_week', 'start_time', 'end_time'},
             "classes",
         )
-        _reject_duplicate_keys(df, ['class_id'], "classes")
+        if 'instructor_id' in df.columns:
+            identified_classes = df[df['instructor_id'].astype(str).str.strip() != '']
+            _reject_duplicate_keys(
+                identified_classes,
+                ['class_id', 'instructor_id'],
+                "classes",
+            )
+        else:
+            _reject_duplicate_keys(df, ['class_id'], "classes")
         self.fixed_roster_mode_requested = (
             'swimmer_1_id' in df.columns or 'swimmer_2_id' in df.columns
         )
@@ -652,9 +694,7 @@ class DataLoader:
                 self.instructors, row, row_number
             )
             cls = Class(
-                class_id=_required_int(
-                    row['class_id'], 'class_id', row_number, minimum=1
-                ),
+                class_id=_required_id(row['class_id'], 'class_id', row_number),
                 day_of_week=_normalize_day(
                     _required_text(row['day_of_week'], 'day_of_week', row_number)
                 ),
@@ -665,14 +705,21 @@ class DataLoader:
                     _required_text(row['end_time'], 'end_time', row_number)
                 ),
                 instructor_id=instructor_id,
-                swimmer_1_id=_optional_positive_int(
+                swimmer_1_id=_optional_id(
                     row.get('swimmer_1_id'), 'swimmer_1_id', row_number
                 ),
-                swimmer_2_id=_optional_positive_int(
+                swimmer_2_id=_optional_id(
                     row.get('swimmer_2_id'), 'swimmer_2_id', row_number
                 ),
             )
-            self.classes[cls.class_id] = cls
+            class_key: object = cls.class_id
+            occurrence = 1
+            while class_key in self.classes:
+                occurrence += 1
+                class_key = (
+                    f"{cls.class_id}::{cls.instructor_id or ''}::{occurrence}"
+                )
+            self.classes[class_key] = cls
             if resolution_flags:
                 self.class_resolution_flags[cls.class_id] = list(resolution_flags)
 
@@ -692,12 +739,8 @@ class DataLoader:
         _reject_duplicate_keys(df, ['swimmer_id'], "historical pairings")
         for row_number, (_, row) in enumerate(df.iterrows(), start=2):
             pairing = HistoricalPairing(
-                swimmer_id=_required_int(
-                    row['swimmer_id'], 'swimmer_id', row_number, minimum=1
-                ),
-                instructor_id=_required_int(
-                    row['instructor_id'], 'instructor_id', row_number, minimum=1
-                ),
+                swimmer_id=_required_id(row['swimmer_id'], 'swimmer_id', row_number),
+                instructor_id=_required_id(row['instructor_id'], 'instructor_id', row_number),
                 session=_required_text(row['session'], 'session', row_number),
                 num_sessions=_required_int(
                     row['num_sessions'], 'num_sessions', row_number, minimum=0
@@ -799,7 +842,7 @@ class DataLoader:
                     f"Class {cls.class_id} repeats swimmer {cls.swimmer_1_id} in both swimmer slots"
                 )
 
-        swimmer_class_counts: Dict[int, int] = {}
+        swimmer_class_counts: Dict[EntityId, int] = {}
         for cls in self.classes.values():
             for swimmer_id in (cls.swimmer_1_id, cls.swimmer_2_id):
                 if swimmer_id is None:
@@ -828,10 +871,10 @@ class DataLoader:
     # Accessor Methods
     # -------------------------------------------------------------------------
 
-    def get_instructor(self, instructor_id: int) -> Optional[Instructor]:
+    def get_instructor(self, instructor_id: EntityId) -> Optional[Instructor]:
         return self.instructors.get(instructor_id)
 
-    def get_swimmer(self, swimmer_id: int) -> Optional[Swimmer]:
+    def get_swimmer(self, swimmer_id: EntityId) -> Optional[Swimmer]:
         return self.swimmers.get(swimmer_id)
 
     def get_all_swimmers(self) -> List[Swimmer]:
@@ -881,9 +924,10 @@ class DataLoader:
                 )
         return pairs
 
-    def get_historical_pairing(self, swimmer_id: int) -> Optional[HistoricalPairing]:
+    def get_historical_pairing(self, swimmer_id: EntityId) -> Optional[HistoricalPairing]:
+        normalized_id = str(swimmer_id) if isinstance(swimmer_id, int) else swimmer_id
         for pairing in self.historical_pairings:
-            if pairing.swimmer_id == swimmer_id:
+            if pairing.swimmer_id == normalized_id:
                 return pairing
         return None
 

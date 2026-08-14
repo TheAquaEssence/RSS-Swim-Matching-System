@@ -10,7 +10,8 @@ Handles:
 Known gaps (to be filled by future work):
   - classes:  cat_2 has no source in the partner export (left blank)
   - swimmers: swimmer_type_id has no source — defaults to Non-Response / Unknown
-  - swimmers: skill_level has no source — TBD (defaulted to 0)
+  - swimmers: skill_level uses the exporter Skill Level field or an unambiguous
+              RSS level in Current Classes; unresolved rows remain 0 for review
   - swimmers: has_special_needs — read from a "Special Needs" column when present;
               the Notes column is a count (0/1) in Jackrabbit exports and is NOT used
               to set has_special_needs; text-valued Notes are passed to the solver
@@ -232,6 +233,7 @@ def import_classes(partner_csv_text: str) -> tuple[str, list[str]]:
         raise ValueError(f"Partner Classes CSV is missing required columns: {sorted(missing)}")
 
     out_rows: list[dict] = []
+    seen_assignments: set[tuple[str, ...]] = set()
 
     for row_num, row in enumerate(reader, start=2):  # row 1 is header
         try:
@@ -245,11 +247,10 @@ def import_classes(partner_csv_text: str) -> tuple[str, list[str]]:
             if not class_id_raw:
                 warnings.append(f"Row {row_num}: '{class_name}' skipped — missing Class ID (Jackrabbit xID required)")
                 continue
-            try:
-                class_id = int(class_id_raw)
-            except ValueError:
+            if not class_id_raw.isascii() or not class_id_raw.isdigit():
                 warnings.append(f"Row {row_num}: '{class_name}' skipped — Class ID {class_id_raw!r} is not a valid integer")
                 continue
+            class_id = class_id_raw
 
             raw_instructors = row.get("Instructors", "").strip()
             instructor_names = _split_instructors(raw_instructors)
@@ -282,7 +283,6 @@ def import_classes(partner_csv_text: str) -> tuple[str, list[str]]:
                 continue
 
             for i, instructor in enumerate(instructor_names):
-                slot_id = class_id if len(instructor_names) == 1 else class_id * 100 + i
                 # Prefer per-split xID; fall back to the single xID for all splits
                 instr_id = (
                     raw_instructor_ids[i] if i < len(raw_instructor_ids)
@@ -292,8 +292,20 @@ def import_classes(partner_csv_text: str) -> tuple[str, list[str]]:
                 # If no xID is available, blank the name too — name-only rows are not
                 # supported; the DataLoader requires instructor_id for matching.
                 instr_name = instructor if instr_id else ""
+                assignment_key = (
+                    (class_id, instr_id)
+                    if instr_id
+                    else (class_id, "", instructor.casefold(), str(i))
+                )
+                if assignment_key in seen_assignments:
+                    warnings.append(
+                        f"Row {row_num}: duplicate Class ID/instructor_id assignment "
+                        f"{class_id}/{instr_id or '(blank)'} skipped"
+                    )
+                    continue
+                seen_assignments.add(assignment_key)
                 out_rows.append({
-                    "class_id":        slot_id,
+                    "class_id":        class_id,
                     "start_time":      start_time,
                     "end_time":        end_time,
                     "day_of_week":     row.get("Days", "").strip(),
@@ -330,7 +342,7 @@ SWIMMERS_INTERNAL_HEADERS = [
     "first_name",
     "last_name",
     "swimmer_type_id",  # STUB: populated via survey flow (not in partner export)
-    "skill_level",      # STUB: TBD data source (not in partner export)
+    "skill_level",      # Exporter value or unambiguous RSS class-name inference
     "age",
     "has_special_needs",
     "notes",
@@ -340,10 +352,50 @@ SWIMMERS_INTERNAL_HEADERS = [
 
 # Default stub values for fields with no source in the partner export
 _DEFAULT_SWIMMER_TYPE_ID = NON_RESPONSE_SWIMMER_TYPE_ID
-_DEFAULT_SKILL_LEVEL = 0       # TODO: replace once data source is determined
+_DEFAULT_SKILL_LEVEL = 0
 
 
-def import_students(partner_csv_text: str) -> tuple[str, list[str]]:
+def _parse_exported_skill_level(
+    row: dict,
+    *,
+    allow_class_inference: bool = True,
+) -> tuple[int | str, str | None]:
+    """Return a single RSS level from exporter data, or 0 when ambiguous.
+
+    The extension can populate ``Skill Level`` directly.  For list exports it
+    may only have the registered class name, so accept an unambiguous ``RSS N``
+    marker from ``Current Classes`` as a fallback.
+    """
+
+    explicit = _get_first_present_value(row, "Skill Level", "RSS Level", "Level")
+    if explicit:
+        match = re.fullmatch(r"(?:RSS\s*)?(\d{1,2})", explicit, re.IGNORECASE)
+        if match and 1 <= int(match.group(1)) <= 12:
+            return int(match.group(1)), None
+        return 0, f"unrecognized Skill Level {explicit!r}"
+
+    if not allow_class_inference:
+        return "", "no Skill Level was exported"
+
+    registered_classes = str(row.get("Current Classes", "")).strip()
+    levels = {
+        int(value)
+        for value in re.findall(r"\bRSS\s*(\d{1,2})\b", registered_classes, re.IGNORECASE)
+        if 1 <= int(value) <= 12
+    }
+    if len(levels) == 1:
+        return levels.pop(), None
+    if len(levels) > 1:
+        return 0, f"multiple RSS levels found in Current Classes {registered_classes!r}"
+    return 0, "no Skill Level or unambiguous RSS class level was exported"
+
+
+def import_students(
+    partner_csv_text: str,
+    *,
+    preserve_missing: bool = False,
+    allow_class_level_inference: bool = True,
+) -> tuple[str, list[str]]:
     """
     Convert a partner Students.csv string into the internal swimmers.csv format.
 
@@ -354,7 +406,7 @@ def import_students(partner_csv_text: str) -> tuple[str, list[str]]:
 
     Known stubs in the output:
         swimmer_type_id = Non-Response / Unknown
-        skill_level     = 0  (needs TBD data source)
+        skill_level     = exporter value/class-name inference, or 0 for review
         pair_id         = blank — pairs are set manually by staff (same pair_id
             on both swimmers); never inferred from the Family column
         has_special_needs — read from a "Special Needs" column if present; otherwise False.
@@ -390,11 +442,10 @@ def import_students(partner_csv_text: str) -> tuple[str, list[str]]:
             if not swimmer_id_raw:
                 warnings.append(f"Row {row_num}: skipped — missing Student ID (Jackrabbit xID required)")
                 continue
-            try:
-                swimmer_id = int(swimmer_id_raw)
-            except ValueError:
+            if not swimmer_id_raw.isascii() or not swimmer_id_raw.isdigit():
                 warnings.append(f"Row {row_num}: skipped — Student ID {swimmer_id_raw!r} is not a valid integer")
                 continue
+            swimmer_id = swimmer_id_raw
 
             first_name = row.get("Student First Name", "").strip()
             last_name  = row.get("Student Last Name", "").strip()
@@ -404,7 +455,17 @@ def import_students(partner_csv_text: str) -> tuple[str, list[str]]:
 
             # has_special_needs: use dedicated column when present; never infer from Notes.
             if special_needs_col is not None:
-                has_special_needs = _is_truthy_export_value(row.get(special_needs_col, ""))
+                special_needs_raw = str(row.get(special_needs_col, "")).strip()
+                has_special_needs = (
+                    _is_truthy_export_value(special_needs_raw)
+                    if special_needs_raw
+                    else ("" if preserve_missing else False)
+                )
+                if preserve_missing and not special_needs_raw:
+                    warnings.append(
+                        f"Row {row_num}: {first_name} {last_name} has no Special Needs "
+                        "value — left blank for review"
+                    )
             else:
                 has_special_needs = False
 
@@ -429,12 +490,24 @@ def import_students(partner_csv_text: str) -> tuple[str, list[str]]:
                 warnings.append(f"Row {row_num}: {first_name} {last_name} has no Age — defaulting to 0")
             age = _parse_age(age_str) if age_str else 0.0
 
+            skill_level, skill_problem = _parse_exported_skill_level(
+                row,
+                allow_class_inference=allow_class_level_inference,
+            )
+            if preserve_missing and skill_level == _DEFAULT_SKILL_LEVEL:
+                skill_level = ""
+            if skill_problem:
+                warnings.append(
+                    f"Row {row_num}: {first_name} {last_name} has unresolved skill_level — "
+                    f"{skill_problem}"
+                )
+
             raw_rows.append({
                 "swimmer_id":       swimmer_id,
                 "first_name":       first_name,
                 "last_name":        last_name,
                 "swimmer_type_id":  _DEFAULT_SWIMMER_TYPE_ID,
-                "skill_level":      _DEFAULT_SKILL_LEVEL,
+                "skill_level":      skill_level,
                 "age":              age,
                 "has_special_needs": has_special_needs,
                 "notes":            notes_text,
@@ -464,11 +537,11 @@ def import_students(partner_csv_text: str) -> tuple[str, list[str]]:
             "on two swimmers to pair them (pairs are no longer inferred from Family)."
         )
 
-    if raw_rows:
+    unresolved_levels = sum(row["skill_level"] in (_DEFAULT_SKILL_LEVEL, "") for row in raw_rows)
+    if unresolved_levels:
         warnings.append(
-            f"skill_level is 0 for all {len(raw_rows)} imported swimmer(s) — "
-            "Jackrabbit does not export RSS level. "
-            "Staff must set skill_level before running the solver."
+            f"skill_level is unresolved for {unresolved_levels} of {len(raw_rows)} "
+            "imported swimmer(s). Staff must set those levels before running the solver."
         )
 
     # --- Build output CSV ----------------------------------------------------
@@ -505,10 +578,21 @@ INSTRUCTORS_INTERNAL_HEADERS = [
     "can_teach_adults",
     "can_teach_adapted",
     "used_default_profile",
+    "profile_source",
 ]
 
-def import_instructors(partner_csv_text: str, default_profile: dict | None = None) -> tuple[str, list[str]]:
-    """Convert a partner ActiveStaff export into the internal instructors.csv format."""
+def import_instructors(
+    partner_csv_text: str,
+    default_profile: dict | None = None,
+    *,
+    preserve_missing: bool = False,
+) -> tuple[str, list[str]]:
+    """Convert a partner ActiveStaff export into the internal instructors.csv format.
+
+    ``preserve_missing`` is used by the versioned Jackrabbit bundle path. It
+    keeps matcher-owned profile fields blank instead of inventing attributes
+    that the exporter did not capture.
+    """
     warnings: list[str] = []
     reader = csv.DictReader(io.StringIO(partner_csv_text))
     profile = default_profile or {}
@@ -519,12 +603,12 @@ def import_instructors(partner_csv_text: str, default_profile: dict | None = Non
         raise ValueError(f"Partner instructors file is missing required columns: {sorted(missing)}")
 
     out_rows: list[dict] = []
-    seen_names: set[str] = set()
+    seen_ids: set[str] = set()
     has_position_column = "Position" in (reader.fieldnames or [])
 
     for row_num, row in enumerate(reader, start=2):
         status = str(row.get("Status", "")).strip()
-        if status.lower() != "active":
+        if status.lower() != "active" and not (preserve_missing and not status):
             warnings.append(f"Row {row_num}: skipped (Status={status!r})")
             continue
 
@@ -532,39 +616,50 @@ def import_instructors(partner_csv_text: str, default_profile: dict | None = Non
         if not instructor_id_raw:
             warnings.append(f"Row {row_num}: skipped — missing Staff ID (Jackrabbit xID required)")
             continue
-        try:
-            instructor_id = int(instructor_id_raw)
-        except ValueError:
+        if not instructor_id_raw.isascii() or not instructor_id_raw.isdigit():
             warnings.append(f"Row {row_num}: skipped — Staff ID {instructor_id_raw!r} is not a valid integer")
             continue
+        instructor_id = instructor_id_raw
 
         position = " ".join(str(row.get("Position", "")).split())
-        if has_position_column:
+        if has_position_column and not (preserve_missing and not position):
             if not is_editable_instructor_position(position):
                 warnings.append(
                     f"Row {row_num}: skipped (Position={position!r}; expected one of {list(EDITABLE_INSTRUCTOR_POSITION_VALUES)})"
                 )
                 continue
-        elif "Instructor" in (reader.fieldnames or []) and not _is_truthy_export_value(row.get("Instructor", "")):
+        elif (
+            "Instructor" in (reader.fieldnames or [])
+            and not _is_truthy_export_value(row.get("Instructor", ""))
+            and not (preserve_missing and not str(row.get("Instructor", "")).strip())
+        ):
             warnings.append(f"Row {row_num}: skipped (Instructor flag is not truthy)")
             continue
 
         raw_name = " ".join(str(row.get("Name", "")).split())
-        if not raw_name:
+        if not raw_name and not preserve_missing:
             warnings.append(f"Row {row_num}: skipped — no instructor name found")
             continue
+        if not raw_name:
+            warnings.append(
+                f"Row {row_num}: Staff ID {instructor_id} has no name — identity retained "
+                "with blank descriptive fields for review"
+            )
 
-        dedupe_key = raw_name.casefold()
-        if dedupe_key in seen_names:
-            warnings.append(f"Row {row_num}: duplicate instructor '{raw_name}' skipped")
+        if instructor_id in seen_ids:
+            warnings.append(f"Row {row_num}: duplicate Staff ID {instructor_id} skipped")
             continue
-        seen_names.add(dedupe_key)
+        seen_ids.add(instructor_id)
 
         first_name, last_name = _split_person_name(raw_name)
         used_default_profile = _is_truthy_export_value(row.get("used_default_profile", "0"))
 
-        normalized_ids: dict[str, int] = {}
+        normalized_ids: dict[str, int | str] = {}
         for field in STYLE_COLOR_PROFILE_COLUMNS:
+            if preserve_missing and not str(row.get(field, "")).strip():
+                normalized_ids[field] = ""
+                used_default_profile = True
+                continue
             default_value = int(profile.get(field, {
                 "primary_color_id": 1,
                 "secondary_color_id": 2,
@@ -575,8 +670,12 @@ def import_instructors(partner_csv_text: str, default_profile: dict | None = Non
             normalized_ids[field] = parsed_value
             used_default_profile = used_default_profile or did_default
 
-        normalized_flags: dict[str, int] = {}
+        normalized_flags: dict[str, int | str] = {}
         for field in CERTIFICATION_PROFILE_COLUMNS:
+            if preserve_missing and not str(row.get(field, "")).strip():
+                normalized_flags[field] = ""
+                used_default_profile = True
+                continue
             default_value = bool(profile.get(field, {
                 "is_team_captain": False,
                 "can_teach_NL": True,
@@ -602,6 +701,10 @@ def import_instructors(partner_csv_text: str, default_profile: dict | None = Non
             "can_teach_adults": normalized_flags["can_teach_adults"],
             "can_teach_adapted": normalized_flags["can_teach_adapted"],
             "used_default_profile": 1 if used_default_profile else 0,
+            # The generation service uses this provenance marker to prevent
+            # identity-only Jackrabbit records from silently receiving the
+            # desktop's generic matcher defaults.
+            "profile_source": 1 if preserve_missing else "",
         })
 
     output = io.StringIO()
@@ -612,8 +715,13 @@ def import_instructors(partner_csv_text: str, default_profile: dict | None = Non
     if out_rows:
         if any(str(row["used_default_profile"]) == "1" for row in out_rows):
             warnings.append(
-                "ActiveStaff import used default instructor profile values for colors, styles, "
-                "or teaching certifications where the export did not provide them"
+                (
+                    "Jackrabbit staff identities have incomplete matcher-owned profile fields; "
+                    "review colors, styles, and teaching qualifications before matching"
+                    if preserve_missing
+                    else "ActiveStaff import used default instructor profile values for colors, "
+                    "styles, or teaching certifications where the export did not provide them"
+                )
             )
 
     return output.getvalue(), warnings

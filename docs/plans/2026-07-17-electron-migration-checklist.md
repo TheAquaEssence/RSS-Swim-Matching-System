@@ -377,6 +377,7 @@ Complete these before building the full installer.
 
 - [x] Test the supported Python version or version matrix.
 - [x] Run Ruff and all active Python tests.
+- [x] Enforce GitHub no-reply author and committer identities in CI, including merge commits.
 - [x] Add frontend linting/testing if a JavaScript toolchain is introduced.
 - [x] Add a Windows Electron build job.
 - [x] Add a packaged-application smoke test.
@@ -391,6 +392,8 @@ Complete these before building the full installer.
 - [x] Fresh-clone test passes.
 - [x] Clean-machine installer test passes.
 - [ ] No personal or operational data exists in the current tree, history, artifacts, or releases.
+  - `main` was rewritten and verified clean on 2026-08-11.
+  - **Blocked:** GitHub Support must purge the pre-rewrite objects retained by read-only PR refs #1–#6 and cached commit views.
 - [x] Security and privacy documentation is complete.
 - [x] All automated tests pass.
 - [ ] Installer checksum is published.
@@ -423,11 +426,13 @@ Complete these before building the full installer.
 ## Recorded Decisions
 
 - **Data classification (2026-07-17):** `data/aqua_essence.db`, `data/source/instructors.csv`, and `data/source/pairings.csv` contain **real operational data**. The repository and installers ship synthetic data only; the real dataset is delivered to the client once, out of band (password-protected archive over a private channel), and imported into the local application-data database on first launch. Do not commit real data in any form, including encrypted blobs.
-- **Public release strategy (2026-07-17):** The current repository stays **private permanently** as the development archive (its history contains the real data). The public release is a **new repository** seeded from a single clean initial commit of the sanitized tree — no inherited history. History-purge checklist items are satisfied by this decision.
+- **Public release strategy (2026-07-17):** The original development archive stays **private permanently** because its history contains real data. This public repository was seeded from a single clean initial commit of the sanitized tree with no inherited archive history.
 - **Single-solver decision (2026-07-18):** Version 1 supports CP-SAT only; solver plugins are not a product requirement. `/api/solvers`, `/api/set_solver`, the `active_solver` setting, manifest discovery, the hidden frontend picker, and `.bat`/`.cmd`/`.exe` execution branches were removed. The solver entry is fixed at `solvers/python_cpsat/solver_wrapper.py`, still run in a separate process for timeout/crash isolation (`SOLVERS_DIR` remains the test seam).
-- **Commit attribution in the new public repo (2026-07-17):** Every commit must end with `Co-Authored-By:` trailers crediting Daniel Nwogo (nigerianpickle) and Ibrahim Mamman (Nabxz). No other co-author trailers (including AI tool attributions) are permitted. **Deferred:** which email addresses to use is undecided — personal emails must not appear in public commits, so noreply addresses (`users.noreply.github.com`) or another option will be chosen when the new repository is created. Enforce with a `prepare-commit-msg` hook or commit template at that time.
+- **Commit attribution in the public repo (updated 2026-08-11):** Every non-merge commit must end with `Co-Authored-By:` trailers crediting Daniel Nwogo (nigerianpickle) and Ibrahim Mamman (Nabxz), using their approved GitHub no-reply addresses. No other co-author trailers, including tool attributions, are permitted. Authors and committers on every commit—including merges—must use GitHub-provided no-reply identities. `scripts/check_commit_attribution.py` enforces the complete policy in CI.
 
 ## Progress Log
+
+- **2026-08-11 (public commit-identity remediation):** Rewrote the public Git history with `git-filter-repo` 2.47.0 so affected author metadata now uses the account's ID-based GitHub no-reply address. Verification across all rewritten commits proved file trees, messages, timestamps, and parent topology were unchanged. Force-updated `main`, deleted four obsolete merged remote branches, and confirmed a fresh clone has zero personal-address matches; CI and Secret scan pass on rewritten `main`. GitHub's immutable PR refs #1–#6 still expose the pre-rewrite objects, so a GitHub Support request is required to dereference those PRs, garbage-collect the old commits, and clear cached views before closing the privacy gate. Added CI enforcement for privacy-safe author and committer identities on all commits, including merges.
 
 - **2026-07-21 (fresh-clone release-candidate verification):** Commit `18b3d6b` was pushed to `dev` and cloned from GitHub into a new `C:\tmp` directory with no inherited working files. The exact remote commit restored 285 lockfile-pinned desktop packages with zero npm audit vulnerabilities; all 29 desktop tests and JavaScript checks passed. The current Python/CI suite passed 605 tests with three expected environment/artifact-gated skips, while Ruff, third-party-notice drift, tag/version/changelog release validation, and clean-worktree checks passed. The fresh clone tracks only canonical lookup tables and the seeded synthetic `examples/demo/` dataset; scans found none of the forbidden operational paths, runtime data, project-personal identifiers, or credential patterns. The local working tree run remained 606 passed/two skipped because it could exercise one additional packaged-artifact test against `.dist`; the fresh source clone correctly skipped it.
 

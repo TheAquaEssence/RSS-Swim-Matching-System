@@ -12,53 +12,117 @@
   <link rel="stylesheet" href="./styles/sessions.css" />
   <link rel="stylesheet" href="./styles/instructor-editor.css" />
   <link rel="stylesheet" href="./styles/ux-refresh.css" />
+  <link rel="stylesheet" href="./styles/workspace.css" />
+  <link rel="stylesheet" href="./styles/matching-workspace.css" />
+  <link rel="stylesheet" href="./styles/interaction-workspace.css" />
 </head>
 
 <body>
-  <header class="app-header">
-    <div class="app-brand">
-      <h1 class="app-title">Aqua Essence</h1>
-      <p class="app-subtitle">Swimmer to Instructor Matching</p>
-    </div>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="app-shell">
+    <aside class="app-sidebar" aria-label="Application sidebar">
+      <a class="app-brand" href="/" aria-label="Aqua Essence home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M3 8.5c2.1 0 2.1-1.5 4.2-1.5s2.1 1.5 4.2 1.5S13.5 7 15.6 7s2.1 1.5 4.2 1.5M3 13c2.1 0 2.1-1.5 4.2-1.5s2.1 1.5 4.2 1.5 2.1-1.5 4.2-1.5 2.1 1.5 4.2 1.5M3 17.5c2.1 0 2.1-1.5 4.2-1.5s2.1 1.5 4.2 1.5 2.1-1.5 4.2-1.5 2.1 1.5 4.2 1.5" />
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <span class="app-title">Aqua Essence</span>
+          <span class="app-subtitle">Swim matching</span>
+        </span>
+      </a>
+      <div class="sidebar-section-label">Workspace</div>
     <nav class="product-nav" aria-label="Primary navigation">
-      <a class="product-nav-link active" href="/" aria-current="page">Matching</a>
+      <a class="product-nav-link active" id="matchingNavLink" href="#matchingView" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">M</span>
+        <span>Matching</span>
+      </a>
+      <a class="product-nav-link" id="resultsNavLink" href="#results-section"
+        aria-disabled="true" aria-describedby="resultsNavHint">
+        <span class="nav-icon" aria-hidden="true">R</span>
+        <span>Results</span>
+      </a>
       <a class="product-nav-link" id="explainabilityNavLink" href="/xai/"
-        aria-disabled="true" aria-describedby="explainabilityNavHint">Explainability</a>
+        aria-disabled="true" aria-describedby="explainabilityNavHint">
+        <span class="nav-icon" aria-hidden="true">E</span>
+        <span>Explainability</span>
+      </a>
+      <a class="product-nav-link" id="dataSettingsNavLink" href="#advancedSection">
+        <span class="nav-icon" aria-hidden="true">D</span>
+        <span>Data &amp; settings</span>
+      </a>
       <span class="visually-hidden" id="explainabilityNavHint">Available after a matching result is generated.</span>
+      <span class="visually-hidden" id="resultsNavHint">Available after a matching result is generated.</span>
     </nav>
-    <div class="header-right">
+      <div class="sidebar-footer">
+        <div class="header-status" role="status" aria-live="polite" aria-atomic="true">
+          <span class="status-dot" id="hostStatusDot" aria-hidden="true"></span>
+          <span id="hostStatusText">Backend: checking...</span>
+        </div>
+      </div>
+    </aside>
+
+    <section class="app-workspace">
+      <header class="app-header">
+        <div class="workspace-context">
+          <span class="workspace-eyebrow" id="workspaceContextEyebrow">Operator workspace</span>
+          <strong id="workspaceContextTitle">Swimmer matching</strong>
+        </div>
+        <div class="header-right">
       <label class="operator-field" title="Optional — your name is recorded with changes you make (instructor edits, imports)">
         <span>Operator</span>
         <input type="text" id="operatorNameInput" placeholder="Your name" maxlength="80" autocomplete="off" />
       </label>
 
-      <div class="header-status">
-        <span class="status-dot" id="hostStatusDot"></span>
-        <span id="hostStatusText">Host: checking...</span>
-      </div>
-
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light mode">
         <span class="theme-icon" aria-hidden="true"></span>
         <span class="theme-text" id="themeText">Light mode</span>
       </button>
-    </div>
-
-  </header>
-
-  <main class="app-main">
-    <section class="card setup-card">
-      <div class="section-heading">
-        <div>
-          <span class="section-eyebrow">Setup</span>
-          <h2 class="card-title">Choose matching data</h2>
-          <p class="card-hint">Confirm the classes, swimmers, and instructors to include in this run.</p>
         </div>
-        <span class="step-badge">Step 1 of 2</span>
+      </header>
+
+  <main class="app-main" id="main-content">
+    <section class="workspace-view" id="matchingView" data-workspace-view="matching">
+      <div class="page-heading">
+        <div>
+          <span class="section-eyebrow">New matching</span>
+          <h1>Build swimmer assignments</h1>
+          <p>Confirm the source data and safeguards, then run the matching engine.</p>
+        </div>
+      </div>
+
+      <ol class="workflow-steps" aria-label="Matching workflow">
+        <li class="workflow-step active"><span>1</span><strong>Sources</strong><small>Confirm input data</small></li>
+        <li class="workflow-step"><span>2</span><strong>Generate</strong><small>Optimize assignments</small></li>
+        <li class="workflow-step"><span>3</span><strong>Review</strong><small>Inspect results</small></li>
+      </ol>
+
+      <div class="matching-layout">
+        <section class="card setup-card">
+          <div class="section-heading">
+            <div>
+              <span class="section-eyebrow">Source data</span>
+              <h2 class="card-title">Files for this run</h2>
+              <p class="card-hint">Required files are validated before the solver starts.</p>
+            </div>
+            <span class="status-badge" id="sourceValidationStatus">Checking sources</span>
+          </div>
+
+      <div class="file-row">
+        <div class="file-row-left">
+          <label class="file-label" for="jackrabbitImportButton">Jackrabbit export</label>
+          <div class="file-meta" id="jackrabbitImportStatus" role="status" aria-live="polite" aria-atomic="true">Import one bundle from the Jackrabbit Exporter to select all run sources.</div>
+        </div>
+        <div class="file-row-right">
+          <button class="button button-primary" id="jackrabbitImportButton" type="button">Import export</button>
+          <input type="file" id="jackrabbitImportFileInput" accept=".json,application/json" aria-describedby="jackrabbitImportStatus" hidden />
+        </div>
       </div>
 
       <div class="file-row">
         <div class="file-row-left">
-          <label class="file-label">classes.csv</label>
+          <label class="file-label" for="classesBrowseButton">classes.csv</label>
           <div class="file-meta" id="classesFileMeta">Selected file: no file selected</div>
         </div>
 
@@ -99,36 +163,68 @@
       </div>
 
       <div class="data-sources-summary hidden" id="dataSourcesSummary"></div>
+        </section>
 
-      <div class="actions-row">
-        <button class="button button-primary" id="generateButton" type="button" disabled>
-          Generate matching
-        </button>
-
-        <button class="button button-secondary hidden" id="reopenPdfButton" type="button">
-          Save latest matching report (PDF)
-        </button>
-
-        <button class="button button-secondary hidden" id="downloadFilledClassesButton" type="button">
-          Download filled classes CSV
-        </button>
-
+        <aside class="card run-readiness-card" aria-labelledby="run-readiness-title">
+          <div class="section-heading">
+            <div>
+              <span class="section-eyebrow">Run readiness</span>
+              <h2 class="card-title" id="run-readiness-title">Safeguards</h2>
+              <p class="card-hint">Hard constraints remain enforced for every run.</p>
+            </div>
+          </div>
+          <ul class="safeguard-list">
+            <li><span class="safeguard-check" aria-hidden="true">✓</span><div><strong>Instructor capacity</strong><small>One class of 1–2 swimmers per slot</small></div></li>
+            <li><span class="safeguard-check" aria-hidden="true">✓</span><div><strong>Adapted routing</strong><small>Qualified instructors are required</small></div></li>
+            <li><span class="safeguard-check" aria-hidden="true">✓</span><div><strong>Age routing</strong><small>Baby and adult qualifications apply</small></div></li>
+            <li><span class="safeguard-check" aria-hidden="true">✓</span><div><strong>Pair compatibility</strong><small>Maximum 1 level and 2 years apart</small></div></li>
+          </ul>
+          <div class="run-status" id="runReadinessStatus" role="status">Select all required sources to continue.</div>
+          <div class="actions-row run-actions">
+            <button class="button button-primary" id="generateButton" type="button" disabled>
+              Generate matching
+            </button>
+          </div>
+          <div class="output" id="output" aria-live="polite"></div>
+        </aside>
       </div>
-
-      <div class="output" id="output"></div>
     </section>
 
-    <section class="card results-card hidden" id="results-section">
+    <section class="workspace-view results-card hidden" id="results-section" data-workspace-view="results" hidden>
       <div class="section-heading results-heading">
         <div>
-          <span class="section-eyebrow">Review</span>
-          <h2 class="card-title">Matching results</h2>
+          <span class="section-eyebrow">Latest run</span>
+          <h1 class="card-title">Matching results</h1>
           <p class="card-hint">Select any row to review the match details and supporting profiles.</p>
         </div>
-        <span class="step-badge step-badge-success">Step 2 of 2</span>
+        <div class="results-actions">
+          <button class="button button-secondary hidden" id="reopenPdfButton" type="button">
+            Save report (PDF)
+          </button>
+          <button class="button button-secondary hidden" id="downloadFilledClassesButton" type="button">
+            Download classes CSV
+          </button>
+          <a class="button button-primary" href="/xai/">Explain decisions</a>
+        </div>
       </div>
       <div class="results-summary" id="results-summary"></div>
-      <div class="results-table-wrap">
+      <div class="results-toolbar" aria-label="Filter matching results">
+        <label class="results-search-field">
+          <span class="visually-hidden">Search results</span>
+          <input id="resultsSearchInput" type="search" placeholder="Search swimmer, instructor, or reason" autocomplete="off" />
+        </label>
+        <label class="results-filter-field">
+          <span class="visually-hidden">Filter by review status</span>
+          <select id="resultsReviewFilter">
+            <option value="all">All assignments</option>
+            <option value="review">Needs review</option>
+            <option value="clear">Clear assignments</option>
+            <option value="unassigned">Unassigned swimmers</option>
+          </select>
+        </label>
+        <span class="results-filter-summary" id="resultsFilterSummary" aria-live="polite"></span>
+      </div>
+      <div class="results-table-wrap" id="resultsAssignmentsTableWrap">
         <table class="results-table" id="results-table">
           <thead>
             <tr>
@@ -162,17 +258,31 @@
           </table>
         </div>
       </div>
+      <p class="results-empty-state" id="resultsEmptyState" hidden>No results match the current search and filter.</p>
     </section>
 
-    <section class="card">
-      <details id="advancedSection">
-        <summary class="details-summary">
-          <span>Advanced settings</span>
-          <span class="details-subtitle">History, reference tables, and defaults</span>
-        </summary>
-
-        <div class="details-body">
-          <h3 class="section-title">History</h3>
+    <section class="workspace-view" id="dataSettingsView" data-workspace-view="data" hidden>
+      <div class="page-heading">
+        <div>
+          <span class="section-eyebrow">Data &amp; settings</span>
+          <h1>Manage matching inputs</h1>
+          <p>Maintain history, reference rules, and instructor defaults in one workspace.</p>
+        </div>
+      </div>
+      <div class="data-settings-layout">
+        <nav class="data-settings-nav" aria-label="Data and settings sections">
+          <a href="#settings-history">History</a>
+          <a href="#settings-reference">Reference tables</a>
+          <a href="#settings-instructors">Instructor profiles</a>
+        </nav>
+        <details id="advancedSection" class="data-settings-details" open>
+          <summary class="visually-hidden">Data and settings controls</summary>
+          <div class="details-body">
+          <section class="card settings-panel" id="settings-history">
+            <div class="settings-panel-heading">
+              <div><span class="section-eyebrow">Continuity</span><h2>Historical pairings</h2></div>
+              <p>Select prior sessions that should influence continuity in the next run.</p>
+            </div>
 
           <!-- Historical pairings — DB-first with session selector -->
           <div class="file-row" id="historicalDbRow">
@@ -181,15 +291,17 @@
               <div class="file-meta" id="historicalDbMeta">Loading sessions from database…</div>
             </div>
             <div class="file-row-right">
-              <button class="button button-secondary" id="historicalSessionsToggle" type="button">Choose sessions</button>
+              <button class="button button-secondary" id="historicalSessionsToggle" type="button"
+                aria-expanded="false" aria-controls="historicalSessionsPanel">Choose sessions</button>
             </div>
           </div>
 
           <!-- Session selector panel (hidden by default) -->
-          <div id="historicalSessionsPanel" class="hidden">
+          <div id="historicalSessionsPanel" class="session-selector-panel hidden" role="region"
+            aria-labelledby="historicalSessionsToggle">
             <div class="session-selector-search-row">
               <input id="historicalSessionSearch" class="session-selector-search" type="search"
-                placeholder="Search sessions…" autocomplete="off" />
+                placeholder="Search sessions…" autocomplete="off" aria-label="Search historical sessions" />
               <button class="button button-ghost" id="historicalSelectAll"  type="button">All</button>
               <button class="button button-ghost" id="historicalSelectNone" type="button">None</button>
             </div>
@@ -203,13 +315,17 @@
             </div>
             <div class="file-row-right">
               <input type="file" id="jackrabbitPairingsFileInput" accept=".csv" style="display:none" />
-              <button class="button button-secondary" id="jackrabbitImportButton" type="button">Upload pairings CSV</button>
+              <button class="button button-secondary" id="jackrabbitPairingsImportButton" type="button">Upload pairings CSV</button>
             </div>
           </div>
 
-          <div class="divider"></div>
+          </section>
 
-          <h3 class="section-title">Reference tables</h3>
+          <section class="card settings-panel" id="settings-reference">
+            <div class="settings-panel-heading">
+              <div><span class="section-eyebrow">Scoring inputs</span><h2>Reference tables</h2></div>
+              <p>Manage the rankings and lookup values used by compatibility scoring.</p>
+            </div>
 
           <div class="file-row">
             <div class="file-row-left">
@@ -275,8 +391,13 @@
             </div>
           </div>
 
-          <div class="divider"></div>
+          </section>
 
+          <section class="card settings-panel" id="settings-instructors">
+            <div class="settings-panel-heading">
+              <div><span class="section-eyebrow">People</span><h2>Instructor profiles</h2></div>
+              <p>Maintain stored profiles and the fallback used for incomplete records.</p>
+            </div>
           <div class="file-row">
             <div class="file-row-left">
               <label class="file-label">Instructor profiles</label>
@@ -296,14 +417,19 @@
               <button class="button button-secondary" id="defaultInstructorEditButton" type="button">Edit</button>
             </div>
           </div>
-        </div>
-      </details>
+          </section>
+          </div>
+        </details>
+      </div>
     </section>
   </main>
+    </section>
+  </div>
 
   <!-- Profile side drawer -->
-  <div id="drawer-backdrop" class="drawer-backdrop"></div>
-  <aside id="profile-drawer" class="profile-drawer">
+  <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
+  <aside id="profile-drawer" class="profile-drawer" role="dialog" aria-modal="true"
+    aria-labelledby="drawer-title" aria-hidden="true">
     <div class="drawer-header" id="drawer-header">
       <span class="drawer-title" id="drawer-title">Profile</span>
       <button class="drawer-close" id="drawer-close" type="button" aria-label="Close profile">&times;</button>
@@ -636,6 +762,7 @@
   <script src="./instructor_defaults.js"></script>
   <script src="./instructor_editor.js"></script>
   <script src="./session_selector.js"></script>
+  <script src="./jackrabbit_import.js"></script>
   <script src="./generate_flow.js"></script>
   <script src="./app.js"></script>
 </body>

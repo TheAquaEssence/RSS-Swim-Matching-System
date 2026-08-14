@@ -105,5 +105,6 @@ contracts are in [database-schema-migrations.md](database-schema-migrations.md),
 
 The separately versioned
 [Jackrabbit Exporter](https://github.com/TheAquaEssence/jackrabbit-exporter)
-integrates through CSV files only. Aqua Essence owns import validation and
-conversion; it has no runtime dependency on extension source code.
+integrates through a versioned JSON bundle containing CSV payloads. Aqua
+Essence owns contract validation, conversion, and database import; it has no
+runtime dependency on extension source code.

@@ -22,12 +22,106 @@ function setExplainabilityAvailable(isAvailable) {
   link.setAttribute("aria-disabled", String(!Boolean(isAvailable)));
 }
 
-function wireProductNavigation() {
-  const link = document.getElementById("explainabilityNavLink");
+function setResultsAvailable(isAvailable) {
+  const link = document.getElementById("resultsNavLink");
   if (!link) return;
-  link.addEventListener("click", (event) => {
-    if (link.getAttribute("aria-disabled") === "true") event.preventDefault();
+  link.setAttribute("aria-disabled", String(!Boolean(isAvailable)));
+}
+
+const WORKSPACE_VIEW_CONFIG = Object.freeze({
+  matching: { hash: "#matchingView", eyebrow: "Operator workspace", title: "Swimmer matching", documentTitle: "Matching | Aqua Essence", navId: "matchingNavLink" },
+  results: { hash: "#results-section", eyebrow: "Latest solver run", title: "Matching results", documentTitle: "Results | Aqua Essence", navId: "resultsNavLink" },
+  data: { hash: "#advancedSection", eyebrow: "Configuration", title: "Data & settings", documentTitle: "Data & settings | Aqua Essence", navId: "dataSettingsNavLink" },
+});
+
+function preferredScrollBehavior() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? "auto" : "smooth";
+}
+
+function showWorkspaceView(viewName, { updateHash = true, focusHeading = true } = {}) {
+  const config = WORKSPACE_VIEW_CONFIG[viewName];
+  if (!config) return false;
+
+  const resultsLink = document.getElementById("resultsNavLink");
+  if (viewName === "results" && resultsLink?.getAttribute("aria-disabled") === "true") return false;
+
+  document.querySelectorAll("[data-workspace-view]").forEach((view) => {
+    view.hidden = view.dataset.workspaceView !== viewName;
   });
+
+  Object.values(WORKSPACE_VIEW_CONFIG).forEach((entry) => {
+    const link = document.getElementById(entry.navId);
+    if (!link) return;
+    const isCurrent = entry.navId === config.navId;
+    link.classList.toggle("active", isCurrent);
+    if (isCurrent) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+
+  const contextEyebrow = document.getElementById("workspaceContextEyebrow");
+  const contextTitle = document.getElementById("workspaceContextTitle");
+  if (contextEyebrow) contextEyebrow.textContent = config.eyebrow;
+  if (contextTitle) contextTitle.textContent = config.title;
+  document.title = config.documentTitle;
+
+  if (viewName === "data") {
+    const advancedSection = document.getElementById("advancedSection");
+    if (advancedSection) advancedSection.open = true;
+  }
+
+  if (updateHash) window.history.replaceState(null, "", config.hash);
+  window.scrollTo({ top: 0, behavior: preferredScrollBehavior() });
+  if (focusHeading) {
+    const activeView = document.querySelector(`[data-workspace-view="${viewName}"]`);
+    const heading = activeView?.querySelector("h1");
+    if (heading) {
+      heading.tabIndex = -1;
+      window.setTimeout(() => heading.focus({ preventScroll: true }), 0);
+    }
+  }
+  return true;
+}
+
+function syncWorkspaceViewFromHash() {
+  const hash = window.location.hash;
+  if (hash === "#advancedSection" || hash.startsWith("#settings-")) {
+    showWorkspaceView("data", { updateHash: false, focusHeading: false });
+    if (hash.startsWith("#settings-")) {
+      window.setTimeout(() => document.querySelector(hash)?.scrollIntoView({ behavior: preferredScrollBehavior(), block: "start" }), 0);
+    }
+    return;
+  }
+  if (hash === "#results-section" && showWorkspaceView("results", { updateHash: false, focusHeading: false })) return;
+  showWorkspaceView("matching", { updateHash: false, focusHeading: false });
+}
+
+function wireProductNavigation() {
+  const explainabilityLink = document.getElementById("explainabilityNavLink");
+  if (explainabilityLink) {
+    explainabilityLink.addEventListener("click", (event) => {
+      if (explainabilityLink.getAttribute("aria-disabled") === "true") event.preventDefault();
+    });
+  }
+
+  const matchingLink = document.getElementById("matchingNavLink");
+  matchingLink?.addEventListener("click", (event) => {
+    event.preventDefault();
+    showWorkspaceView("matching");
+  });
+
+  const resultsLink = document.getElementById("resultsNavLink");
+  resultsLink?.addEventListener("click", (event) => {
+    event.preventDefault();
+    showWorkspaceView("results");
+  });
+
+  const dataSettingsLink = document.getElementById("dataSettingsNavLink");
+  dataSettingsLink?.addEventListener("click", (event) => {
+    event.preventDefault();
+    showWorkspaceView("data");
+  });
+
+  syncWorkspaceViewFromHash();
 }
 
 function setReopenPdfButton(pdfUrl) {
@@ -220,6 +314,7 @@ async function initializeUserInterface() {
     settingsFiles.refreshUiFromHost(settings),
     loadLatestGeneratedResult(),
   ]);
+  syncWorkspaceViewFromHash();
   loadLastPdfFromStorage();
   loadLastFilledClassesFromStorage();
 
