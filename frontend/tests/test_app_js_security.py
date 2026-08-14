@@ -181,6 +181,34 @@ def test_stage_four_session_selector_exposes_expansion_state():
     assert 'e.key !== "Enter" && e.key !== " "' in source
 
 
+def test_stage_five_workspace_navigation_manages_focus_title_and_motion():
+    html = INDEX_HTML.read_text(encoding="utf-8")
+    source = APP_JS.read_text(encoding="utf-8")
+    workspace_css = (FRONTEND_DIR / "styles" / "workspace.css").read_text(encoding="utf-8")
+
+    assert 'role="status" aria-live="polite" aria-atomic="true"' in html
+    assert 'id="hostStatusDot" aria-hidden="true"' in html
+    assert 'for="classesBrowseButton"' in html
+    assert 'documentTitle: "Matching | Aqua Essence"' in source
+    assert "document.title = config.documentTitle;" in source
+    assert "function preferredScrollBehavior()" in source
+    assert 'window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches' in source
+    assert "behavior: preferredScrollBehavior()" in source
+    assert 'heading.focus({ preventScroll: true })' in source
+    assert 'focusHeading: false' in source
+    assert '.workspace-view h1[tabindex="-1"]:focus' in workspace_css
+
+
+def test_stage_five_generate_action_prevents_duplicate_runs():
+    source = (FRONTEND_DIR / "generate_flow.js").read_text(encoding="utf-8")
+
+    assert "let generationInProgress = false;" in source
+    assert "if (generationInProgress) return;" in source
+    assert 'generateButton.setAttribute("aria-busy", "true");' in source
+    assert 'generateButton.removeAttribute("aria-busy");' in source
+    assert "setGenerateEnabled(dataSourcesSummarySettings);" in source
+
+
 def test_app_delegates_profile_drawer_and_drops_its_state():
     source = APP_JS.read_text(encoding="utf-8")
     assert source.count("window.AquaProfileDrawer.wireProfileDrawer();") == 1

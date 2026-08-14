@@ -382,7 +382,7 @@ function initSessionSelector() {
 
 // Jackrabbit pairings CSV upload → POST /api/import_jackrabbit_pairings
 function initJackrabbitPairingsUpload() {
-    const btn      = getElementByIdOrThrow("jackrabbitImportButton");
+    const btn      = getElementByIdOrThrow("jackrabbitPairingsImportButton");
     const input    = getElementByIdOrThrow("jackrabbitPairingsFileInput");
     const metaEl   = getElementByIdOrThrow("jackrabbitImportMeta");
 

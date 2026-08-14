@@ -56,8 +56,8 @@
       <span class="visually-hidden" id="resultsNavHint">Available after a matching result is generated.</span>
     </nav>
       <div class="sidebar-footer">
-        <div class="header-status">
-          <span class="status-dot" id="hostStatusDot"></span>
+        <div class="header-status" role="status" aria-live="polite" aria-atomic="true">
+          <span class="status-dot" id="hostStatusDot" aria-hidden="true"></span>
           <span id="hostStatusText">Backend: checking...</span>
         </div>
       </div>
@@ -111,7 +111,18 @@
 
       <div class="file-row">
         <div class="file-row-left">
-          <label class="file-label">classes.csv</label>
+          <label class="file-label" for="jackrabbitImportButton">Jackrabbit export</label>
+          <div class="file-meta" id="jackrabbitImportStatus" role="status" aria-live="polite" aria-atomic="true">Import one bundle from the Jackrabbit Exporter to select all run sources.</div>
+        </div>
+        <div class="file-row-right">
+          <button class="button button-primary" id="jackrabbitImportButton" type="button">Import export</button>
+          <input type="file" id="jackrabbitImportFileInput" accept=".json,application/json" aria-describedby="jackrabbitImportStatus" hidden />
+        </div>
+      </div>
+
+      <div class="file-row">
+        <div class="file-row-left">
+          <label class="file-label" for="classesBrowseButton">classes.csv</label>
           <div class="file-meta" id="classesFileMeta">Selected file: no file selected</div>
         </div>
 
@@ -304,7 +315,7 @@
             </div>
             <div class="file-row-right">
               <input type="file" id="jackrabbitPairingsFileInput" accept=".csv" style="display:none" />
-              <button class="button button-secondary" id="jackrabbitImportButton" type="button">Upload pairings CSV</button>
+              <button class="button button-secondary" id="jackrabbitPairingsImportButton" type="button">Upload pairings CSV</button>
             </div>
           </div>
 
@@ -751,6 +762,7 @@
   <script src="./instructor_defaults.js"></script>
   <script src="./instructor_editor.js"></script>
   <script src="./session_selector.js"></script>
+  <script src="./jackrabbit_import.js"></script>
   <script src="./generate_flow.js"></script>
   <script src="./app.js"></script>
 </body>
