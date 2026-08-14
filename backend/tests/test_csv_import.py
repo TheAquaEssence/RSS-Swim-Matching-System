@@ -26,21 +26,21 @@ def _workspace_root() -> Path:
 
 
 JACKRABBIT_CLASSES_CSV = """Class ID,Location,Class,Status,Session,Start Date,End Date,Days,Start Time,End Time,Instructors,Cat 1,Open,Size
-21271704,*HQ-KENAST,RSS 1 Monday 7:30 am 2:1 Kenaston,Active,2026 Spring,4/27/2026,6/15/2026,Mon,07:30 AM,08:00 AM,Olivia R.,RSS Spring,0,2
-21271705,*HQ-KENAST,RSS 5/6 Monday 7:30 am 2:1 Kenaston,Active,2026 Spring,4/27/2026,6/15/2026,Mon,07:30 AM,08:00 AM,"Ava A., Olivia R.",RSS Spring,0,2
-21271706,*HQ-KENAST,Inactive Example,Inactive,2026 Spring,4/27/2026,6/15/2026,Tue,08:00 AM,08:30 AM,Ava A.,RSS Spring,0,2
+00201,Synthetic Pool,RSS 1 Synthetic Class A,Active,Synthetic Session,4/27/2026,6/15/2026,Mon,07:30 AM,08:00 AM,Synthetic A.,RSS,0,2
+00202,Synthetic Pool,RSS 5/6 Synthetic Class B,Active,Synthetic Session,4/27/2026,6/15/2026,Mon,07:30 AM,08:00 AM,"Synthetic B., Synthetic A.",RSS,0,2
+00203,Synthetic Pool,Inactive Example,Inactive,Synthetic Session,4/27/2026,6/15/2026,Tue,08:00 AM,08:30 AM,Synthetic B.,RSS,0,2
 """
 
 JACKRABBIT_STUDENTS_CSV = """Student ID,Student First Name,Student Last Name,Family,Status,Age,Notes
-15618069,Alice,Smith,Smith Family,Active,"07 yrs, 08 mths",0
-31648935,Bob,Smith,Smith Family,Active,"09 yrs, 00 mths",1
+00101,Student,Example A,Synthetic Family,Active,"07 yrs, 08 mths",0
+00102,Student,Example B,Synthetic Family,Active,"09 yrs, 00 mths",1
 """
 
 ACTIVE_STAFF_CSV = """Staff ID,Name,Status,Instructor,Type
-729154,Hannah Sullivan,Active,1,Part-Time
-716599,Marcus Chen,Active,1,Part-Time
-340649,Front Desk Example,Active,0,Part-Time
-854779,Inactive Example,Inactive,1,Part-Time
+00301,Synthetic Instructor A,Active,1,Part-Time
+00302,Synthetic Instructor B,Active,1,Part-Time
+00303,Synthetic Front Desk,Active,0,Part-Time
+00304,Synthetic Inactive Staff,Inactive,1,Part-Time
 """
 
 
@@ -136,18 +136,41 @@ def test_import_students_warns_about_skill_level_zero():
     """import_students must include a summary warning about skill_level=0."""
     csv_text = (
         "Student ID,Student First Name,Student Last Name,Status,Age,Family,Notes\n"
-        "15618069,Alex,Smith,Active,10 yrs 0 mths,Smith Family,0\n"
+        "00101,Synthetic,Student,Active,10 yrs 0 mths,Synthetic Family,0\n"
     )
     _, warnings = import_students(csv_text)
     skill_warning = any("skill_level" in w.lower() for w in warnings)
     assert skill_warning, f"Expected a skill_level warning. Got: {warnings}"
 
 
+def test_import_students_uses_exported_skill_level():
+    csv_text = (
+        "Student ID,Student First Name,Student Last Name,Status,Age,Family,Skill Level\n"
+        "00101,Synthetic,Student,Active,10,Synthetic Family,6\n"
+    )
+    converted, warnings = import_students(csv_text)
+    row = next(csv.DictReader(io.StringIO(converted)))
+
+    assert row["skill_level"] == "6"
+    assert not any("skill_level is unresolved" in warning for warning in warnings)
+
+
+def test_import_students_infers_unambiguous_rss_level_from_current_class():
+    csv_text = (
+        "Student ID,Student First Name,Student Last Name,Status,Age,Family,Current Classes\n"
+        "00101,Synthetic,Student,Active,10,Synthetic Family,RSS 5 Monday 4:00 pm\n"
+    )
+    converted, _ = import_students(csv_text)
+    row = next(csv.DictReader(io.StringIO(converted)))
+
+    assert row["skill_level"] == "5"
+
+
 CLASSES_FILLED_CSV = """\
 class_id,day_of_week,start_time,end_time,instructor_name,instructor_id,class_level,swimmer_1_name,swimmer_1_id,swimmer_2_name,swimmer_2_id,match_type,compatibility_score,match_confidence,match_reason,continuity_dispute,flag_codes,flag_summary,review_action,review_severity
-1,Monday,07:30,08:00,Jane Smith,1,RSS 3,Alex Brown,10,,,,continuity,,Continuity: 1 session(s) together,False,,,, none
-2,Monday,08:00,08:30,Ava Lee,2,RSS 4,Sam Jones,11,Pat Kim,12,pair,compatibility,80.0%,78.0%,Optimal compatibility match (80.0%),False,,,,none
-3,Monday,08:30,09:00,Bob Ray,3,RSS 2,,,,,,,,,,False,,,,none
+1,Monday,07:30,08:00,Synthetic Instructor A,1,RSS 3,Synthetic Student A,10,,,,continuity,,Continuity: 1 session(s) together,False,,,, none
+2,Monday,08:00,08:30,Synthetic Instructor B,2,RSS 4,Synthetic Student B,11,Synthetic Student C,12,pair,compatibility,80.0%,78.0%,Optimal compatibility match (80.0%),False,,,,none
+3,Monday,08:30,09:00,Synthetic Instructor C,3,RSS 2,,,,,,,,,,False,,,,none
 """
 
 
@@ -239,10 +262,10 @@ def test_import_students_defaults_missing_survey_type_to_non_response():
 
 
 def test_import_students_does_not_set_has_special_needs_from_notes_count():
-    """Notes count (0/1) must never set has_special_needs — that was the Gabrielle bug."""
+    """A numeric Notes count must never set has_special_needs."""
     csv_text = (
         "Student ID,Student First Name,Student Last Name,Status,Age,Family,Notes\n"
-        "15618069,Gabrielle,Test,Active,7,Test Family,1\n"
+        "00101,Synthetic,Student,Active,7,Synthetic Family,1\n"
     )
     converted, _ = import_students(csv_text)
     row = next(csv.DictReader(io.StringIO(converted)))
@@ -257,8 +280,8 @@ def test_import_students_uses_special_needs_column_when_present():
     """A dedicated Special Needs column takes precedence for has_special_needs."""
     csv_text = (
         "Student ID,Student First Name,Student Last Name,Status,Age,Family,Notes,Special Needs\n"
-        "15618069,Alice,A,Active,7,A Family,0,1\n"
-        "31648935,Bob,B,Active,9,B Family,0,0\n"
+        "00101,Synthetic,Student A,Active,7,Synthetic Family A,0,1\n"
+        "00102,Synthetic,Student B,Active,9,Synthetic Family B,0,0\n"
     )
     converted, _ = import_students(csv_text)
     rows = list(csv.DictReader(io.StringIO(converted)))
@@ -270,7 +293,7 @@ def test_import_students_warns_when_notes_count_nonzero_and_no_special_needs_col
     """Warn the user when Notes is a nonzero count but there's no Special Needs column."""
     csv_text = (
         "Student ID,Student First Name,Student Last Name,Status,Age,Family,Notes\n"
-        "15618069,Jane,Doe,Active,8,Doe Family,2\n"
+        "00101,Synthetic,Student,Active,8,Synthetic Family,2\n"
     )
     _, warnings = import_students(csv_text)
     assert any("notes count" in w.lower() and "special needs" in w.lower() for w in warnings)
@@ -280,11 +303,11 @@ def test_import_students_text_notes_preserved_for_solver():
     """Text-valued Notes are passed through to the notes field for the solver's notes_parser."""
     csv_text = (
         "Student ID,Student First Name,Student Last Name,Status,Age,Family,Notes\n"
-        "15618069,Sam,Lee,Active,10,Lee Family,prefer Coach One\n"
+        "00101,Synthetic,Student,Active,10,Synthetic Family,prefer Synthetic Instructor A\n"
     )
     converted, _ = import_students(csv_text)
     row = next(csv.DictReader(io.StringIO(converted)))
-    assert row["notes"] == "prefer Coach One"
+    assert row["notes"] == "prefer Synthetic Instructor A"
     assert not _is_truthy_csv(row["has_special_needs"])
 
 
@@ -292,7 +315,7 @@ def test_import_students_text_notes_do_not_set_has_special_needs():
     """Text in Notes must not cause has_special_needs to be set."""
     csv_text = (
         "Student ID,Student First Name,Student Last Name,Status,Age,Family,Notes\n"
-        "15618069,Tim,Jones,Active,6,Jones Family,avoid bad instructor\n"
+        "00101,Synthetic,Student,Active,6,Synthetic Family,avoid Synthetic Instructor B\n"
     )
     converted, _ = import_students(csv_text)
     row = next(csv.DictReader(io.StringIO(converted)))
@@ -303,7 +326,7 @@ def test_import_students_notes_count_zero_no_warning():
     """Notes=0 should not produce any notes-count warning."""
     csv_text = (
         "Student ID,Student First Name,Student Last Name,Status,Age,Family,Notes\n"
-        "15618069,Lily,Park,Active,5,Park Family,0\n"
+        "00101,Synthetic,Student,Active,5,Synthetic Family,0\n"
     )
     _, warnings = import_students(csv_text)
     assert not any("notes count" in w.lower() for w in warnings)
@@ -313,8 +336,8 @@ def test_import_instructors_from_active_staff_defaults_missing_profile_fields():
     converted, warnings = import_instructors(ACTIVE_STAFF_CSV)
     rows = list(csv.DictReader(io.StringIO(converted)))
 
-    assert [row["first_name"] for row in rows] == ["Hannah", "Marcus"]
-    assert [row["last_name"] for row in rows] == ["Sullivan", "Chen"]
+    assert [row["first_name"] for row in rows] == ["Synthetic", "Synthetic"]
+    assert [row["last_name"] for row in rows] == ["Instructor A", "Instructor B"]
     assert all(row["primary_style_id"] == "6" for row in rows)
     assert all(row["can_teach_babies"] == "0" for row in rows)
     assert all(row["can_teach_adults"] == "0" for row in rows)
@@ -348,9 +371,9 @@ def test_import_instructors_uses_configured_default_profile():
 
 def test_import_instructors_filters_to_editable_positions_and_preserves_source_profile_values():
     source_csv = """Staff ID,Name,Status,Position,Instructor,primary_color_id,secondary_color_id,primary_style_id,secondary_style_id,is_team_captain,can_teach_NL,can_teach_babies,can_teach_adults,can_teach_adapted,used_default_profile
-729154,Coach One,Active,Coach,1,4,3,2,1,0,1,1,1,1,0
-340649,Front Desk Person,Active,Customer Service,1,2,1,6,5,0
-716599,Youth Leader Example,Active,Youth Leader,1,,,,,
+00301,Synthetic Coach,Active,Coach,1,4,3,2,1,0,1,1,1,1,0
+00303,Synthetic Front Desk,Active,Customer Service,1,2,1,6,5,0
+00302,Synthetic Youth Leader,Active,Youth Leader,1,,,,,
 """
     converted, _ = import_instructors(
         source_csv,
@@ -369,8 +392,8 @@ def test_import_instructors_filters_to_editable_positions_and_preserves_source_p
     rows = list(csv.DictReader(io.StringIO(converted)))
 
     assert [f"{row['first_name']} {row['last_name']}".strip() for row in rows] == [
-        "Coach One",
-        "Youth Leader Example",
+        "Synthetic Coach",
+        "Synthetic Youth Leader",
     ]
     assert rows[0]["primary_color_id"] == "4"
     assert rows[0]["secondary_style_id"] == "1"
@@ -381,24 +404,24 @@ def test_import_instructors_filters_to_editable_positions_and_preserves_source_p
 
 def test_import_instructors_accepts_compound_editable_positions():
     source_csv = """Staff ID,Name,Status,Position,Instructor
-729154,Rishona Hyman,Active,Instructor Office Staff,1
-716599,Mitchell McCausland,Active,Instructor Team Captain Office Staff,1
-340649,Front Desk Example,Active,Customer Service Office Staff,1
+00301,Synthetic Instructor A,Active,Instructor Office Staff,1
+00302,Synthetic Instructor B,Active,Instructor Team Captain Office Staff,1
+00303,Synthetic Front Desk,Active,Customer Service Office Staff,1
 """
     converted, warnings = import_instructors(source_csv)
     rows = list(csv.DictReader(io.StringIO(converted)))
 
     assert [f"{row['first_name']} {row['last_name']}".strip() for row in rows] == [
-        "Rishona Hyman",
-        "Mitchell McCausland",
+        "Synthetic Instructor A",
+        "Synthetic Instructor B",
     ]
-    assert not any("Rishona Hyman" in warning and "skipped" in warning for warning in warnings)
-    assert not any("Mitchell McCausland" in warning and "skipped" in warning for warning in warnings)
+    assert not any("Synthetic Instructor A" in warning and "skipped" in warning for warning in warnings)
+    assert not any("Synthetic Instructor B" in warning and "skipped" in warning for warning in warnings)
 
 
 def test_import_classes_accepts_excel_serial_dates():
     serial_date_classes_csv = """Class ID,Location,Class,Status,Session,Start Date,End Date,Days,Start Time,End Time,Instructors,Cat 1,Open,Size
-21271704,*HQ-KENAST,RSS 1 Monday 7:30 am 2:1 Kenaston,Active,2026 Spring,46139,46188,Mon,07:30 AM,08:00 AM,Olivia R.,RSS Spring,0,2
+00201,Synthetic Pool,RSS 1 Synthetic Class,Active,Synthetic Session,46139,46188,Mon,07:30 AM,08:00 AM,Synthetic A.,RSS,0,2
 """
     converted, _ = import_classes(serial_date_classes_csv)
     row = next(csv.DictReader(io.StringIO(converted)))
@@ -444,7 +467,7 @@ def test_imported_jackrabbit_classes_without_instructor_id_yield_no_instructor(t
         source_dir=_workspace_root() / "data" / "source",
     )
 
-    sorted_ids = sorted(loader.classes)  # [21271704, 2127170500, 2127170501] → sorted slot IDs
+    sorted_ids = sorted(loader.classes)
     # No xID → DataLoader has no instructor to resolve; all return None
     assert all(loader.classes[cid].instructor_id is None for cid in sorted_ids)
     first_class = loader.classes[sorted_ids[0]]
@@ -467,8 +490,8 @@ def test_imported_active_staff_resolves_full_instructor_names(tmp_path, loader_c
     classes_path.write_text(
         "\n".join([
             "class_id,start_time,end_time,day_of_week,location,class_name,session,instructor_name,open,size,status,cat_1,cat_2,start_date,end_date",
-            "1,07:30 AM,08:00 AM,Mon,*HQ-KENAST,Real Class,2026 Spring,Hannah Sullivan,0,2,Active,RSS Spring,,2026-04-27,2026-06-15",
-            "2,08:00 AM,08:30 AM,Mon,*HQ-KENAST,Real Class 2,2026 Spring,Marcus Chen,0,2,Active,RSS Spring,,2026-04-27,2026-06-15",
+            "1,07:30 AM,08:00 AM,Mon,Synthetic Pool,Synthetic Class A,Synthetic Session,Synthetic Instructor A,0,2,Active,RSS,,2026-04-27,2026-06-15",
+            "2,08:00 AM,08:30 AM,Mon,Synthetic Pool,Synthetic Class B,Synthetic Session,Synthetic Instructor B,0,2,Active,RSS,,2026-04-27,2026-06-15",
         ]),
         encoding="utf-8",
     )
@@ -481,5 +504,4 @@ def test_imported_active_staff_resolves_full_instructor_names(tmp_path, loader_c
         source_dir=_workspace_root() / "data" / "source",
     )
 
-    # Hannah Sullivan → 729154, Marcus Chen → 716599 (Jackrabbit staff xIDs)
-    assert [loader.classes[class_id].instructor_id for class_id in sorted(loader.classes)] == [729154, 716599]
+    assert [loader.classes[class_id].instructor_id for class_id in sorted(loader.classes)] == ["00301", "00302"]

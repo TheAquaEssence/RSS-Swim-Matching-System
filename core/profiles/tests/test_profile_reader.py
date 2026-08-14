@@ -67,7 +67,7 @@ class TestBuildSwimmerProfiles:
             types_path=data_dir / "swimmer_types.csv",
         )
         swimmer = profiles["swimmers"]["101"]
-        assert swimmer["swimmer_id"] == 101
+        assert swimmer["swimmer_id"] == "101"
         assert swimmer["first_name"] == "Alice"
         assert swimmer["last_name"] == "Smith"
         assert swimmer["name"] == "Alice Smith"
@@ -139,7 +139,7 @@ class TestBuildInstructorProfiles:
             styles_path=data_dir / "instructor_styles.csv",
         )
         inst = profiles["instructors"]["501"]
-        assert inst["instructor_id"] == 501
+        assert inst["instructor_id"] == "501"
         assert inst["first_name"] == "Carol"
         assert inst["last_name"] == "Lee"
         assert inst["name"] == "Carol Lee"
@@ -152,6 +152,30 @@ class TestBuildInstructorProfiles:
         assert inst["can_teach_babies"] is True
         assert inst["can_teach_adults"] is False
         assert inst["can_teach_adapted"] is True
+
+    def test_external_ids_keep_leading_zeroes(self, data_dir):
+        swimmers_path = data_dir / "swimmers_leading_zero.csv"
+        instructors_path = data_dir / "instructors_leading_zero.csv"
+        swimmers_path.write_text(
+            (data_dir / "swimmers.csv").read_text(encoding="utf-8").replace(
+                "101,Alice", "00101,Alice"
+            ),
+            encoding="utf-8",
+        )
+        instructors_path.write_text(
+            (data_dir / "instructors.csv").read_text(encoding="utf-8").replace(
+                "501,Carol", "00501,Carol"
+            ),
+            encoding="utf-8",
+        )
+
+        profiles = build_profiles(
+            swimmers_path=swimmers_path,
+            instructors_path=instructors_path,
+        )
+
+        assert profiles["swimmers"]["00101"]["swimmer_id"] == "00101"
+        assert profiles["instructors"]["00501"]["instructor_id"] == "00501"
 
 
 class TestFallbackResolution:

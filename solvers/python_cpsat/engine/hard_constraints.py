@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .config import AGE_THRESHOLDS, PAIRING_CONSTRAINTS
-from .data_loader import Class, Instructor, Swimmer
+from .data_loader import Class, EntityId, Instructor, Swimmer
 
 
 @dataclass(frozen=True)
@@ -85,7 +85,7 @@ def collect_hard_constraint_violations(
     matches: Sequence[Mapping[str, Any]],
     swimmers: Iterable[Swimmer],
     instructors: Iterable[Instructor],
-    classes: Mapping[int, Class] | Iterable[Class] | None = None,
+    classes: Mapping[object, Class] | Iterable[Class] | None = None,
 ) -> list[HardConstraintViolation]:
     """Collect all HC-1 through HC-4 violations in proposed assignments."""
     swimmer_lookup = {swimmer.swimmer_id: swimmer for swimmer in swimmers}
@@ -95,8 +95,8 @@ def collect_hard_constraint_violations(
     class_lookup = _class_lookup(classes)
 
     violations: list[HardConstraintViolation] = []
-    seen_swimmers: dict[int, int] = {}
-    seen_classes: dict[int, int] = {}
+    seen_swimmers: dict[EntityId, int] = {}
+    seen_classes: dict[object, int] = {}
     seen_instructor_slots: dict[tuple[Any, ...], int] = {}
 
     for match_index, match in enumerate(matches):
@@ -177,13 +177,16 @@ def collect_hard_constraint_violations(
 
         class_id = match.get("class_id")
         if class_id is not None:
-            if class_id not in class_lookup:
+            class_key = (class_id, instructor_id)
+            if class_key not in class_lookup and class_id in class_lookup:
+                class_key = class_id
+            if class_key not in class_lookup:
                 violations.append(HardConstraintViolation(
                     "DATA",
                     f"match {match_index} references unknown class {class_id}",
                     match_index,
                 ))
-            previous_match = seen_classes.get(class_id)
+            previous_match = seen_classes.get(class_key)
             if previous_match is not None:
                 violations.append(HardConstraintViolation(
                     "HC-1",
@@ -191,7 +194,7 @@ def collect_hard_constraint_violations(
                     match_index,
                 ))
             else:
-                seen_classes[class_id] = match_index
+                seen_classes[class_key] = match_index
 
         if match_type == "pair" and len(resolved_swimmers) == 2:
             for reason in pair_constraint_violations(
@@ -210,7 +213,7 @@ def validate_hard_constraints(
     matches: Sequence[Mapping[str, Any]],
     swimmers: Iterable[Swimmer],
     instructors: Iterable[Instructor],
-    classes: Mapping[int, Class] | Iterable[Class] | None = None,
+    classes: Mapping[object, Class] | Iterable[Class] | None = None,
 ) -> None:
     """Raise if any proposed assignment violates a hard constraint."""
     violations = collect_hard_constraint_violations(
@@ -223,35 +226,54 @@ def validate_hard_constraints(
         raise HardConstraintViolationError(violations)
 
 
-def _match_swimmer_ids(match: Mapping[str, Any]) -> tuple[int, ...] | None:
+def _is_entity_id(value: object) -> bool:
+    return (
+        isinstance(value, int) and not isinstance(value, bool) and value > 0
+    ) or (
+        isinstance(value, str) and bool(value) and value.isascii() and value.isdigit()
+    )
+
+
+def _match_swimmer_ids(match: Mapping[str, Any]) -> tuple[EntityId, ...] | None:
     match_type = match.get("type")
-    if match_type == "individual" and isinstance(match.get("swimmer_id"), int):
+    if match_type == "individual" and _is_entity_id(match.get("swimmer_id")):
         return (match["swimmer_id"],)
     if (
         match_type == "pair"
-        and isinstance(match.get("swimmer_1_id"), int)
-        and isinstance(match.get("swimmer_2_id"), int)
+        and _is_entity_id(match.get("swimmer_1_id"))
+        and _is_entity_id(match.get("swimmer_2_id"))
     ):
         return (match["swimmer_1_id"], match["swimmer_2_id"])
     return None
 
 
 def _class_lookup(
-    classes: Mapping[int, Class] | Iterable[Class] | None,
-) -> dict[int, Class]:
+    classes: Mapping[object, Class] | Iterable[Class] | None,
+) -> dict[object, Class]:
     if classes is None:
         return {}
-    if isinstance(classes, Mapping):
-        return dict(classes)
-    return {class_obj.class_id: class_obj for class_obj in classes}
+    class_values = list(classes.values()) if isinstance(classes, Mapping) else list(classes)
+    counts: dict[EntityId, int] = {}
+    for class_obj in class_values:
+        counts[class_obj.class_id] = counts.get(class_obj.class_id, 0) + 1
+    lookup: dict[object, Class] = {}
+    for class_obj in class_values:
+        lookup[(class_obj.class_id, class_obj.instructor_id)] = class_obj
+        if counts[class_obj.class_id] == 1:
+            lookup[class_obj.class_id] = class_obj
+    return lookup
 
 
 def _instructor_capacity_key(
-    instructor_id: int,
-    class_id: int | None,
-    class_lookup: Mapping[int, Class],
+    instructor_id: EntityId,
+    class_id: EntityId | None,
+    class_lookup: Mapping[object, Class],
 ) -> tuple[Any, ...]:
-    class_obj = class_lookup.get(class_id) if class_id is not None else None
+    class_obj = (
+        class_lookup.get((class_id, instructor_id)) or class_lookup.get(class_id)
+        if class_id is not None
+        else None
+    )
     if class_obj is None:
         return (instructor_id, "unscheduled")
     return (

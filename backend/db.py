@@ -48,8 +48,9 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE TABLE IF NOT EXISTS pairings (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id    INTEGER NOT NULL REFERENCES sessions(id),
-    swimmer_id    INTEGER NOT NULL,
-    instructor_id INTEGER NOT NULL,
+    swimmer_id    TEXT    NOT NULL,
+    instructor_id TEXT    NOT NULL,
+    class_id       TEXT,
     class_slot    TEXT,
     source        TEXT    NOT NULL DEFAULT 'solver'
 );
@@ -119,11 +120,59 @@ def _migration_2_operator_attribution(con: sqlite3.Connection) -> None:
         _add_column_if_missing(con, table, column, declaration)
 
 
+def _migration_3_pairing_ids_as_text(con: sqlite3.Connection) -> None:
+    """Preserve external xIDs, including leading zeroes, in pairing history."""
+
+    column_types = {
+        row[1]: str(row[2]).upper()
+        for row in con.execute("PRAGMA table_info(pairings)")
+    }
+    if (
+        column_types.get("swimmer_id") == "TEXT"
+        and column_types.get("instructor_id") == "TEXT"
+        and column_types.get("class_id") == "TEXT"
+    ):
+        return
+
+    con.execute(
+        """
+        CREATE TABLE pairings_text_ids (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id    INTEGER NOT NULL REFERENCES sessions(id),
+            swimmer_id    TEXT    NOT NULL,
+            instructor_id TEXT    NOT NULL,
+            class_id       TEXT,
+            class_slot    TEXT,
+            source        TEXT    NOT NULL DEFAULT 'solver'
+        )
+        """
+    )
+    con.execute(
+        """
+        INSERT INTO pairings_text_ids
+            (id, session_id, swimmer_id, instructor_id, class_id, class_slot, source)
+        SELECT id, session_id, CAST(swimmer_id AS TEXT), CAST(instructor_id AS TEXT),
+               NULL, class_slot, source
+        FROM pairings
+        """
+    )
+    con.execute("DROP TABLE pairings")
+    con.execute("ALTER TABLE pairings_text_ids RENAME TO pairings")
+    con.execute("CREATE INDEX idx_pairings_swimmer ON pairings(swimmer_id)")
+    con.execute("CREATE INDEX idx_pairings_instructor ON pairings(instructor_id)")
+    con.execute("CREATE INDEX idx_pairings_session ON pairings(session_id)")
+    con.execute(
+        "CREATE UNIQUE INDEX idx_pairings_unique "
+        "ON pairings(session_id, swimmer_id, instructor_id)"
+    )
+
+
 # Position in this tuple is the schema version. Never reorder or rewrite a
 # released migration; append a new callable and increment the version instead.
 _MIGRATIONS = (
     _migration_1_initial_schema,
     _migration_2_operator_attribution,
+    _migration_3_pairing_ids_as_text,
 )
 CURRENT_SCHEMA_VERSION = len(_MIGRATIONS)
 
@@ -196,14 +245,15 @@ def save_session_pairings(
         if not instr_id:
             continue
         class_slot = m.get("class_slot") or m.get("day_of_week") or None
+        class_id = str(m.get("class_id", "")).strip() or None
 
         s1 = m.get("swimmer_id") or m.get("swimmer_1_id")
         if s1:
-            rows.append((int(s1), int(instr_id), class_slot, source))
+            rows.append((str(s1).strip(), str(instr_id).strip(), class_id, class_slot, source))
 
         s2 = m.get("swimmer_2_id")
         if s2:
-            rows.append((int(s2), int(instr_id), class_slot, source))
+            rows.append((str(s2).strip(), str(instr_id).strip(), class_id, class_slot, source))
 
     with _db_lock, _connect() as con:
         existing = con.execute(
@@ -223,9 +273,13 @@ def save_session_pairings(
             )
             session_id = cur.lastrowid
         con.executemany(
-            "INSERT INTO pairings (session_id, swimmer_id, instructor_id, class_slot, source) "
-            "VALUES (?, ?, ?, ?, ?)",
-            [(session_id, swimmer, instr, slot, src) for swimmer, instr, slot, src in rows],
+            "INSERT INTO pairings "
+            "(session_id, swimmer_id, instructor_id, class_id, class_slot, source) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            [
+                (session_id, swimmer, instr, class_id, slot, src)
+                for swimmer, instr, class_id, slot, src in rows
+            ],
         )
         con.commit()
 
@@ -358,12 +412,13 @@ def import_jackrabbit_pairings_csv(csv_text: str, imported_by: Optional[str] = N
 
     # Parse + deduplicate in memory
     seen: set[tuple] = set()
-    by_session: dict[str, list[tuple]] = {}  # session_label -> [(swimmer_id, instructor_id, class_name)]
+    by_session: dict[str, list[tuple]] = {}
     skipped = 0
 
     for row in reader:
         sid   = row.get("swimmer_id",    "").strip()
         iid   = row.get("instructor_id", "").strip()
+        cid   = row.get("class_id", "").strip()
         sess  = row.get("session",       "").strip()
         cname = row.get("class_name",    "").strip()
 
@@ -371,9 +426,7 @@ def import_jackrabbit_pairings_csv(csv_text: str, imported_by: Optional[str] = N
             skipped += 1
             continue
 
-        try:
-            int(sid); int(iid)          # must be numeric xIDs
-        except ValueError:
+        if not (sid.isascii() and sid.isdigit() and iid.isascii() and iid.isdigit()):
             skipped += 1
             continue
 
@@ -382,7 +435,7 @@ def import_jackrabbit_pairings_csv(csv_text: str, imported_by: Optional[str] = N
             skipped += 1
             continue
         seen.add(key)
-        by_session.setdefault(sess, []).append((sid, iid, cname))
+        by_session.setdefault(sess, []).append((sid, iid, cid, cname))
 
     imported = 0
     session_labels: list[str] = []
@@ -403,13 +456,19 @@ def import_jackrabbit_pairings_csv(csv_text: str, imported_by: Optional[str] = N
                 )
                 session_id = cur.lastrowid
 
-            for swimmer_id, instructor_id, class_name in pairs:
+            for swimmer_id, instructor_id, class_id, class_name in pairs:
                 try:
                     con.execute(
                         "INSERT OR IGNORE INTO pairings "
-                        "(session_id, swimmer_id, instructor_id, class_slot, source) "
-                        "VALUES (?, ?, ?, ?, 'jackrabbit_import')",
-                        (session_id, int(swimmer_id), int(instructor_id), class_name or None),
+                        "(session_id, swimmer_id, instructor_id, class_id, class_slot, source) "
+                        "VALUES (?, ?, ?, ?, ?, 'jackrabbit_import')",
+                        (
+                            session_id,
+                            swimmer_id,
+                            instructor_id,
+                            class_id or None,
+                            class_name or None,
+                        ),
                     )
                     imported += con.execute("SELECT changes()").fetchone()[0]
                 except Exception:
@@ -1088,7 +1147,7 @@ def export_instructors_solver_csv() -> str:
         "instructor_id", "first_name", "last_name",
         "primary_color_id", "secondary_color_id", "primary_style_id", "secondary_style_id",
         "is_team_captain", "can_teach_NL", "can_teach_babies", "can_teach_adults", "can_teach_adapted",
-        "used_default_profile",
+        "used_default_profile", "profile_source",
     ]
     rows = list_instructors()
     out = io.StringIO()

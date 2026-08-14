@@ -18,7 +18,7 @@ from core.flags import (
 from core.swimmer_types import is_non_response_swimmer_type
 
 from .config import CONFIDENCE, REVIEW_THRESHOLDS
-from .data_loader import Swimmer, Instructor, DataLoader
+from .data_loader import DataLoader, EntityId, Instructor, Swimmer
 
 
 def generate_explanations(
@@ -28,7 +28,7 @@ def generate_explanations(
     scorer: CompatibilityScorer,
     data_loader: DataLoader,
     disputed_ids: set = None,
-    swimmer_flags: Dict[int, List[str]] = None,
+    swimmer_flags: Dict[EntityId, List[str]] = None,
 ) -> List[Dict]:
     """
     Phase 3: Add explanation text and confidence scores to all matches.
@@ -233,7 +233,7 @@ def _has_weak_signals(result: CompatibilityResult) -> bool:
 
 def _check_first_choice(
     swimmer: Swimmer,
-    instructor_id: int,
+    instructor_id: EntityId,
     instructors: List[Instructor],
     scorer: CompatibilityScorer,
     style_lookup
@@ -611,9 +611,19 @@ def generate_output_csv(
     if disputed_ids is None:
         disputed_ids = set()
 
+    class_id_counts: Dict[object, int] = {}
+    for class_obj in classes.values():
+        class_id_counts[class_obj.class_id] = class_id_counts.get(class_obj.class_id, 0) + 1
     assignment_lookup_by_class_id = {
         a['class_id']: a for a in assignments
-        if a.get('class_id') is not None
+        if (
+            a.get('class_id') is not None
+            and class_id_counts.get(a['class_id'], 0) == 1
+        )
+    }
+    assignment_lookup_by_class_and_instructor = {
+        (a['class_id'], a['instructor_id']): a for a in assignments
+        if a.get('class_id') is not None and a.get('instructor_id') is not None
     }
     assignment_lookup_by_instructor_id = {
         a['instructor_id']: a for a in assignments
@@ -622,7 +632,11 @@ def generate_output_csv(
     output_rows = []
 
     for class_obj in classes.values():
-        assignment = assignment_lookup_by_class_id.get(class_obj.class_id)
+        assignment = assignment_lookup_by_class_and_instructor.get(
+            (class_obj.class_id, class_obj.instructor_id)
+        )
+        if assignment is None:
+            assignment = assignment_lookup_by_class_id.get(class_obj.class_id)
         if assignment is None and class_obj.instructor_id is not None:
             assignment = assignment_lookup_by_instructor_id.get(class_obj.instructor_id)
 
@@ -742,7 +756,7 @@ def get_confidence_category(confidence: float) -> str:
 
 def generate_unassigned_report(
     unassigned_swimmers: List[Swimmer],
-    reasons: Dict[int, str],
+    reasons: Dict[EntityId, str],
     output_path: str
 ) -> 'pd.DataFrame':
     """
