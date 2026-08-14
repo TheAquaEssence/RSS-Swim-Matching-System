@@ -943,6 +943,12 @@ HEARTBEAT_TIMEOUT = 180  # 3 minutes
 
 def _watchdog(state: ApplicationState):
     while not state.shutdown_event.wait(timeout=5):
+        # A synchronous generate request prevents the renderer's heartbeat
+        # fetch from completing. Keep the host alive until the bounded solver
+        # request finishes so the five-minute solver timeout remains reachable.
+        if state.generate_in_progress:
+            state.last_heartbeat = time.monotonic()
+            continue
         if time.monotonic() - state.last_heartbeat > HEARTBEAT_TIMEOUT:
             print("UI heartbeat timed out. Shutting down.", flush=True)
             os.kill(os.getpid(), signal.SIGINT)
