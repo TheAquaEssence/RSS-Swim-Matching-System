@@ -24,20 +24,10 @@ jobs:
           python-version-file: ".python-version"
           cache: pip
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: "24" # current LTS
-          cache: npm
-          cache-dependency-path: desktop/package-lock.json
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
-
-      - name: Install desktop dependencies
-        working-directory: desktop
-        run: npm ci --ignore-scripts
 
       - name: Verify public commit attribution
         run: python scripts/check_commit_attribution.py
@@ -48,10 +38,25 @@ jobs:
       - name: Run tests
         run: python -m pytest -q
 
-      - name: Run desktop tests
+  desktop:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24" # current LTS
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci --ignore-scripts
+
+      - name: Run tests
         working-directory: desktop
         run: npm test
 
-      - name: Check desktop JavaScript
+      - name: Check JavaScript
         working-directory: desktop
         run: npm run check
