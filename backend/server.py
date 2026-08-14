@@ -993,7 +993,7 @@ api_router = APIRouter()
 
 @api_router.get("/api/health")
 def health():
-    return JSONResponse({"ok": True, "version": "0.1.0"}, headers=NO_CACHE)
+    return JSONResponse({"ok": True, "version": "0.2.0"}, headers=NO_CACHE)
 
 
 @api_router.get("/api/ready")

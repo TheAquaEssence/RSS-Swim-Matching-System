@@ -5,6 +5,8 @@ All notable user-visible changes are recorded here. Versioning follows
 
 ## Unreleased
 
+## 0.2.0 — 2026-08-14
+
 ### Added
 
 - Added strict import support for Jackrabbit Exporter 1.1.0 format-version-1
