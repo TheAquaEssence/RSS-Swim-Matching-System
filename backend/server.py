@@ -430,7 +430,7 @@ def normalize_instructors_csv(
     styles_path: Path,
     output_path: Path,
     default_profile: dict,
-) -> tuple[int, set[int]]:
+) -> tuple[int, set[str]]:
     """Rewrite instructors.csv with missing/invalid profile fields defaulted."""
     headers, rows = read_csv_file(source_path)
     required = [
@@ -455,19 +455,33 @@ def normalize_instructors_csv(
 
     normalized_rows = []
     changed = 0
-    defaulted_ids: set[int] = set()
+    defaulted_ids: set[str] = set()
     output_headers = list(headers)
     if "used_default_profile" not in output_headers:
         output_headers.append("used_default_profile")
+
+    incomplete_profile_ids = sorted(
+        str(row.get("instructor_id", "")).strip()
+        for row in rows
+        if str(row.get("profile_source", "")).strip() in {"1", "2"}
+    )
+    if incomplete_profile_ids:
+        rendered = ", ".join(incomplete_profile_ids[:10])
+        if len(incomplete_profile_ids) > 10:
+            rendered += f", and {len(incomplete_profile_ids) - 10} more"
+        raise ValueError(
+            "Instructor profiles are incomplete for ID(s): "
+            f"{rendered}. Complete their colors, styles, and teaching "
+            "qualifications in Data & settings before matching."
+        )
 
     for row in rows:
         normalized = dict(row)
         row_changed = False
         used_default = _parse_boolish(row.get("used_default_profile"), False)
 
-        try:
-            instructor_id = int(str(row.get("instructor_id", "")).strip())
-        except (TypeError, ValueError):
+        instructor_id = str(row.get("instructor_id", "")).strip()
+        if not instructor_id:
             normalized_rows.append(normalized)
             continue
 
@@ -1569,9 +1583,31 @@ from backend.routers.settings_files import (  # noqa: E402
     SettingsFilesDependencies,
     create_settings_files_router,
 )
+from backend.routers.jackrabbit_import import (  # noqa: E402
+    JackrabbitImportDependencies,
+    create_jackrabbit_import_router,
+)
 
 def _include_dependency_routers(application: FastAPI, services: ApplicationServices) -> None:
     state = services.state
+    application.include_router(
+        create_jackrabbit_import_router(
+            JackrabbitImportDependencies(
+                no_cache_headers=NO_CACHE,
+                app_data_root=services.paths.app_data_root,
+                settings_lock=state.settings_lock,
+                get_settings=lambda: state.settings,
+                validate_settings=validate_and_fixup,
+                save_settings=lambda value: save_settings(value, services.paths.settings_path),
+                sanitize_instructor_profile=_sanitize_instructor_default_profile,
+                import_classes=import_classes,
+                import_students=import_students,
+                import_instructors=import_instructors,
+                repository=services.repository,
+                operator_name=_operator_name,
+            )
+        )
+    )
     application.include_router(
         create_generation_router(
             GenerationRouterDependencies(
