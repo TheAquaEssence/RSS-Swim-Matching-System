@@ -7,8 +7,8 @@
 
 A prioritized list of bugs, improvements, and features for the Aqua Essence app,
 informed by a codebase review and direct feedback from the company coordinator
-(the day-to-day user). Each item is written to be **self-contained**: copy a
-single item (or a whole batch) into a fresh Claude session as the prompt.
+(the day-to-day user). Each item is written to be **self-contained** so a
+single item or batch can be used directly as an implementation brief.
 
 **Coordinator feedback driving priorities** (from their email):
 - They value the Jackrabbit exporter and want the workflow usable by more than
@@ -237,7 +237,7 @@ generation.
 5. **C1–C4** (polish, each tiny)
 6. **B4**, then **D1–D5** (engineering, anytime)
 
-Conventions for any session picking these up: backend tests live in
+Conventions for implementing these items: backend tests live in
 `backend/tests/`; run `python -m pytest backend/tests/ -q`; commit per item
 with Conventional Commits, **no Co-Authored-By lines**; verify UI changes in
 the browser via the `fastapi` launch config before committing.

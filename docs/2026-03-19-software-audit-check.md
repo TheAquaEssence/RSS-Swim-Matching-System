@@ -110,7 +110,7 @@ The Aqua Essence swim matching system has a solid core solver (CP-SAT) with good
 
 ### 5. Documentation
 
-**Summary:** CLAUDE.md is thorough and current. RUN_APP.md has stale references. No API documentation.
+**Summary:** The development guide is thorough and current. RUN_APP.md has stale references. No API documentation.
 
 | Finding | Severity | Evidence |
 |---------|----------|----------|
@@ -118,7 +118,7 @@ The Aqua Essence swim matching system has a solid core solver (CP-SAT) with good
 | **RUN_APP.md documents C++ backend as primary** | Medium | `docs/RUN_APP.md:3-8` — but `backend2/server.py` is the active dev backend |
 | **PLAN.md has stale `swim_matching/` references** | Low | `docs/PLAN.md` — references `swim_matching/matcher.py`, `swim_matching/data/classes.csv` etc. |
 | **No API endpoint documentation** | Medium | 18+ endpoints across 3 servers, none documented outside code |
-| **CLAUDE.md is accurate and comprehensive** | N/A (good) | Cross-verified against codebase |
+| **The development guide is accurate and comprehensive** | N/A (good) | Cross-verified against codebase |
 
 ---
 
