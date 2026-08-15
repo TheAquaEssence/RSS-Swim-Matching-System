@@ -372,6 +372,8 @@ def test_completed_bundle_flows_through_solver_profiles_results_and_export(tmp_p
 
     assert generated.status_code == 200, generated.text
     assert generated.json()["ok"] is True
+    assert generated.json()["matches"][0]["class_id"] == "00201"
+    assert isinstance(generated.json()["matches"][0]["class_id"], str)
     job_dir = Path(services.state.last_job_dir)
     with (job_dir / "classes_filled.csv").open(encoding="utf-8", newline="") as handle:
         output_rows = list(csv.DictReader(handle))

@@ -134,6 +134,23 @@ def _flag_summary(flag_codes):
     return FLAG_CODES.get(primary, {}).get('description', '')
 
 
+def _result_class_id(match, classes):
+    """Resolve an unambiguous class xID for the public result contract."""
+    class_id = match.get('class_id')
+    if class_id is not None:
+        return str(class_id)
+
+    instructor_id = str(match.get('instructor_id', '')).strip()
+    if not instructor_id:
+        return None
+    candidates = {
+        str(class_obj.class_id)
+        for class_obj in classes.values()
+        if str(class_obj.instructor_id or '').strip() == instructor_id
+    }
+    return next(iter(candidates)) if len(candidates) == 1 else None
+
+
 def main(argv=None):
     logger = configure_component_logger(COMPONENT)
     install_uncaught_exception_logging(logger, COMPONENT)
@@ -362,7 +379,7 @@ def main(argv=None):
             for m in annotated_matches:
                 flag_codes = m.get('flag_codes', [])
                 entry = {
-                    'class_id': m.get('class_id'),
+                    'class_id': _result_class_id(m, loader.classes),
                     'type': m['type'],
                     'instructor_id': m['instructor_id'],
                     'instructor_name': m.get('instructor_name', ''),
