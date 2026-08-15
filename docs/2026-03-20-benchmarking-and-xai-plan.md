@@ -246,7 +246,7 @@ B1 and B2 are fully independent and can be done in parallel.
 
 - **Plan A and Plan B are fully independent** — can be interleaved in any order
 - **Suggested starting order:** A1 → B1+B2 → A2+A3 → B3 → A4 → B4 → A5 → B5
-- Both plans update `CLAUDE.md` as phases complete
+- Both plans update the project documentation as phases complete
 
 ## Verification
 

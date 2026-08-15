@@ -16,6 +16,9 @@ Aqua Essence owns bundle validation, CSV conversion, source selection, and
 database import. The exporter owns browser permissions, Jackrabbit page
 extraction, buffering, and bundle generation.
 
+The supported release compatibility is Aqua Essence 0.2.0, Jackrabbit
+Exporter 1.1.0, and bundle contract version 1 (`format_version: 1`).
+
 The only supported bundle handoff is
 `aqua_essence_jackrabbit_export.json`, produced by Jackrabbit Exporter 1.1.0,
 with:

@@ -348,15 +348,15 @@ function renderResults(result) {
     let swimmers;
     if (m.type === "pair") {
       swimmers =
-        `<span class="paired-swimmer-line"><span class="profile-link swimmer-link" data-type="swimmer" data-id="${m.swimmer_1_id}">${esc(m.swimmer_1_name ?? m.swimmer_1_id)}</span></span>` +
-        `<span class="paired-swimmer-line"><span class="profile-link swimmer-link" data-type="swimmer" data-id="${m.swimmer_2_id}">${esc(m.swimmer_2_name ?? m.swimmer_2_id)}</span></span>`;
+        `<span class="paired-swimmer-line"><button type="button" class="profile-link swimmer-link" data-type="swimmer" data-id="${m.swimmer_1_id}">${esc(m.swimmer_1_name ?? m.swimmer_1_id)}</button></span>` +
+        `<span class="paired-swimmer-line"><button type="button" class="profile-link swimmer-link" data-type="swimmer" data-id="${m.swimmer_2_id}">${esc(m.swimmer_2_name ?? m.swimmer_2_id)}</button></span>`;
     } else {
-      swimmers = `<span class="profile-link swimmer-link" data-type="swimmer" data-id="${m.swimmer_id}">${esc(m.swimmer_name ?? m.swimmer_id ?? "?")}</span>`;
+      swimmers = `<button type="button" class="profile-link swimmer-link" data-type="swimmer" data-id="${m.swimmer_id}">${esc(m.swimmer_name ?? m.swimmer_id ?? "?")}</button>`;
     }
     const conf = typeof m.confidence === "number" ? `${m.confidence.toFixed(0)}%` : "N/A";
 
     row.innerHTML =
-      `<td class="name-cell instructor-cell"><span class="profile-link instructor-link" data-type="instructor" data-id="${m.instructor_id}">${esc(m.instructor_name ?? m.instructor_id ?? "?")}</span></td>` +
+      `<td class="name-cell instructor-cell"><button type="button" class="profile-link instructor-link" data-type="instructor" data-id="${m.instructor_id}">${esc(m.instructor_name ?? m.instructor_id ?? "?")}</button></td>` +
       `<td class="name-cell swimmer-cell">${swimmers}</td>` +
       `<td><span class="confidence-badge confidence-${getConfidenceLevel(m.confidence)}">${conf}</span></td>` +
       `<td class="review-text-cell">${window.AquaProfileDrawer.renderReviewText(m)}</td>` +
@@ -408,7 +408,7 @@ function renderResults(result) {
           row.classList.add(`review-row-${severity}`);
         }
         row.innerHTML =
-          `<td class="name-cell swimmer-cell"><span class="profile-link swimmer-link" data-type="swimmer" data-id="${u.swimmer_id}">${esc(u.swimmer_name ?? u.swimmer_id ?? "?")}</span></td>` +
+          `<td class="name-cell swimmer-cell"><button type="button" class="profile-link swimmer-link" data-type="swimmer" data-id="${u.swimmer_id}">${esc(u.swimmer_name ?? u.swimmer_id ?? "?")}</button></td>` +
           `<td>${u.skill_level ?? "?"}</td>` +
           `<td>${window.AquaProfileDrawer.formatAge(u.age)}</td>` +
           `<td>${u.has_special_needs ? "Yes" : "No"}</td>` +

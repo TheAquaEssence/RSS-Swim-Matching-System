@@ -699,6 +699,12 @@ html[data-theme="light"] .flag-urgent .flag-card-severity {
 .profile-link {
   display: inline-block;
   max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: 2px;

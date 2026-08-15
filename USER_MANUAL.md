@@ -1,6 +1,9 @@
-# Aqua Essence User Manual
+# Aqua Essence 0.2.0 User Manual
 
-This manual explains how to prepare input files, run the application, review the results, and maintain the reference data used by the matching system.
+This manual explains how to prepare input files, run the application, review
+the results, and maintain the reference data used by the matching system. It
+covers Aqua Essence 0.2.0, which supports Jackrabbit Exporter 1.1.0 through
+bundle contract version 1.
 
 ## 1. What The App Does
 
@@ -105,8 +108,9 @@ narrow a large run.
 
 Use **Import export** for the supported Jackrabbit Exporter workflow. Select the
 file named `aqua_essence_jackrabbit_export.json` produced by Jackrabbit Exporter
-1.1.0. Aqua Essence accepts bundle format `aqua-essence-jackrabbit-export`,
-format version 1 only.
+1.1.0. Aqua Essence 0.2.0 accepts bundle format
+`aqua-essence-jackrabbit-export`, bundle contract version 1 only
+(`format_version: 1`).
 
 The bundle must contain exactly these four embedded CSV files:
 

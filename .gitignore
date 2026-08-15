@@ -16,10 +16,6 @@ env/
 .vscode/
 .idea/
 
-# Claude Code
-.claude/
-.claudeignore
-
 # OS files
 .DS_Store
 Thumbs.db
@@ -110,11 +106,3 @@ _debug*/
 # Jackrabbit exports staged locally for testing — contains real student PII
 # (names, DOBs, special-needs notes); never commit.
 files/
-
-# Playwright MCP debug artifacts (console logs, page snapshots)
-.playwright-mcp/
-
-# Local agent configuration. Tracked guidance lives in docs/development.md;
-# AGENTS.md and .agents may be supplied by a developer environment.
-AGENTS.md
-.agents/

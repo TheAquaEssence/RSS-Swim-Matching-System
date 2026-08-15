@@ -1,13 +1,13 @@
-# Aqua Essence
+# Aqua Essence 0.2.0
 
 Aqua Essence is a local-first desktop application that matches swimmers with
 instructors for the Ready, Set, Swim! youth program. It combines continuity,
 hard safety and qualification constraints, compatibility scoring, CP-SAT
 optimization, and explainable review output.
 
-Version 1 targets Windows and packages the existing web interface, FastAPI
-backend, and Python solver inside an Electron application. Operational data
-stays on the user's machine.
+Aqua Essence 0.2.0 targets Windows and packages the existing web interface,
+FastAPI backend, and Python solver inside an Electron application. Operational
+data stays on the user's machine.
 
 ## Status
 
@@ -97,8 +97,10 @@ Contributor setup and package-specific checks are documented in the
 
 The Jackrabbit browser extension is maintained separately in the private
 [TheAquaEssence/jackrabbit-exporter](https://github.com/TheAquaEssence/jackrabbit-exporter)
-repository pending public-release review. The projects integrate through CSV
-contracts only.
+repository pending public-release review. Aqua Essence 0.2.0 supports
+Jackrabbit Exporter 1.1.0 through bundle contract version 1
+(`format_version: 1`). The downloaded JSON bundle contains CSV payloads; there
+is no source-code or runtime dependency between the projects.
 
 ## Privacy and security
 
