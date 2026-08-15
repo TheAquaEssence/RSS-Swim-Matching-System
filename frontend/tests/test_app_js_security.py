@@ -169,6 +169,17 @@ def test_stage_four_unifies_secondary_workflows_and_drawer_accessibility():
     assert ".session-selector-panel" in interaction_css
 
 
+def test_result_profile_controls_are_keyboard_native_buttons():
+    source = (FRONTEND_DIR / "generate_flow.js").read_text(encoding="utf-8")
+    overlays_css = (FRONTEND_DIR / "styles" / "overlays.css").read_text(encoding="utf-8")
+
+    assert source.count('<button type="button" class="profile-link') == 5
+    assert '<span class="profile-link' not in source
+    assert ".profile-link {" in overlays_css
+    for reset in ("padding: 0;", "border: 0;", "background: none;", "font: inherit;"):
+        assert reset in overlays_css
+
+
 def test_stage_four_session_selector_exposes_expansion_state():
     html = INDEX_HTML.read_text(encoding="utf-8")
     source = (FRONTEND_DIR / "session_selector.js").read_text(encoding="utf-8")
